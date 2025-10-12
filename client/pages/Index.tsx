@@ -1,62 +1,39 @@
-import { DemoResponse } from "@shared/api";
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Index() {
-  const [exampleFromServer, setExampleFromServer] = useState("");
-  // Fetch users on component mount
-  useEffect(() => {
-    fetchDemo();
-  }, []);
-
-  // Example of how to fetch data from the server (if needed)
-  const fetchDemo = async () => {
-    try {
-      const response = await fetch("/api/demo");
-      const data = (await response.json()) as DemoResponse;
-      setExampleFromServer(data.message);
-    } catch (error) {
-      console.error("Error fetching hello:", error);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="text-center">
-        {/* TODO: FUSION_GENERATION_APP_PLACEHOLDER replace everything here with the actual app! */}
-        <h1 className="text-2xl font-semibold text-slate-800 flex items-center justify-center gap-3">
-          <svg
-            className="animate-spin h-8 w-8 text-slate-400"
-            viewBox="0 0 50 50"
-          >
-            <circle
-              className="opacity-30"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-            />
-            <circle
-              className="text-slate-600"
-              cx="25"
-              cy="25"
-              r="20"
-              stroke="currentColor"
-              strokeWidth="5"
-              fill="none"
-              strokeDasharray="100"
-              strokeDashoffset="75"
-            />
-          </svg>
-          Generating your app...
-        </h1>
-        <p className="mt-4 text-slate-600 max-w-md">
-          Watch the chat on the left for updates that might need your attention
-          to finish generating
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <main className="mx-auto max-w-4xl text-center py-24">
+        <h1 className="text-4xl font-extrabold mb-4">ACES MSD Fuel</h1>
+        <p className="text-muted-foreground mb-8">
+          Fleet fueling operations simplified — dispatch, drivers, and logs in one
+          modern workspace.
         </p>
-        <p className="mt-4 hidden max-w-md">{exampleFromServer}</p>
-      </div>
+
+        <div className="flex items-center justify-center gap-4">
+          <Link to="/mobile/driver-design" className="rounded-lg bg-primary px-5 py-3 text-primary-foreground font-semibold">
+            View Driver Mobile Preview
+          </Link>
+          <Link to="/driver" className="rounded-lg border border-border px-5 py-3 text-foreground">
+            Open Driver App (Demo)
+          </Link>
+        </div>
+
+        <section className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="rounded-lg border p-4 bg-card">
+            <h3 className="font-semibold">Dispatch</h3>
+            <p className="text-sm text-muted-foreground">Manage fuel tasks and assignments.</p>
+          </div>
+          <div className="rounded-lg border p-4 bg-card">
+            <h3 className="font-semibold">Drivers</h3>
+            <p className="text-sm text-muted-foreground">Mobile app for drivers to complete fueling jobs.</p>
+          </div>
+          <div className="rounded-lg border p-4 bg-card">
+            <h3 className="font-semibold">Logs</h3>
+            <p className="text-sm text-muted-foreground">Track fuel usage and exports.</p>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

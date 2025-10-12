@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.app-shell {
+  @apply min-h-screen grid place-items-center bg-white text-gray-900;
+}
+.app-title {
+  @apply text-2xl font-semibold;
+}
+.app-subtitle {
+  @apply text-sm text-gray-600;
+}

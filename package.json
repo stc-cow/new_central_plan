@@ -18,14 +18,26 @@
     "start": "node dist/server/node-build.mjs",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "cap:sync": "pnpm exec cap sync",
+    "android": "pnpm build && pnpm exec cap copy android && pnpm exec cap open android",
+    "ios": "pnpm build && pnpm exec cap copy ios && pnpm exec cap open ios"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/ios": "^7.4.3",
+    "@capacitor/local-notifications": "^7.0.3",
+    "@capacitor/preferences": "^7.0.2",
+    "@capacitor/push-notifications": "^7.0.3",
+    "@supabase/supabase-js": "^2.57.4",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
     "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
