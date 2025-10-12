@@ -20,19 +20,26 @@ function failingResponse() {
 }
 
 function mockFrom() {
+  const chainObj: any = {
+    maybeSingle: () => failingResponse(),
+    single: () => failingResponse(),
+  };
+  const chainable = () => chainObj;
+  chainObj.ilike = chainable;
+  chainObj.eq = chainable;
+  chainObj.order = chainable;
+  chainObj.filter = chainable;
+  chainObj.limit = chainable;
+  chainObj.match = chainable;
+  chainObj.not = chainable;
+  chainObj.is = chainable;
+
   return {
-    select: () => ({
-      order: () => failingResponse(),
-      maybeSingle: () => failingResponse(),
-      single: () => failingResponse(),
-      eq: () => ({
-        maybeSingle: () => failingResponse(),
-        single: () => failingResponse(),
-      }),
-    }),
+    select: () => chainObj,
     insert: () => failingResponse(),
     update: () => ({ eq: () => failingResponse() }),
     delete: () => ({ eq: () => failingResponse() }),
+    upsert: () => failingResponse(),
   } as any;
 }
 
