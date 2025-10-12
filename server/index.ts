@@ -57,19 +57,30 @@ export function createServer() {
 
       if (contentSid) {
         params.append("ContentSid", contentSid);
-        const vars = { 1: code, 2: new Date(expires_at || Date.now()).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) } as Record<string, string>;
+        const vars = {
+          1: code,
+          2: new Date(expires_at || Date.now()).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+          }),
+        } as Record<string, string>;
         params.append("ContentVariables", JSON.stringify(vars));
       } else {
-        const minutes = Math.max(1, Math.round((Date.parse(expires_at || "") - Date.now()) / 60000));
+        const minutes = Math.max(
+          1,
+          Math.round((Date.parse(expires_at || "") - Date.now()) / 60000),
+        );
         const body = `Your ACES MSD Fuel OTP is ${code}. It expires in ${Number.isFinite(minutes) ? minutes : 5} minutes.`;
         params.append("Body", body);
       }
 
-      const authHeader = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
+      const authHeader = Buffer.from(`${accountSid}:${authToken}`).toString(
+        "base64",
+      );
       const resp = await fetch(url, {
         method: "POST",
         headers: {
-          "Authorization": `Basic ${authHeader}`,
+          Authorization: `Basic ${authHeader}`,
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: params as any,
@@ -77,14 +88,18 @@ export function createServer() {
 
       if (!resp.ok) {
         const text = await resp.text();
-        res.status(500).json({ ok: false, error: "Twilio API error", details: text });
+        res
+          .status(500)
+          .json({ ok: false, error: "Twilio API error", details: text });
         return;
       }
 
       const data = await resp.json();
       res.json({ ok: true, sid: data.sid });
     } catch (err: any) {
-      res.status(500).json({ ok: false, error: err?.message || "Unknown error" });
+      res
+        .status(500)
+        .json({ ok: false, error: err?.message || "Unknown error" });
     }
   });
 

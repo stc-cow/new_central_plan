@@ -23,11 +23,17 @@ export default function DriverDesignPage() {
             </CardHeader>
             <CardContent>
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
-                <img src="/placeholder.svg" alt="Web portal preview" className="h-full w-full object-cover rounded-xl" />
+                <img
+                  src="/placeholder.svg"
+                  alt="Web portal preview"
+                  className="h-full w-full object-cover rounded-xl"
+                />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity">
                   <div className="text-center">
                     <p className="text-sm font-medium">Web portal preview</p>
-                    <p className="text-xs">(Live iframe disabled to avoid dev overlay issues)</p>
+                    <p className="text-xs">
+                      (Live iframe disabled to avoid dev overlay issues)
+                    </p>
                   </div>
                 </div>
               </div>
