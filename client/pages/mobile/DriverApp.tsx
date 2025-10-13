@@ -1157,7 +1157,13 @@ export default function DriverApp() {
                 onClick={verifyPassword}
                 disabled={verifying}
               >
-                {verifying ? "Checking..." : "Login"}
+                {verifying ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Logging in...
+                  </span>
+                ) : (
+                  "Login"
+                )}
               </Button>
             </CardContent>
           </Card>
