@@ -118,9 +118,9 @@ export default function DriverApp() {
   const [errorMsg, setErrorMsg] = useState("");
   const [tasks, setTasks] = useState<any[]>([]);
   const [query, setQuery] = useState("");
-  const [filterMode, setFilterMode] = useState<"all" | "active" | "returned" | "completed">(
-    "active",
-  );
+  const [filterMode, setFilterMode] = useState<
+    "all" | "active" | "returned" | "completed"
+  >("active");
   const [editOpen, setEditOpen] = useState(false);
   const [activeTask, setActiveTask] = useState<any | null>(null);
   const [notifOpen, setNotifOpen] = useState(false);
