@@ -451,6 +451,10 @@ export default function DriverApp() {
 
   useEffect(() => {
     try {
+      try {
+        const saved = localStorage.getItem("driver.lastUsername");
+        if (saved && !name) setName(saved);
+      } catch {}
       const getParams = () => {
         const search = window.location.search;
         if (search && search.length > 1) return new URLSearchParams(search);
