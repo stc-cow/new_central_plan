@@ -961,6 +961,22 @@ export default function DriverApp() {
     setEditOpen(true);
   };
 
+  const reportIssue = async (t: any) => {
+    try {
+      let note = "";
+      if (typeof window !== "undefined") {
+        note = window.prompt("Describe the issue", "") || "";
+      }
+      await supabase
+        .from("driver_tasks")
+        .update({ status: "issue", notes: note || null })
+        .eq("id", t.id);
+      setTasks((arr) => arr.map((x) => (x.id === t.id ? { ...x, status: "issue", notes: note || x.notes } : x)));
+    } catch (e) {
+      console.error("Failed to report issue", e);
+    }
+  };
+
   const saveCompletion = async () => {
     if (!activeTask) return;
     const qty = parseFloat(entry.quantity_added || entry.liters || "0");
