@@ -565,6 +565,63 @@ export default function DriverApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, demoMode]);
 
+  // Realtime sync: listen to driver_tasks changes and update list live
+  useEffect(() => {
+    if (!profile || demoMode) return;
+    const channel = (supabase as any)
+      .channel(`driver_tasks:${profile.name || "anon"}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'driver_tasks' },
+        async (payload: any) => {
+          try {
+            const row = (payload.new ?? payload.old) as any;
+            const matches =
+              (row?.driver_name && row.driver_name === profile.name) ||
+              (row?.driver_phone && row.driver_phone && profile.phone && String(row.driver_phone) === String(profile.phone));
+            if (!matches) return;
+
+            if (payload.eventType === 'DELETE') {
+              setTasks((arr) => arr.filter((t) => t.id !== row.id));
+              return;
+            }
+
+            const nextRow = payload.new as any;
+            // ensure coordinate enrichment for new/updated task
+            const enriched = await enrichTasksWithCoordinates([nextRow]);
+            const finalRow = enriched && enriched[0] ? enriched[0] : nextRow;
+
+            setTasks((arr) => {
+              const exists = arr.some((t) => t.id === finalRow.id);
+              const updated = exists
+                ? arr.map((t) => (t.id === finalRow.id ? { ...t, ...finalRow } : t))
+                : [...arr, finalRow];
+              // keep non-completed first, order by scheduled_at asc
+              return updated
+                .slice()
+                .sort((a: any, b: any) => {
+                  const aDone = a?.status === 'completed' ? 1 : 0;
+                  const bDone = b?.status === 'completed' ? 1 : 0;
+                  if (aDone !== bDone) return aDone - bDone;
+                  const aTime = a?.scheduled_at ? Date.parse(a.scheduled_at) : 0;
+                  const bTime = b?.scheduled_at ? Date.parse(b.scheduled_at) : 0;
+                  return aTime - bTime;
+                });
+            });
+          } catch (err) {
+            console.error('Realtime update failed', err);
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      try {
+        (supabase as any).removeChannel?.(channel);
+      } catch {}
+    };
+  }, [profile, demoMode, enrichTasksWithCoordinates]);
+
   useEffect(() => {
     try {
       localStorage.setItem("driver.remember", String(remember));
@@ -936,6 +993,17 @@ export default function DriverApp() {
       setTasks((arr) =>
         arr.map((x) => (x.id === t.id ? { ...x, status: "in_progress" } : x)),
       );
+    try {
+      await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Task started',
+          message: `Driver ${profile?.name || ''} started task #${t.id} at ${t.site_name || 'site'}`,
+          driver_names: [profile?.name || '']
+        })
+      }).catch(() => {});
+    } catch {}
   };
 
   const openComplete = (t: any) => {
