@@ -333,7 +333,7 @@ export default function MissionsPage() {
     };
     setRows((r) => [newRow, ...r]);
     toast({ title: "Task created" });
-    // send notification to the assigned driver
+    // record + push notification to the assigned driver
     try {
       const sentBy =
         localStorage.getItem("auth.username") ||
@@ -345,6 +345,16 @@ export default function MissionsPage() {
         driver_name: addForm.driverName || null,
         sent_by: sentBy,
       });
+      await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'New mission assigned',
+          message: `A new mission has been assigned to you for site: ${addForm.siteName}`,
+          driver_names: [addForm.driverName].filter(Boolean),
+          data: { path: '/mobile/driver', task_id: String(data.id) }
+        })
+      }).catch(() => {});
     } catch {}
     setAddForm(emptyForm);
     setAddOpen(false);
@@ -452,6 +462,26 @@ export default function MissionsPage() {
       }));
       if (notices.length > 0)
         await supabase.from("driver_notifications").insert(notices);
+
+      const uniqueDrivers = Array.from(
+        new Set(
+          rows
+            .map((r) => r.assignedDriver || r.driverName)
+            .filter((v): v is string => !!v && v.trim().length > 0),
+        ),
+      );
+      if (uniqueDrivers.length > 0) {
+        await fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: 'New missions assigned',
+            message: 'You have new missions assigned.',
+            driver_names: uniqueDrivers,
+            data: { path: '/mobile/driver' }
+          })
+        }).catch(() => {});
+      }
     } catch {}
     toast({ title: "Missions synced to Supabase" });
   };
