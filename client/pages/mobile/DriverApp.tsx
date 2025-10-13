@@ -118,7 +118,7 @@ export default function DriverApp() {
   const [errorMsg, setErrorMsg] = useState("");
   const [tasks, setTasks] = useState<any[]>([]);
   const [query, setQuery] = useState("");
-  const [filterMode, setFilterMode] = useState<"all" | "active" | "returned">(
+  const [filterMode, setFilterMode] = useState<"all" | "active" | "returned" | "completed">(
     "active",
   );
   const [editOpen, setEditOpen] = useState(false);
@@ -453,6 +453,15 @@ export default function DriverApp() {
         return new URLSearchParams();
       };
       const params = getParams();
+      const initialFilter = (params.get("filter") || "active").toLowerCase();
+      if (
+        initialFilter === "all" ||
+        initialFilter === "active" ||
+        initialFilter === "returned" ||
+        initialFilter === "completed"
+      ) {
+        setFilterMode(initialFilter as any);
+      }
       const demo = params.get("demo") === "1";
       setDemoMode(demo);
       if (demo) {
@@ -541,6 +550,23 @@ export default function DriverApp() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, demoMode]);
+
+  const applyFilter = (next: "all" | "active" | "returned" | "completed") => {
+    setFilterMode(next);
+    try {
+      const url = new URL(window.location.href);
+      // keep hash routing, add/update filter param
+      const hash = url.hash || "#";
+      const [path, q] = hash.split("?");
+      const params = new URLSearchParams(q || "");
+      params.set("filter", next);
+      const newHash = `${path}?${params.toString()}`;
+      if (newHash !== hash) {
+        url.hash = newHash;
+        history.replaceState(null, "", url.toString());
+      }
+    } catch {}
+  };
 
   const activeCount = useMemo(
     () => tasks.filter((t) => t.status === "in_progress").length,
@@ -1211,8 +1237,7 @@ export default function DriverApp() {
                   key={option.key}
                   type="button"
                   onClick={() => {
-                    setFilterMode(option.key);
-                    void loadTasks();
+                    applyFilter(option.key as any);
                   }}
                   className={`rounded-xl px-3 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#202B6D]/30 ${
                     isActive
