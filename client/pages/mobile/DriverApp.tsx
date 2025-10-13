@@ -1133,6 +1133,17 @@ export default function DriverApp() {
                   </button>
                 </div>
               </div>
+              <div className="flex items-center justify-between">
+                <label className="flex select-none items-center gap-2 text-sm text-[#111827]">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-[#D1D5DB] text-[#202B6D] focus:ring-[#202B6D]"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                  />
+                  Remember me
+                </label>
+              </div>
               {errorMsg && (
                 <div
                   className="rounded-xl border border-[#F4A5A8] bg-[#FDE8EA] px-3 py-2 text-sm font-semibold text-[#E52329]"
