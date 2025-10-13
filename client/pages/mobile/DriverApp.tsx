@@ -568,57 +568,104 @@ export default function DriverApp() {
   // Realtime sync: listen to driver_tasks changes and update list live
   useEffect(() => {
     if (!profile || demoMode) return;
-    const channel = (supabase as any)
-      .channel(`driver_tasks:${profile.name || "anon"}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'driver_tasks' },
-        async (payload: any) => {
-          try {
-            const row = (payload.new ?? payload.old) as any;
-            const matches =
-              (row?.driver_name && row.driver_name === profile.name) ||
-              (row?.driver_phone && row.driver_phone && profile.phone && String(row.driver_phone) === String(profile.phone));
-            if (!matches) return;
+    let subscription: any = null;
 
-            if (payload.eventType === 'DELETE') {
-              setTasks((arr) => arr.filter((t) => t.id !== row.id));
-              return;
-            }
+    const handlePayload = async (payload: any, type?: string) => {
+      try {
+        // normalize payload for different supabase client versions
+        const evtType =
+          (payload?.eventType as string) || (payload?.event as string) || type || '';
+        const row = (payload?.new ?? payload?.record ?? payload?.old) as any;
+        if (!row) return;
+        const matches =
+          (row?.driver_name && row.driver_name === profile.name) ||
+          (row?.driver_phone && profile.phone && String(row.driver_phone) === String(profile.phone));
+        if (!matches) return;
 
-            const nextRow = payload.new as any;
-            // ensure coordinate enrichment for new/updated task
-            const enriched = await enrichTasksWithCoordinates([nextRow]);
-            const finalRow = enriched && enriched[0] ? enriched[0] : nextRow;
+        if (/delete/i.test(evtType)) {
+          setTasks((arr) => arr.filter((t) => t.id !== row.id));
+          return;
+        }
 
-            setTasks((arr) => {
-              const exists = arr.some((t) => t.id === finalRow.id);
-              const updated = exists
-                ? arr.map((t) => (t.id === finalRow.id ? { ...t, ...finalRow } : t))
-                : [...arr, finalRow];
-              // keep non-completed first, order by scheduled_at asc
-              return updated
-                .slice()
-                .sort((a: any, b: any) => {
-                  const aDone = a?.status === 'completed' ? 1 : 0;
-                  const bDone = b?.status === 'completed' ? 1 : 0;
-                  if (aDone !== bDone) return aDone - bDone;
-                  const aTime = a?.scheduled_at ? Date.parse(a.scheduled_at) : 0;
-                  const bTime = b?.scheduled_at ? Date.parse(b.scheduled_at) : 0;
-                  return aTime - bTime;
-                });
+        const nextRow = payload.new ?? payload.record ?? row;
+        const enriched = await enrichTasksWithCoordinates([nextRow]);
+        const finalRow = enriched && enriched[0] ? enriched[0] : nextRow;
+
+        setTasks((arr) => {
+          const exists = arr.some((t) => t.id === finalRow.id);
+          const updated = exists
+            ? arr.map((t) => (t.id === finalRow.id ? { ...t, ...finalRow } : t))
+            : [...arr, finalRow];
+          return updated
+            .slice()
+            .sort((a: any, b: any) => {
+              const aDone = a?.status === 'completed' ? 1 : 0;
+              const bDone = b?.status === 'completed' ? 1 : 0;
+              if (aDone !== bDone) return aDone - bDone;
+              const aTime = a?.scheduled_at ? Date.parse(a.scheduled_at) : 0;
+              const bTime = b?.scheduled_at ? Date.parse(b.scheduled_at) : 0;
+              return aTime - bTime;
             });
-          } catch (err) {
-            console.error('Realtime update failed', err);
-          }
-        },
-      )
-      .subscribe();
+        });
+      } catch (err) {
+        console.error('Realtime update failed', err);
+      }
+    };
+
+    const setupRealtime = async () => {
+      try {
+        // supabase-js v2 realtime
+        if (typeof (supabase as any).channel === 'function') {
+          subscription = (supabase as any)
+            .channel(`driver_tasks:${profile.name || 'anon'}`)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'driver_tasks' }, handlePayload)
+            .subscribe();
+          return;
+        }
+
+        // legacy supabase-js v1 realtime
+        if (typeof (supabase as any).from === 'function') {
+          subscription = (supabase as any)
+            .from('driver_tasks')
+            .on('INSERT', (p: any) => handlePayload(p, 'INSERT'))
+            .on('UPDATE', (p: any) => handlePayload(p, 'UPDATE'))
+            .on('DELETE', (p: any) => handlePayload(p, 'DELETE'))
+            .subscribe?.();
+          return;
+        }
+
+        console.info('Realtime not available on this supabase client');
+      } catch (err) {
+        console.error('Failed to setup realtime subscription', err);
+      }
+    };
+
+    void setupRealtime();
 
     return () => {
       try {
-        (supabase as any).removeChannel?.(channel);
-      } catch {}
+        if (!subscription) return;
+        if (typeof (supabase as any).removeChannel === 'function') {
+          try {
+            (supabase as any).removeChannel(subscription);
+            return;
+          } catch {}
+        }
+        if (typeof subscription.unsubscribe === 'function') {
+          try {
+            subscription.unsubscribe();
+            return;
+          } catch {}
+        }
+        if (typeof (supabase as any).removeSubscription === 'function') {
+          try {
+            (supabase as any).removeSubscription(subscription);
+            return;
+          } catch {}
+        }
+      } catch (err) {
+        // ignore
+      }
     };
   }, [profile, demoMode, enrichTasksWithCoordinates]);
 
