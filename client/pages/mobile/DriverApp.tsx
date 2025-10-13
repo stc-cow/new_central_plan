@@ -114,6 +114,13 @@ export default function DriverApp() {
   const [demoMode, setDemoMode] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState<boolean>(() => {
+    try {
+      return (localStorage.getItem("driver.remember") || "true").toLowerCase() === "true";
+    } catch {
+      return true;
+    }
+  });
   const [verifying, setVerifying] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [tasks, setTasks] = useState<any[]>([]);
