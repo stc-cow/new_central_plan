@@ -45,7 +45,7 @@ const App = () => (
         <HashRouter>
           <NativeStartRedirect />
           <Routes>
-            <Route path="/" element={<Navigate to="/driver" replace />} />
+            <Route path="/" element={<Navigate to="/driver-login" replace />} />
             <Route path="/driver" element={<DriverApp />} />
             <Route path="/driver-login" element={<DriverLogin />} />
             <Route path="*" element={<Navigate to="/driver-login" replace />} />
