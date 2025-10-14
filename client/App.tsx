@@ -18,7 +18,6 @@ import { I18nProvider } from "./i18n";
 import DriverApp from "./pages/mobile/DriverApp";
 import DriverDashboard from "./pages/mobile/DriverDashboard";
 import DriverLogin from "./pages/mobile/DriverLogin";
-import DriverLogin from "./pages/mobile/DriverLogin";
 import { Capacitor } from "@capacitor/core";
 
 const queryClient = new QueryClient();
