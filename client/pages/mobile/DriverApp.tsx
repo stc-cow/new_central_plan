@@ -692,7 +692,6 @@ export default function DriverApp() {
       }
     } catch {}
   };
-
   const activeCount = useMemo(
     () => tasks.filter((t) => t.status === "in_progress").length,
     [tasks],
@@ -972,7 +971,6 @@ export default function DriverApp() {
         } catch {}
         return;
       }
-
       const { row, error } = await fetchDriver(n);
       if (error) {
         console.error("Driver lookup failed", error);
@@ -1098,7 +1096,6 @@ export default function DriverApp() {
       console.error("Failed to report issue", e);
     }
   };
-
   const saveCompletion = async () => {
     if (!activeTask) return;
     const qty = parseFloat(entry.quantity_added || entry.liters || "0");

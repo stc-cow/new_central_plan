@@ -462,7 +462,6 @@ export default function MissionsPage() {
       }));
       if (notices.length > 0)
         await supabase.from("driver_notifications").insert(notices);
-
       const uniqueDrivers = Array.from(
         new Set(
           rows
