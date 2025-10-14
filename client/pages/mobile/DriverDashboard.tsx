@@ -9,7 +9,7 @@ export default function DriverDashboard() {
         {/* Top Row: ACES + Username */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <img src="aces-logo.png" alt="ACES Logo" className="h-6 w-auto" />
+            <img src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F4447a86c5269426e9a4e9dfb765a6409" alt="ACES Logo" className="h-6 w-auto" />
             <div className="flex flex-col leading-tight">
               <span className="text-[11px] text-gray-500">Signed in as</span>
               <span className="text-sm font-semibold text-blue-900">{username}</span>
@@ -72,7 +72,7 @@ export default function DriverDashboard() {
 
       {/* Footer */}
       <footer className="text-center py-3 text-[11px] text-slate-300">
-        Powered by <span className="text-white font-semibold">ACES Managed Services</span>
+        Powered by <span className="text-white font-semibold">ACES MSD</span>
       </footer>
     </div>
   );
