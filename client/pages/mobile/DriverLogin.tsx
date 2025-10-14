@@ -85,7 +85,7 @@ export default function DriverLogin() {
           </form>
 
           <p className="text-center text-xs text-slate-400 mt-6">
-            Powered by <span className="font-semibold text-blue-800">ACES</span>
+            Powered by <span className="font-semibold text-blue-800"><strong>ACES MSD</strong></span>
           </p>
         </CardContent>
       </Card>
