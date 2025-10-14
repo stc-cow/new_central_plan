@@ -16,6 +16,8 @@ import {
 } from "react-router-dom";
 import { I18nProvider } from "./i18n";
 import DriverApp from "./pages/mobile/DriverApp";
+import DriverDashboard from "./pages/mobile/DriverDashboard";
+import DriverLogin from "./pages/mobile/DriverLogin";
 import DriverLogin from "./pages/mobile/DriverLogin";
 import { Capacitor } from "@capacitor/core";
 
@@ -47,6 +49,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/driver-login" replace />} />
             <Route path="/driver" element={<DriverApp />} />
+            <Route path="/driver-dashboard" element={<DriverDashboard />} />
             <Route path="/driver-login" element={<DriverLogin />} />
             <Route path="*" element={<Navigate to="/driver-login" replace />} />
           </Routes>
