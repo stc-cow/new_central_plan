@@ -30,10 +30,15 @@ export function useTaskSync(driverId: string) {
       .channel(`public:tasks:driver:${driverId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "tasks", filter: `driver_id=eq.${driverId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "tasks",
+          filter: `driver_id=eq.${driverId}`,
+        },
         () => {
           fetchTasks();
-        }
+        },
       )
       .subscribe();
 
