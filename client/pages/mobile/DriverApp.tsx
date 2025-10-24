@@ -1010,55 +1010,26 @@ export default function DriverApp() {
     }
     setVerifying(true);
     try {
-      // If Supabase isn't configured, allow local demo login
-      const { SUPABASE_CONFIGURED } = await import("@/lib/supabase");
-      console.debug("Supabase configured:", SUPABASE_CONFIGURED);
-      if (!SUPABASE_CONFIGURED) {
-        console.warn("Supabase not configured, entering demo mode");
-        const prof = { name: n, phone: "" };
-        setProfile(prof);
-        setDemoMode(true);
-        try {
-          if (remember)
-            localStorage.setItem("driver.profile", JSON.stringify(prof));
-          localStorage.setItem("driver.demo", "true");
-        } catch {}
-        return;
-      }
-      const { row, error } = await fetchDriver(n);
-      if (error) {
-        console.error("Driver lookup failed", error);
-        setErrorMsg("Login unavailable");
-        return;
-      }
-      if (!row || ("active" in row && row.active === false)) {
-        setErrorMsg("Account not found or inactive");
-        return;
-      }
+      // Use backend API for authentication
+      console.debug("Attempting driver login via backend API");
+      const response = await fetch("/api/driver/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: n, password: pw }),
+      });
 
-      const storedHash =
-        typeof row.password_sha256 === "string"
-          ? row.password_sha256.toLowerCase()
-          : null;
-      if (storedHash) {
-        const hash = (await sha256(pw)).toLowerCase();
-        if (hash !== storedHash) {
-          setErrorMsg("Invalid password");
-          return;
-        }
-      } else if (typeof row.password === "string") {
-        if (row.password.trim() !== pw) {
-          setErrorMsg("Invalid password");
-          return;
-        }
-      } else {
-        setErrorMsg("Password not configured");
+      const result = await response.json() as { ok?: boolean; profile?: any; error?: string };
+
+      if (!response.ok || !result.ok) {
+        console.error("Login failed:", result.error);
+        setErrorMsg(result.error || "Login failed");
+        setVerifying(false);
         return;
       }
 
       const prof = {
-        name: (row.name as string) || n,
-        phone: (row.phone as string) || "",
+        name: result.profile.name,
+        phone: result.profile.phone || "",
       };
       console.debug("Login successful, setting profile:", prof);
       setProfile(prof);
