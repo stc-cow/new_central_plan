@@ -1021,26 +1021,40 @@ export default function DriverApp() {
     }
     setVerifying(true);
     try {
-      // Use backend API for authentication
-      console.debug("Attempting driver login via backend API");
-      const response = await fetch("/api/driver/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: n, password: pw }),
-      });
+      const { row, error } = await fetchDriver(n);
+      if (error) {
+        console.error("Driver lookup failed", error);
+        setErrorMsg("Login unavailable");
+        return;
+      }
+      if (!row || ("active" in row && row.active === false)) {
+        setErrorMsg("Account not found or inactive");
+        return;
+      }
 
-      const result = await response.json() as { ok?: boolean; profile?: any; error?: string };
-
-      if (!response.ok || !result.ok) {
-        console.error("Login failed:", result.error);
-        setErrorMsg(result.error || "Login failed");
-        setVerifying(false);
+      const storedHash =
+        typeof row.password_sha256 === "string"
+          ? row.password_sha256.toLowerCase()
+          : null;
+      if (storedHash) {
+        const hash = (await sha256(pw)).toLowerCase();
+        if (hash !== storedHash) {
+          setErrorMsg("Invalid password");
+          return;
+        }
+      } else if (typeof row.password === "string") {
+        if (row.password.trim() !== pw) {
+          setErrorMsg("Invalid password");
+          return;
+        }
+      } else {
+        setErrorMsg("Password not configured");
         return;
       }
 
       const prof = {
-        name: result.profile.name,
-        phone: result.profile.phone || "",
+        name: (row.name as string) || n,
+        phone: (row.phone as string) || "",
       };
       console.debug("Login successful, setting profile:", prof);
       setProfile(prof);
