@@ -517,44 +517,66 @@ export default function DriverApp() {
   }, []);
 
   const loadTasks = async () => {
-    if (!profile || demoMode) return;
-    const ors: string[] = [`driver_name.eq.${profile.name}`];
-    if (profile.phone && profile.phone.trim())
-      ors.push(`driver_phone.eq.${profile.phone}`);
-    const { data } = await supabase
-      .from("driver_tasks")
-      .select("*")
-      .or(ors.join(","))
-      .order("scheduled_at", { ascending: true });
-    const incoming = data || [];
-    const now = Date.now();
-    const nextTasks: any[] = [];
-    for (const task of incoming) {
-      if (task?.status === "completed") {
-        const completionDate = getCompletionDate(task);
-        if (
-          completionDate &&
-          now - completionDate.getTime() > COMPLETED_RETENTION_MS
-        ) {
-          continue;
-        }
-        if (!task.local_completed_at && completionDate) {
-          nextTasks.push({
-            ...task,
-            local_completed_at: completionDate.toISOString(),
-          });
-          continue;
-        }
-      }
-      nextTasks.push(task);
+    if (!profile || demoMode) {
+      console.debug("loadTasks skipped: profile or demoMode", { profile, demoMode });
+      return;
     }
-    let enrichedTasks = nextTasks;
     try {
-      enrichedTasks = await enrichTasksWithCoordinates(nextTasks);
-    } catch (error) {
-      console.error("Failed to enrich tasks with site coordinates", error);
+      console.debug("loadTasks starting for driver:", profile.name, profile.phone);
+      const ors: string[] = [`driver_name.eq.${profile.name}`];
+      if (profile.phone && profile.phone.trim())
+        ors.push(`driver_phone.eq.${profile.phone}`);
+
+      const query = ors.join(",");
+      console.debug("loadTasks query filter:", query);
+
+      const { data, error } = await supabase
+        .from("driver_tasks")
+        .select("*")
+        .or(query)
+        .order("scheduled_at", { ascending: true });
+
+      if (error) {
+        console.error("loadTasks Supabase error:", error);
+        setTasks([]);
+        return;
+      }
+
+      const incoming = data || [];
+      console.debug("loadTasks received data:", incoming.length, "tasks");
+
+      const now = Date.now();
+      const nextTasks: any[] = [];
+      for (const task of incoming) {
+        if (task?.status === "completed") {
+          const completionDate = getCompletionDate(task);
+          if (
+            completionDate &&
+            now - completionDate.getTime() > COMPLETED_RETENTION_MS
+          ) {
+            continue;
+          }
+          if (!task.local_completed_at && completionDate) {
+            nextTasks.push({
+              ...task,
+              local_completed_at: completionDate.toISOString(),
+            });
+            continue;
+          }
+        }
+        nextTasks.push(task);
+      }
+      let enrichedTasks = nextTasks;
+      try {
+        enrichedTasks = await enrichTasksWithCoordinates(nextTasks);
+      } catch (error) {
+        console.error("Failed to enrich tasks with site coordinates", error);
+      }
+      console.debug("loadTasks setting", enrichedTasks.length, "enriched tasks");
+      setTasks(enrichedTasks);
+    } catch (err) {
+      console.error("loadTasks unexpected error:", err);
     }
-    setTasks(enrichedTasks);
   };
 
   useEffect(() => {
