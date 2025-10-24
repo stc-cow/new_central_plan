@@ -778,26 +778,37 @@ export default function DriverApp() {
 
   const loadNotifications = async () => {
     if (!profile) return;
-    const { data } = await supabase
-      .from("driver_notifications")
-      .select("id, created_at, title, message, driver_name, sent_by")
-      .or(`driver_name.is.null,driver_name.eq.${profile.name}`)
-      .order("created_at", { ascending: false })
-      .limit(50);
-    setNotifications(data || []);
-    const ids = (data || []).map((n: any) => n.id);
-    if (ids.length === 0) {
+    try {
+      const params = new URLSearchParams({ driverName: profile.name });
+      const response = await fetch(`/api/driver/notifications?${params.toString()}`);
+      const result = await response.json() as {
+        ok?: boolean;
+        notifications?: any[];
+        error?: string;
+      };
+
+      if (!response.ok || !result.ok) {
+        console.error("loadNotifications API error:", result.error);
+        setNotifications([]);
+        setUnreadCount(0);
+        return;
+      }
+
+      const data = result.notifications || [];
+      setNotifications(data);
+      const ids = data.map((n: any) => n.id);
+      if (ids.length === 0) {
+        setUnreadCount(0);
+        return;
+      }
+
+      // For now, mark all as read (or implement read tracking separately)
+      setUnreadCount(Math.max(0, ids.length));
+    } catch (err) {
+      console.error("loadNotifications error:", err);
+      setNotifications([]);
       setUnreadCount(0);
-      return;
     }
-    const { data: reads } = await supabase
-      .from("driver_notification_reads")
-      .select("notification_id")
-      .eq("driver_name", profile.name)
-      .in("notification_id", ids);
-    const readSet = new Set((reads || []).map((r: any) => r.notification_id));
-    const unread = ids.filter((id: number) => !readSet.has(id)).length;
-    setUnreadCount(unread);
   };
 
   const filtered = useMemo(() => {
