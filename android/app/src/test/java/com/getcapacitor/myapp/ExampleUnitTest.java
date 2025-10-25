@@ -1,4 +1,4 @@
-package com.getcapacitor.myapp;
+package com.aces.fuel.driver;
 
 import static org.junit.Assert.*;
 
