@@ -1,9 +1,10 @@
 ---
-description: Keep component and files small
+description: Keep components and files small and modular
 globs:
-alwaysApply: true
+  alwaysApply: true
 ---
 
-As development goes, break down complex UI into smaller components, avoiding very nested JSX trees.
-Also, even within a single page (route), feel free to create auxiliary extra smaller files to make the page more maintenable.
-Breaking big components into multiple files will help down the road when the user asks for changes or refactors.
+During development, break complex UIs into smaller, reusable components to avoid deeply nested JSX structures.  
+Even within a single page (route), create additional smaller files or subcomponents to keep the codebase organized and maintainable.
+
+Modularizing large components into multiple files improves clarity, simplifies future updates or refactors, and enhances long-term scalability.
