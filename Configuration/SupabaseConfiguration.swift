@@ -14,7 +14,9 @@ struct SupabaseConfiguration {
 
     private static func load() throws -> SupabaseConfiguration {
         guard let resourceUrl = Bundle.main.url(forResource: "SupabaseConfig", withExtension: "plist") else {
-            throw ConfigurationError.missingResource
+            throw ConfigurationError.missingResourceWithHint(
+                "Add Resources/SupabaseConfig.plist (see SupabaseConfig.example.plist or run `pnpm sync:supabase-config`)."
+            )
         }
 
         let data = try Data(contentsOf: resourceUrl)
@@ -32,8 +34,20 @@ struct SupabaseConfiguration {
         return SupabaseConfiguration(url: url, anonKey: anonKey)
     }
 
-    enum ConfigurationError: Error {
+    enum ConfigurationError: LocalizedError {
+        case missingResourceWithHint(String)
         case missingResource
         case invalidFormat
+
+        var errorDescription: String? {
+            switch self {
+            case .missingResourceWithHint(let hint):
+                return "Supabase configuration missing. \(hint)"
+            case .missingResource:
+                return "Supabase configuration file not found in bundle."
+            case .invalidFormat:
+                return "Supabase configuration plist is malformed."
+            }
+        }
     }
 }

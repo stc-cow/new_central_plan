@@ -32,3 +32,5 @@ build/
 *.key
 *.pem
 .DS_Store
+public/env.js
+Resources/SupabaseConfig.plist

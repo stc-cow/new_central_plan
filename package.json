@@ -22,7 +22,8 @@
     "cap:sync": "pnpm exec cap sync",
     "android": "pnpm build && pnpm exec cap copy android && pnpm exec cap open android",
     "ios": "pnpm build && pnpm exec cap copy ios && pnpm exec cap open ios",
-    "sync:builder": "node scripts/sync-builder.mjs"
+    "sync:builder": "node scripts/sync-builder.mjs",
+    "sync:supabase-config": "node scripts/sync-supabase-config.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
