@@ -610,6 +610,11 @@ export default function DriverApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, demoMode]);
 
+  // Update unread count whenever notifications change
+  useEffect(() => {
+    setUnreadCount(notifications.length);
+  }, [notifications]);
+
   // Realtime sync: listen to driver_tasks changes and update list live
   useEffect(() => {
     if (!profile || demoMode) return;
