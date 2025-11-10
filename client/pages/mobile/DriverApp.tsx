@@ -612,8 +612,11 @@ export default function DriverApp() {
 
   // Update unread count whenever notifications change
   useEffect(() => {
+    console.debug(
+      `Notification count updated: ${notifications.length} for driver ${profile?.name}`
+    );
     setUnreadCount(notifications.length);
-  }, [notifications]);
+  }, [notifications, profile?.name]);
 
   // Realtime sync: listen to driver_tasks changes and update list live
   useEffect(() => {
