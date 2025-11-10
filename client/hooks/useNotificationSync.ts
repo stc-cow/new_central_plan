@@ -37,7 +37,7 @@ export function useNotificationSync(driverName: string | null) {
 
         console.debug(
           `Loaded ${data?.length || 0} notifications for driver: ${driverName}`,
-          data
+          data,
         );
         setNotifications(data || []);
       } finally {
@@ -64,12 +64,9 @@ export function useNotificationSync(driverName: string | null) {
             (payload: any) => {
               console.debug("New notification received:", payload);
               if (isMounted) {
-                setNotifications((prev) => [
-                  payload.new,
-                  ...prev,
-                ]);
+                setNotifications((prev) => [payload.new, ...prev]);
               }
-            }
+            },
           )
           .on(
             "postgres_changes",
@@ -83,12 +80,10 @@ export function useNotificationSync(driverName: string | null) {
               console.debug("Notification updated:", payload);
               if (isMounted) {
                 setNotifications((prev) =>
-                  prev.map((n) =>
-                    n.id === payload.new.id ? payload.new : n
-                  )
+                  prev.map((n) => (n.id === payload.new.id ? payload.new : n)),
                 );
               }
-            }
+            },
           )
           .on(
             "postgres_changes",
@@ -102,15 +97,15 @@ export function useNotificationSync(driverName: string | null) {
               console.debug("Notification deleted:", payload);
               if (isMounted) {
                 setNotifications((prev) =>
-                  prev.filter((n) => n.id !== payload.old.id)
+                  prev.filter((n) => n.id !== payload.old.id),
                 );
               }
-            }
+            },
           )
           .subscribe((status: string) => {
             console.debug(
               `Notification subscription status for ${driverName}:`,
-              status
+              status,
             );
           });
       } catch (err) {

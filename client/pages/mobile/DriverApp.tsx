@@ -613,7 +613,7 @@ export default function DriverApp() {
   // Update unread count whenever notifications change
   useEffect(() => {
     console.debug(
-      `Notification count updated: ${notifications.length} for driver ${profile?.name}`
+      `Notification count updated: ${notifications.length} for driver ${profile?.name}`,
     );
     setUnreadCount(notifications.length);
   }, [notifications, profile?.name]);
@@ -783,7 +783,6 @@ export default function DriverApp() {
       ).length,
     [tasks],
   );
-
 
   const filtered = useMemo(() => {
     let base = tasks;
