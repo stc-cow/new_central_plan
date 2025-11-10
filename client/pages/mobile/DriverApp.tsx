@@ -1224,6 +1224,51 @@ export default function DriverApp() {
     { key: "all", label: "All tasks" },
   ];
 
+  const missionName =
+    activeTask?.site_name ||
+    activeTask?.site ||
+    activeTask?.location ||
+    activeTask?.siteName ||
+    entry.site_id ||
+    "Fuel mission";
+  const missionId =
+    (activeTask?.mission_id ?? activeTask?.id ?? entry.mission_id) || "-";
+  const missionSiteId =
+    (activeTask?.site_id ?? activeTask?.siteId ?? entry.site_id) || "-";
+  const missionRequired =
+    activeTask?.required_liters ??
+    activeTask?.target_liters ??
+    activeTask?.liters ??
+    activeTask?.quantity ??
+    activeTask?.expected_liters ??
+    null;
+  const missionRequiredDisplay =
+    missionRequired === null || missionRequired === undefined || missionRequired === ""
+      ? null
+      : typeof missionRequired === "number"
+        ? `${missionRequired} L`
+        : String(missionRequired);
+  const missionVehicle =
+    activeTask?.vehicle ||
+    activeTask?.asset_name ||
+    activeTask?.asset ||
+    activeTask?.vehicle_name ||
+    null;
+  const missionSchedule = (() => {
+    const raw =
+      activeTask?.scheduled_at ||
+      activeTask?.scheduledAt ||
+      activeTask?.start_time ||
+      activeTask?.created_at ||
+      activeTask?.createdAt ||
+      null;
+    if (!raw) return null;
+    const parsed = new Date(raw as any);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed.toLocaleString();
+  })();
+  const currentBadge = activeTask ? getStatusBadge(activeTask) : null;
+
   if (!profile) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F4F5F7] px-5 py-0 sm:py-12">
@@ -1604,238 +1649,351 @@ export default function DriverApp() {
       </Dialog>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Submit Task</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="site_id">Site ID</Label>
-                <Input id="site_id" value={entry.site_id} readOnly disabled />
+        <DialogContent className="max-w-4xl overflow-hidden border-none bg-transparent p-0">
+          <div className="grid gap-0 lg:grid-cols-[320px,1fr]">
+            <aside className="flex flex-col justify-between gap-6 bg-gradient-to-br from-[#202B6D] via-[#162769] to-[#0B1B3A] p-6 text-white">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/70">
+                    Mission summary
+                  </p>
+                  <h2 className="text-2xl font-semibold leading-snug">
+                    {missionName}
+                  </h2>
+                  {currentBadge ? (
+                    <span
+                      className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${currentBadge.className}`}
+                    >
+                      {currentBadge.label}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="space-y-3 text-sm text-white/80">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-white/60">Mission ID</span>
+                    <span className="font-medium text-white">{missionId}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-white/60">Site ID</span>
+                    <span className="font-medium text-white">{missionSiteId}</span>
+                  </div>
+                  {missionSchedule ? (
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="text-white/60">Scheduled</span>
+                      <span className="font-medium text-white">
+                        {missionSchedule}
+                      </span>
+                    </div>
+                  ) : null}
+                  {missionVehicle ? (
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="text-white/60">Asset</span>
+                      <span className="font-medium text-white">{missionVehicle}</span>
+                    </div>
+                  ) : null}
+                  {missionRequiredDisplay ? (
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="text-white/60">Target volume</span>
+                      <span className="font-medium text-white">
+                        {missionRequiredDisplay}
+                      </span>
+                    </div>
+                  ) : null}
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-white/60">Driver</span>
+                    <span className="font-medium text-white">
+                      {profile?.name}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="mission_id">Mission ID</Label>
-                <Input
-                  id="mission_id"
-                  value={entry.mission_id}
-                  readOnly
-                  disabled
-                />
+              <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-xs text-white/80">
+                <p className="font-semibold text-white">Quick tip</p>
+                <p>
+                  Ensure the entire meter face is readable in every photo and
+                  capture the tank gauge from a stable angle.
+                </p>
               </div>
-            </div>
+            </aside>
+            <div className="flex flex-col gap-6 bg-white p-6">
+              <DialogHeader className="space-y-2 text-left">
+                <DialogTitle className="text-xl font-semibold text-[#202B6D]">
+                  Submit fueling entry
+                </DialogTitle>
+                <p className="text-sm text-[#6B7280]">
+                  Double-check levels and upload the four required photos before
+                  sending your report to operations control.
+                </p>
+              </DialogHeader>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="actual_liters_in_tank">
-                  Actual Liters in Tank
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="actual_liters_in_tank"
+                    className="text-xs font-semibold uppercase tracking-wide text-[#202B6D]"
+                  >
+                    Actual Liters in Tank
+                  </Label>
+                  <Input
+                    id="actual_liters_in_tank"
+                    inputMode="decimal"
+                    value={entry.actual_liters_in_tank}
+                    onChange={(e) =>
+                      setEntry((s) => ({
+                        ...s,
+                        actual_liters_in_tank: e.target.value,
+                      }))
+                    }
+                    className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-base text-[#0F172A] placeholder:text-[#6B7280] focus-visible:border-[#202B6D] focus-visible:ring-2 focus-visible:ring-[#202B6D]/30 focus-visible:ring-offset-0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="quantity_added"
+                    className="text-xs font-semibold uppercase tracking-wide text-[#202B6D]"
+                  >
+                    Quantity Added
+                  </Label>
+                  <Input
+                    id="quantity_added"
+                    inputMode="decimal"
+                    value={entry.quantity_added}
+                    onChange={(e) =>
+                      setEntry((s) => ({
+                        ...s,
+                        quantity_added: e.target.value,
+                      }))
+                    }
+                    className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-base text-[#0F172A] placeholder:text-[#6B7280] focus-visible:border-[#202B6D] focus-visible:ring-2 focus-visible:ring-[#202B6D]/30 focus-visible:ring-offset-0"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-dashed border-[#CBD5F5] bg-[#F5F7FB] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-[#202B6D]">
+                      Before fueling
+                    </p>
+                    <span className="text-xs uppercase tracking-[0.2em] text-[#202B6D]/60">
+                      Capture on arrival
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-[#202B6D]">
+                        Meter reading
+                      </Label>
+                      {isNative ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-12 w-full rounded-xl border border-dashed border-[#202B6D]/40 bg-white text-sm font-semibold text-[#202B6D] hover:bg-[#E6E9F5]"
+                          onClick={() => capturePhoto("counter_before")}
+                          disabled={uploading.counter_before}
+                        >
+                          {uploading.counter_before
+                            ? "Capturing..."
+                            : "Capture photo"}
+                        </Button>
+                      ) : (
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            const url = URL.createObjectURL(f);
+                            setPreviews((p) => ({ ...p, counter_before: url }));
+                            await handleFile("counter_before", f);
+                          }}
+                          className="h-12 rounded-xl border border-dashed border-[#202B6D]/40 bg-white text-sm text-[#202B6D]"
+                        />
+                      )}
+                      {(previews.counter_before || entry.counter_before_url) && (
+                        <img
+                          src={previews.counter_before || entry.counter_before_url}
+                          alt="Counter before"
+                          className="mt-2 h-24 w-24 rounded-xl object-cover shadow-sm"
+                        />
+                      )}
+                      {uploading.counter_before && (
+                        <div className="text-xs text-[#6B7280]">Uploading...</div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-[#202B6D]">
+                        Tank level
+                      </Label>
+                      {isNative ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-12 w-full rounded-xl border border-dashed border-[#202B6D]/40 bg-white text-sm font-semibold text-[#202B6D] hover:bg-[#E6E9F5]"
+                          onClick={() => capturePhoto("tank_before")}
+                          disabled={uploading.tank_before}
+                        >
+                          {uploading.tank_before ? "Capturing..." : "Capture photo"}
+                        </Button>
+                      ) : (
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            const url = URL.createObjectURL(f);
+                            setPreviews((p) => ({ ...p, tank_before: url }));
+                            await handleFile("tank_before", f);
+                          }}
+                          className="h-12 rounded-xl border border-dashed border-[#202B6D]/40 bg-white text-sm text-[#202B6D]"
+                        />
+                      )}
+                      {(previews.tank_before || entry.tank_before_url) && (
+                        <img
+                          src={previews.tank_before || entry.tank_before_url}
+                          alt="Tank before"
+                          className="mt-2 h-24 w-24 rounded-xl object-cover shadow-sm"
+                        />
+                      )}
+                      {uploading.tank_before && (
+                        <div className="text-xs text-[#6B7280]">Uploading...</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-dashed border-[#CBD5F5] bg-[#F5F7FB] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-[#202B6D]">
+                      After fueling
+                    </p>
+                    <span className="text-xs uppercase tracking-[0.2em] text-[#202B6D]/60">
+                      Confirm completion
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-[#202B6D]">
+                        Meter reading
+                      </Label>
+                      {isNative ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-12 w-full rounded-xl border border-dashed border-[#202B6D]/40 bg-white text-sm font-semibold text-[#202B6D] hover:bg-[#E6E9F5]"
+                          onClick={() => capturePhoto("counter_after")}
+                          disabled={uploading.counter_after}
+                        >
+                          {uploading.counter_after ? "Capturing..." : "Capture photo"}
+                        </Button>
+                      ) : (
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            const url = URL.createObjectURL(f);
+                            setPreviews((p) => ({ ...p, counter_after: url }));
+                            await handleFile("counter_after", f);
+                          }}
+                          className="h-12 rounded-xl border border-dashed border-[#202B6D]/40 bg-white text-sm text-[#202B6D]"
+                        />
+                      )}
+                      {(previews.counter_after || entry.counter_after_url) && (
+                        <img
+                          src={previews.counter_after || entry.counter_after_url}
+                          alt="Counter after"
+                          className="mt-2 h-24 w-24 rounded-xl object-cover shadow-sm"
+                        />
+                      )}
+                      {uploading.counter_after && (
+                        <div className="text-xs text-[#6B7280]">Uploading...</div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-[#202B6D]">
+                        Tank level
+                      </Label>
+                      {isNative ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-12 w-full rounded-xl border border-dashed border-[#202B6D]/40 bg-white text-sm font-semibold text-[#202B6D] hover:bg-[#E6E9F5]"
+                          onClick={() => capturePhoto("tank_after")}
+                          disabled={uploading.tank_after}
+                        >
+                          {uploading.tank_after ? "Capturing..." : "Capture photo"}
+                        </Button>
+                      ) : (
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            const url = URL.createObjectURL(f);
+                            setPreviews((p) => ({ ...p, tank_after: url }));
+                            await handleFile("tank_after", f);
+                          }}
+                          className="h-12 rounded-xl border border-dashed border-[#202B6D]/40 bg-white text-sm text-[#202B6D]"
+                        />
+                      )}
+                      {(previews.tank_after || entry.tank_after_url) && (
+                        <img
+                          src={previews.tank_after || entry.tank_after_url}
+                          alt="Tank after"
+                          className="mt-2 h-24 w-24 rounded-xl object-cover shadow-sm"
+                        />
+                      )}
+                      {uploading.tank_after && (
+                        <div className="text-xs text-[#6B7280]">Uploading...</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="notes"
+                  className="text-xs font-semibold uppercase tracking-wide text-[#202B6D]"
+                >
+                  Remarks
                 </Label>
-                <Input
-                  id="actual_liters_in_tank"
-                  inputMode="decimal"
-                  value={entry.actual_liters_in_tank}
+                <Textarea
+                  id="notes"
+                  value={entry.notes}
                   onChange={(e) =>
-                    setEntry((s) => ({
-                      ...s,
-                      actual_liters_in_tank: e.target.value,
-                    }))
+                    setEntry((s) => ({ ...s, notes: e.target.value }))
                   }
+                  placeholder="Add any observations, access issues, or dispatch notes."
+                  className="min-h-[120px] rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-[#0F172A] placeholder:text-[#6B7280] focus-visible:border-[#202B6D] focus-visible:ring-2 focus-visible:ring-[#202B6D]/25 focus-visible:ring-offset-0"
                 />
               </div>
-              <div>
-                <Label htmlFor="quantity_added">Quantity Added</Label>
-                <Input
-                  id="quantity_added"
-                  inputMode="decimal"
-                  value={entry.quantity_added}
-                  onChange={(e) =>
-                    setEntry((s) => ({ ...s, quantity_added: e.target.value }))
-                  }
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Image: Counter Before</Label>
-                {isNative ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 w-full rounded-xl border border-dashed border-[#202B6D]/50 text-sm font-semibold text-[#202B6D]"
-                    onClick={() => capturePhoto("counter_before")}
-                    disabled={uploading.counter_before}
-                  >
-                    {uploading.counter_before
-                      ? "Capturing..."
-                      : "Capture photo"}
-                  </Button>
-                ) : (
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={async (e) => {
-                      const f = e.target.files?.[0];
-                      if (!f) return;
-                      const url = URL.createObjectURL(f);
-                      setPreviews((p) => ({ ...p, counter_before: url }));
-                      await handleFile("counter_before", f);
-                    }}
-                  />
-                )}
-                {(previews.counter_before || entry.counter_before_url) && (
-                  <img
-                    src={previews.counter_before || entry.counter_before_url}
-                    alt="Counter before"
-                    className="mt-2 h-24 w-24 rounded object-cover"
-                  />
-                )}
-                {uploading.counter_before && (
-                  <div className="text-xs text-muted-foreground">
-                    Uploading...
-                  </div>
-                )}
-              </div>
-              <div>
-                <Label>Image: Tank Before</Label>
-                {isNative ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 w-full rounded-xl border border-dashed border-[#202B6D]/50 text-sm font-semibold text-[#202B6D]"
-                    onClick={() => capturePhoto("tank_before")}
-                    disabled={uploading.tank_before}
-                  >
-                    {uploading.tank_before ? "Capturing..." : "Capture photo"}
-                  </Button>
-                ) : (
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={async (e) => {
-                      const f = e.target.files?.[0];
-                      if (!f) return;
-                      const url = URL.createObjectURL(f);
-                      setPreviews((p) => ({ ...p, tank_before: url }));
-                      await handleFile("tank_before", f);
-                    }}
-                  />
-                )}
-                {(previews.tank_before || entry.tank_before_url) && (
-                  <img
-                    src={previews.tank_before || entry.tank_before_url}
-                    alt="Tank before"
-                    className="mt-2 h-24 w-24 rounded object-cover"
-                  />
-                )}
-                {uploading.tank_before && (
-                  <div className="text-xs text-muted-foreground">
-                    Uploading...
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Image: Counter After</Label>
-                {isNative ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 w-full rounded-xl border border-dashed border-[#202B6D]/50 text-sm font-semibold text-[#202B6D]"
-                    onClick={() => capturePhoto("counter_after")}
-                    disabled={uploading.counter_after}
-                  >
-                    {uploading.counter_after ? "Capturing..." : "Capture photo"}
-                  </Button>
-                ) : (
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={async (e) => {
-                      const f = e.target.files?.[0];
-                      if (!f) return;
-                      const url = URL.createObjectURL(f);
-                      setPreviews((p) => ({ ...p, counter_after: url }));
-                      await handleFile("counter_after", f);
-                    }}
-                  />
-                )}
-                {(previews.counter_after || entry.counter_after_url) && (
-                  <img
-                    src={previews.counter_after || entry.counter_after_url}
-                    alt="Counter after"
-                    className="mt-2 h-24 w-24 rounded object-cover"
-                  />
-                )}
-                {uploading.counter_after && (
-                  <div className="text-xs text-muted-foreground">
-                    Uploading...
-                  </div>
-                )}
-              </div>
-              <div>
-                <Label>Image: Tank After</Label>
-                {isNative ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 w-full rounded-xl border border-dashed border-[#202B6D]/50 text-sm font-semibold text-[#202B6D]"
-                    onClick={() => capturePhoto("tank_after")}
-                    disabled={uploading.tank_after}
-                  >
-                    {uploading.tank_after ? "Capturing..." : "Capture photo"}
-                  </Button>
-                ) : (
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={async (e) => {
-                      const f = e.target.files?.[0];
-                      if (!f) return;
-                      const url = URL.createObjectURL(f);
-                      setPreviews((p) => ({ ...p, tank_after: url }));
-                      await handleFile("tank_after", f);
-                    }}
-                  />
-                )}
-                {(previews.tank_after || entry.tank_after_url) && (
-                  <img
-                    src={previews.tank_after || entry.tank_after_url}
-                    alt="Tank after"
-                    className="mt-2 h-24 w-24 rounded object-cover"
-                  />
-                )}
-                {uploading.tank_after && (
-                  <div className="text-xs text-muted-foreground">
-                    Uploading...
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="notes">Remarks</Label>
-              <Textarea
-                id="notes"
-                value={entry.notes}
-                onChange={(e) =>
-                  setEntry((s) => ({ ...s, notes: e.target.value }))
-                }
-              />
+              <DialogFooter className="mt-2 flex flex-col gap-2 border-t border-[#E5E7EB] pt-4 sm:flex-row sm:justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setEditOpen(false)}
+                  className="h-11 rounded-xl border border-slate-300 px-5 text-sm font-semibold text-[#202B6D] hover:bg-[#EEF2F7]"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={saveCompletion}
+                  className="h-11 rounded-xl bg-[#202B6D] px-6 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-lg shadow-[#202B6D]/20 transition hover:bg-[#162769]"
+                >
+                  Submit entry
+                </Button>
+              </DialogFooter>
             </div>
           </div>
-          <DialogFooter className="mt-4 gap-2 sm:gap-2">
-            <Button variant="outline" onClick={() => setEditOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={saveCompletion}>Submit</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
