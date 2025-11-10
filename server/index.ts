@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { handleDemo } from "./routes/demo";
 import {
   handleDriverLogin,
   handleGetDriverTasks,
@@ -64,7 +63,6 @@ export function createServer() {
     res.json({ message: ping });
   });
 
-  app.get("/api/demo", handleDemo);
 
   // Driver API routes
   app.post("/api/driver/login", handleDriverLogin);
@@ -74,11 +72,6 @@ export function createServer() {
   app.post("/api/driver/tasks/update-status", handleUpdateTaskStatus);
   app.post("/api/driver/push-token/register", handleRegisterPushToken);
 
-  app.post("/api/password-reset", async (req, res) => {
-    const { email } = req.body as { email?: string };
-    console.log("Password reset requested for:", email);
-    res.json({ ok: true });
-  });
 
   // Send push notification to drivers
   app.post("/api/notify", async (req, res) => {
