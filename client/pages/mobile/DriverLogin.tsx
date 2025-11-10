@@ -61,7 +61,11 @@ export default function DriverLogin() {
     <div className="min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#001E60] via-[#0b1b3a] to-[#F5F7FB] font-sans text-slate-800 px-4 py-6">
       {/* Header */}
       <div className="flex flex-col items-center">
-        <img src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F4447a86c5269426e9a4e9dfb765a6409" alt="ACES Logo" className="h-24 w-auto mb-4" />
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F4447a86c5269426e9a4e9dfb765a6409"
+          alt="ACES Logo"
+          className="h-24 w-auto mb-4"
+        />
         <h1 className="text-2xl font-semibold text-white mb-1">Driver App</h1>
         <p className="text-slate-200 text-sm text-center max-w-xs">
           Sign in with your assigned credentials to access fueling tasks.
@@ -78,7 +82,9 @@ export default function DriverLogin() {
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Username *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Username *
+              </label>
               <Input
                 type="text"
                 placeholder="Enter username"
@@ -89,7 +95,9 @@ export default function DriverLogin() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Password *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Password *
+              </label>
               <Input
                 type="password"
                 placeholder="Enter password"
