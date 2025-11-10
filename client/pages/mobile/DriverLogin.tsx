@@ -7,12 +7,54 @@ export default function DriverLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (remember && username) localStorage.setItem("driver.remember", username);
-    if (!remember) localStorage.removeItem("driver.remember");
-    window.location.hash = "#/driver-dashboard";
+    setError("");
+
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
+      setError("Please enter both username and password");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/driver-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: trimmedUsername,
+          password: trimmedPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        setError(data.error || "Login failed. Please check your credentials.");
+        return;
+      }
+
+      if (remember) {
+        localStorage.setItem("driver.remember", trimmedUsername);
+        localStorage.setItem("driver.profile", JSON.stringify(data.profile));
+      } else {
+        localStorage.removeItem("driver.remember");
+        localStorage.setItem("driver.profile", JSON.stringify(data.profile));
+      }
+
+      window.location.hash = "#/driver-dashboard";
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Login failed. Check your connection and try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
