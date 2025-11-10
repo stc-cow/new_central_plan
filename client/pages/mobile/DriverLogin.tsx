@@ -24,7 +24,7 @@ export default function DriverLogin() {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/driver-login", {
+      const response = await fetch("/api/driver/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
