@@ -135,8 +135,10 @@ export default function DriverApp() {
   const [editOpen, setEditOpen] = useState(false);
   const [activeTask, setActiveTask] = useState<any | null>(null);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { notifications, loading: notificationsLoading } = useNotificationSync(
+    profile?.name || null,
+  );
   const isNative = useMemo(() => {
     if (typeof window === "undefined") return false;
     const cap = (window as any).Capacitor;
