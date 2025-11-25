@@ -93,9 +93,7 @@ function filterAndValidateSites(rawData) {
                 regionname === 'Central' &&
                 (cowstatus === 'ON-AIR' || cowstatus === 'IN PROGRESS') &&
                 !isNaN(lat) &&
-                !isNaN(lng) &&
-                lat !== 0 &&
-                lng !== 0
+                !isNaN(lng)
             );
         })
         .map(row => {
