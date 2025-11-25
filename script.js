@@ -193,14 +193,9 @@ function populateDueTable(sites) {
         .filter(s => s.status === 'coming3')
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
-    const futureSites = sites
-        .filter(s => s.status === 'next15')
-        .sort((a, b) => a.sitename.localeCompare(b.sitename));
-
     populateOverdueTable(dueSites);
     populateTodayTable(todaySites);
     populateComingTable(comingSites);
-    populateFutureTable(futureSites);
 }
 
 function populateOverdueTable(sites) {
@@ -270,26 +265,6 @@ function populateComingTable(sites) {
     });
 }
 
-function populateFutureTable(sites) {
-    const tbody = document.getElementById('futureTableBody');
-    tbody.innerHTML = '';
-
-    if (sites.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No sites in next 3-15 days</td>';
-        tbody.appendChild(tr);
-        return;
-    }
-
-    sites.forEach(site => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${site.sitename}</td>
-            <td><span style="color: #3ad17c; font-weight: 600;">${site.days}</span></td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
 
 function initMap() {
     map = L.map('map').setView(SA_CENTER, 5);
@@ -350,25 +325,25 @@ function addMarkersToMap(sites) {
                 radius: baseRadius,
                 color: site.color || '#ff6b6b',
                 weight: 2,
-                opacity: 0.6,
-                fillOpacity: 0.15,
+                opacity: 0.8,
+                fillOpacity: 0.25,
                 className: 'pulsing-circle'
             }).addTo(map);
 
             let pulseStartTime = Date.now();
-            const pulseDuration = 1500;
+            const pulseDuration = 2500;
 
             const animatePulse = () => {
                 const elapsed = (Date.now() - pulseStartTime) % pulseDuration;
                 const progress = elapsed / pulseDuration;
                 const easeProgress = 0.5 - Math.cos(progress * Math.PI) / 2;
 
-                const minRadius = 250;
-                const maxRadius = 400;
+                const minRadius = 200;
+                const maxRadius = 75000;
                 const newRadius = minRadius + (maxRadius - minRadius) * easeProgress;
 
-                const minOpacity = 0.3;
-                const maxOpacity = 0.7;
+                const minOpacity = 0.4;
+                const maxOpacity = 0.95;
                 const newOpacity = maxOpacity - (maxOpacity - minOpacity) * easeProgress;
 
                 pulsingCircle.setRadius(newRadius);
@@ -405,18 +380,6 @@ async function loadDashboard() {
     addMarkersToMap(sitesData);
 }
 
-function toggleFutureCard(headerElement) {
-    const content = document.getElementById('futureCardContent');
-    const icon = headerElement.querySelector('.collapse-icon');
-
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        icon.textContent = '−';
-    } else {
-        content.style.display = 'none';
-        icon.textContent = '+';
-    }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
