@@ -46,9 +46,12 @@ body {
 
 .header-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
+    gap: 40px;
+    width: 100%;
+    max-width: 1400px;
 }
 
 .header-title {
@@ -58,11 +61,14 @@ body {
     text-transform: uppercase;
     letter-spacing: 2px;
     margin: 0;
+    flex: 1;
+    text-align: center;
 }
 
 .logo {
-    height: 120px;
+    height: 100px;
     width: auto;
+    flex-shrink: 0;
     object-fit: contain;
     filter: brightness(1.05) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
 }
