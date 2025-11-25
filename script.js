@@ -206,15 +206,25 @@ function updateMetrics(sites) {
 
 function populateDueTable(sites) {
     const overdueSites = sites
-        .filter(s => s.daysUntilFuel < 0)
+        .filter(s => s.status === 'overdue')
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
     const todaySites = sites
-        .filter(s => s.daysUntilFuel === 0)
+        .filter(s => s.status === 'today')
+        .sort((a, b) => a.sitename.localeCompare(b.sitename));
+
+    const comingSites = sites
+        .filter(s => s.status === 'coming')
+        .sort((a, b) => a.sitename.localeCompare(b.sitename));
+
+    const futureSites = sites
+        .filter(s => s.status === 'healthy' && s.daysUntilFuel >= 4 && s.daysUntilFuel <= 15)
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
     populateOverdueTable(overdueSites);
     populateTodayTable(todaySites);
+    populateComingTable(comingSites);
+    populateFutureTable(futureSites);
 }
 
 function populateOverdueTable(sites) {
@@ -253,7 +263,49 @@ function populateTodayTable(sites) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${site.sitename}</td>
-            <td><span style="color: ${getStatusColor(site.status)}; font-weight: 600;">●</span> ${getStatusLabel(site.status)}</td>
+            <td>${site.nextfuelingplan}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function populateComingTable(sites) {
+    const tbody = document.getElementById('comingTableBody');
+    tbody.innerHTML = '';
+
+    if (sites.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No sites coming in 3 days</td>';
+        tbody.appendChild(tr);
+        return;
+    }
+
+    sites.forEach(site => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${site.sitename}</td>
+            <td><span style="color: #ffc857; font-weight: 600;">${site.daysUntilFuel}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function populateFutureTable(sites) {
+    const tbody = document.getElementById('futureTableBody');
+    tbody.innerHTML = '';
+
+    if (sites.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No sites in next 3-15 days</td>';
+        tbody.appendChild(tr);
+        return;
+    }
+
+    sites.forEach(site => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${site.sitename}</td>
+            <td><span style="color: #3ad17c; font-weight: 600;">${site.daysUntilFuel}</span></td>
         `;
         tbody.appendChild(tr);
     });
