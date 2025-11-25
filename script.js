@@ -325,25 +325,25 @@ function addMarkersToMap(sites) {
                 radius: baseRadius,
                 color: site.color || '#ff6b6b',
                 weight: 2,
-                opacity: 0.6,
-                fillOpacity: 0.15,
+                opacity: 0.8,
+                fillOpacity: 0.25,
                 className: 'pulsing-circle'
             }).addTo(map);
 
             let pulseStartTime = Date.now();
-            const pulseDuration = 1500;
+            const pulseDuration = 2500;
 
             const animatePulse = () => {
                 const elapsed = (Date.now() - pulseStartTime) % pulseDuration;
                 const progress = elapsed / pulseDuration;
                 const easeProgress = 0.5 - Math.cos(progress * Math.PI) / 2;
 
-                const minRadius = 250;
-                const maxRadius = 400;
+                const minRadius = 200;
+                const maxRadius = 550;
                 const newRadius = minRadius + (maxRadius - minRadius) * easeProgress;
 
-                const minOpacity = 0.3;
-                const maxOpacity = 0.7;
+                const minOpacity = 0.4;
+                const maxOpacity = 0.95;
                 const newOpacity = maxOpacity - (maxOpacity - minOpacity) * easeProgress;
 
                 pulsingCircle.setRadius(newRadius);
