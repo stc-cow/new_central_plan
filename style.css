@@ -60,7 +60,7 @@ body {
     grid-column: 1 / -1;
     background: linear-gradient(120deg, #161f4a 0%, #1f2f76 45%, #131a3f 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 12px 20px;
+    padding: 18px 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,9 +81,8 @@ body {
 
 .header-content {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    gap: 14px;
     width: 100%;
     max-width: 1280px;
     position: relative;
@@ -91,10 +90,10 @@ body {
 }
 
 .brand-group {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 14px;
-    flex: 1;
+    gap: 18px;
 }
 
 .title-block {
@@ -113,7 +112,7 @@ body {
 }
 
 .header-title {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 800;
     color: white;
     letter-spacing: 0.4px;
@@ -123,7 +122,7 @@ body {
 .header-subtitle {
     margin: 0;
     color: rgba(255, 255, 255, 0.82);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
 }
 
@@ -138,10 +137,10 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 11px;
+    padding: 8px 12px;
     border-radius: 12px;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     background: rgba(255, 255, 255, 0.12);
@@ -169,7 +168,7 @@ body {
 }
 
 .logo {
-    height: 56px;
+    height: 64px;
     width: auto;
     flex-shrink: 0;
     object-fit: contain;
@@ -177,11 +176,11 @@ body {
 }
 
 .logo-left {
-    height: 52px;
+    height: 60px;
 }
 
 .logo-right {
-    height: 46px;
+    height: 50px;
 }
 
 .left-panel {
@@ -558,12 +557,12 @@ body {
     }
 
     .logo {
-        height: 68px;
+        height: 82px;
     }
 
     .header-title {
-        font-size: 26px;
-        letter-spacing: 0.8px;
+        font-size: 30px;
+        letter-spacing: 1.2px;
     }
 }
 
@@ -584,15 +583,12 @@ body {
     }
 
     .header-content {
-        flex-direction: column;
-        align-items: center;
         gap: 10px;
     }
 
     .brand-group {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        grid-template-columns: 1fr;
+        justify-items: center;
         text-align: center;
     }
 
