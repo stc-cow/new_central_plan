@@ -292,12 +292,21 @@ function initMap() {
     map.setMaxBounds(SA_BOUNDS);
 
     L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png',
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
+            attribution: 'Tiles © Esri | Maxar',
             maxZoom: 18,
             minZoom: 3
+        }
+    ).addTo(map);
+
+    L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+        {
+            attribution: 'Tiles © Esri',
+            maxZoom: 18,
+            minZoom: 3,
+            opacity: 0.9
         }
     ).addTo(map);
 }
