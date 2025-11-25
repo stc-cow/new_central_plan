@@ -297,6 +297,33 @@ body {
     color: #2a8a5f;
 }
 
+.future-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 140px;
+    gap: 12px;
+}
+
+.future-count {
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--aces-green);
+    line-height: 1;
+    letter-spacing: -1px;
+}
+
+.future-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
 .sites-table {
     width: 100%;
     border-collapse: collapse;
