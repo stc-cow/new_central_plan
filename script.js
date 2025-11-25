@@ -271,26 +271,6 @@ function populateComingTable(sites) {
     });
 }
 
-function populateFutureTable(sites) {
-    const tbody = document.getElementById('futureTableBody');
-    tbody.innerHTML = '';
-
-    if (sites.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No sites in next 3-15 days</td>';
-        tbody.appendChild(tr);
-        return;
-    }
-
-    sites.forEach(site => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${site.sitename}</td>
-            <td><span style="color: #3ad17c; font-weight: 600;">${site.days}</span></td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
 
 function initMap() {
     map = L.map('map').setView(SA_CENTER, 5);
