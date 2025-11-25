@@ -79,7 +79,7 @@ body {
 .header-title {
     font-size: 22px;
     font-weight: 800;
-    color: white;
+    color: var(--aces-primary);
     text-transform: uppercase;
     letter-spacing: 1.5px;
     margin: 0;
