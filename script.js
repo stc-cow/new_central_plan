@@ -345,20 +345,39 @@ function addMarkersToMap(sites) {
         siteMap[site.sitename] = { marker: marker, site: site };
 
         if (site.status === 'due' || site.status === 'today') {
+            const baseRadius = 300;
             const pulsingCircle = L.circle([site.lat, site.lng], {
-                radius: 300,
+                radius: baseRadius,
                 color: site.color || '#ff6b6b',
                 weight: 2,
-                opacity: 0.4,
-                fillOpacity: 0.1,
+                opacity: 0.6,
+                fillOpacity: 0.15,
                 className: 'pulsing-circle'
             }).addTo(map);
 
-            const circleElement = pulsingCircle._path;
-            if (circleElement) {
-                circleElement.style.animation = 'pulse-marker 2s ease-in-out infinite';
-            }
+            let pulseStartTime = Date.now();
+            const pulseDuration = 1500;
 
+            const animatePulse = () => {
+                const elapsed = (Date.now() - pulseStartTime) % pulseDuration;
+                const progress = elapsed / pulseDuration;
+                const easeProgress = 0.5 - Math.cos(progress * Math.PI) / 2;
+
+                const minRadius = 250;
+                const maxRadius = 400;
+                const newRadius = minRadius + (maxRadius - minRadius) * easeProgress;
+
+                const minOpacity = 0.3;
+                const maxOpacity = 0.7;
+                const newOpacity = maxOpacity - (maxOpacity - minOpacity) * easeProgress;
+
+                pulsingCircle.setRadius(newRadius);
+                pulsingCircle.setStyle({ opacity: newOpacity });
+
+                requestAnimationFrame(animatePulse);
+            };
+
+            animatePulse();
             pulsingCircles.push(pulsingCircle);
         }
     });
