@@ -191,21 +191,51 @@ function updateMetrics(sites) {
 }
 
 function populateDueTable(sites) {
-    const dueSites = sites
-        .filter(s => s.status === 'due')
+    const overdueSites = sites
+        .filter(s => s.daysUntilFuel < 0)
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
-    const tbody = document.getElementById('dueTableBody');
+    const todaySites = sites
+        .filter(s => s.daysUntilFuel === 0)
+        .sort((a, b) => a.sitename.localeCompare(b.sitename));
+
+    populateOverdueTable(overdueSites);
+    populateTodayTable(todaySites);
+}
+
+function populateOverdueTable(sites) {
+    const tbody = document.getElementById('overdueTableBody');
     tbody.innerHTML = '';
 
-    if (dueSites.length === 0) {
+    if (sites.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No overdue sites</td>';
+        tbody.appendChild(tr);
+        return;
+    }
+
+    sites.forEach(site => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${site.sitename}</td>
+            <td><span style="color: #fb6d5d; font-weight: 600;">${site.daysUntilFuel}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function populateTodayTable(sites) {
+    const tbody = document.getElementById('todayTableBody');
+    tbody.innerHTML = '';
+
+    if (sites.length === 0) {
         const tr = document.createElement('tr');
         tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No sites due today</td>';
         tbody.appendChild(tr);
         return;
     }
 
-    dueSites.forEach(site => {
+    sites.forEach(site => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${site.sitename}</td>
