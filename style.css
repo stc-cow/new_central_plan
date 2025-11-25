@@ -417,14 +417,20 @@ body {
     }
 
     .dashboard-header {
-        padding: 14px 20px;
-        flex-direction: column;
-        gap: 12px;
-        text-align: center;
+        padding: 16px 20px;
+    }
+
+    .header-content {
+        gap: 10px;
+    }
+
+    .header-title {
+        font-size: 20px;
+        letter-spacing: 1px;
     }
 
     .logo {
-        height: 44px;
+        height: 80px;
     }
 
     .metrics-grid {
