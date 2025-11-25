@@ -364,6 +364,19 @@ async function loadDashboard() {
     addMarkersToMap(sitesData);
 }
 
+function toggleFutureCard(headerElement) {
+    const content = document.getElementById('futureCardContent');
+    const icon = headerElement.querySelector('.collapse-icon');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.textContent = '−';
+    } else {
+        content.style.display = 'none';
+        icon.textContent = '+';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
     loadDashboard();
