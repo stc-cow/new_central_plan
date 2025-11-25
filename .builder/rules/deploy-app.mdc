@@ -1,0 +1,21 @@
+---
+description: Deploy the Driver App to production using Netlify or Vercel
+globs:
+  alwaysApply: true
+---
+
+Deployment for the **ACES Fuel Driver App** can be handled through **Netlify** or **Vercel** using Model Context Protocol (MCP) integrations.
+
+**For Netlify:**
+- If Netlify tools are unavailable, prompt the user to [Connect Netlify MCP](#open-mcp-popover).
+- When the user requests deployment, use Netlify MCP tools to build and deploy the app.
+- Netlify performs builds on its own servers, so local `pnpm build` verification is optional.
+- Do not ask the user to run terminal commands manually — use the Bash tool when necessary.
+
+**For Vercel:**
+- If Vercel tools are unavailable, prompt the user to [Connect Vercel MCP](#open-mcp-popover).
+- Once connected, Vercel will automatically deploy the app using its MCP integration.
+- Do not request manual terminal commands — execute required operations through the Bash tool.
+
+You can also suggest using the [Open Preview](#open-preview) to test build output,
+but clarify that this preview is not a production deployment.
