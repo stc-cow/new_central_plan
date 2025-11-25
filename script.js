@@ -80,13 +80,18 @@ function filterAndValidateSites(rawData) {
     return rawData
         .filter(row => {
             const regionname = row.regionname ? row.regionname.trim() : '';
-            const cowstatus = row.cowstatus ? row.cowstatus.trim().toUpperCase() : '';
+
+            const cowstatusKey = Object.keys(row).find(key =>
+                key.toLowerCase() === 'cowstatus'
+            );
+            const cowstatus = cowstatusKey ? row[cowstatusKey].trim().toUpperCase() : '';
+
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
 
             return (
                 regionname === 'Central' &&
-                ['ON-AIR', 'IN PROGRESS', 'IN-PROGRESS'].includes(cowstatus) &&
+                (cowstatus === 'ON-AIR' || cowstatus === 'IN PROGRESS') &&
                 !isNaN(lat) &&
                 !isNaN(lng) &&
                 lat !== 0 &&
