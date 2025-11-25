@@ -328,7 +328,7 @@ function addMarkersToMap(sites) {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
 
-    const dueSites = sites.filter(s => s.status === 'due');
+    const redSites = sites.filter(s => s.status === 'overdue' || s.status === 'today');
 
     sites.forEach(site => {
         const color = getStatusColor(site.status);
@@ -351,17 +351,17 @@ function addMarkersToMap(sites) {
         markers.push(marker);
     });
 
-    if (dueSites.length > 0) {
+    if (redSites.length > 0) {
         const group = new L.featureGroup(
             markers.filter(m => {
                 const site = sites.find(s => s.lat === m.getLatLng().lat && s.lng === m.getLatLng().lng);
-                return site && site.status === 'due';
+                return site && (site.status === 'overdue' || site.status === 'today');
             })
         );
 
         if (group.getLayers().length > 0) {
             map.fitBounds(group.getBounds().pad(0.1));
-            startAutoZoomLoop(dueSites);
+            startAutoZoomLoop(redSites);
         }
     } else if (markers.length > 0) {
         const allGroup = new L.featureGroup(markers);
