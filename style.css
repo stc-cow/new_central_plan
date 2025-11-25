@@ -235,9 +235,13 @@ body {
 
 .cards-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 0;
+}
+
+.coming-card {
+    grid-column: 1 / -1;
 }
 
 .status-card {
