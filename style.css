@@ -856,4 +856,41 @@ body {
     font-size: 10px !important;
     text-align: center;
 }
+/* ====== LARGE LOGOS (100px) ====== */
+
+/* STC + ACES logos equal size */
+.logo-left,
+.logo-right,
+.logo {
+    height: 100px !important;   /* Increase to 100px */
+    width: auto !important;
+    object-fit: contain !important;
+}
+
+/* Keep them away from edges */
+.logo-left {
+    margin-left: 20px !important;
+}
+
+.logo-right {
+    margin-right: 20px !important;
+}
+
+/* Re-center and balance layout */
+.brand-group {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+/* Ensure title stays centered */
+.header-content {
+    align-items: center !important;
+    text-align: center !important;
+    gap: 8px !important;
+}
 
