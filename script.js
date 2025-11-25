@@ -339,7 +339,7 @@ function addMarkersToMap(sites) {
                 const easeProgress = 0.5 - Math.cos(progress * Math.PI) / 2;
 
                 const minRadius = 200;
-                const maxRadius = 550;
+                const maxRadius = 5000;
                 const newRadius = minRadius + (maxRadius - minRadius) * easeProgress;
 
                 const minOpacity = 0.4;
