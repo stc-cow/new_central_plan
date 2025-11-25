@@ -133,15 +133,34 @@ body {
     color: #475569;
 }
 
-.due-list {
+.cards-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 0;
+}
+
+.due-card,
+.today-card {
     background: #f8f9fb;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 16px;
     height: auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.due-list h3 {
+.due-card {
+    border-left: 4px solid #fb6d5d;
+}
+
+.today-card {
+    border-left: 4px solid #ffc857;
+}
+
+.due-card h3,
+.today-card h3 {
     font-size: 14px;
     font-weight: 700;
     color: #202b6d;
@@ -150,17 +169,26 @@ body {
     letter-spacing: 0.5px;
 }
 
-#dueTable {
+.due-card h3 {
+    color: #fb6d5d;
+}
+
+.today-card h3 {
+    color: #ffc857;
+}
+
+.sites-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+    flex: 1;
 }
 
-#dueTable thead {
+.sites-table thead {
     background-color: #e0e7ff;
 }
 
-#dueTable th {
+.sites-table th {
     padding: 10px 8px;
     text-align: left;
     font-weight: 700;
@@ -171,17 +199,17 @@ body {
     letter-spacing: 0.3px;
 }
 
-#dueTable td {
+.sites-table td {
     padding: 10px 8px;
     border-bottom: 1px solid #e2e8f0;
     color: #475569;
 }
 
-#dueTable tbody tr:hover {
+.sites-table tbody tr:hover {
     background-color: #f1f5f9;
 }
 
-#dueTable tbody tr:last-child td {
+.sites-table tbody tr:last-child td {
     border-bottom: none;
 }
 
