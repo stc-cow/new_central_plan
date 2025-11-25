@@ -83,7 +83,11 @@ function filterAndValidateSites(rawData) {
             const cowstatus = row.cowstatus ? row.cowstatus.trim().toUpperCase() : '';
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
-            const nextfuelingplan = row.nextfuelingplan || '';
+
+            const nextfuelingplanKey = Object.keys(row).find(key =>
+                key.toLowerCase() === 'nextfuelingplan'
+            );
+            const nextfuelingplan = nextfuelingplanKey ? row[nextfuelingplanKey] : '';
 
             return (
                 regionname === 'Central' &&
@@ -98,18 +102,24 @@ function filterAndValidateSites(rawData) {
         .map(row => {
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
-            const fuelDate = parseDate(row.nextfuelingplan);
+
+            const nextfuelingplanKey = Object.keys(row).find(key =>
+                key.toLowerCase() === 'nextfuelingplan'
+            );
+            const nextfuelingplan = nextfuelingplanKey ? row[nextfuelingplanKey] : '';
+            const fuelDate = parseDate(nextfuelingplan);
+            const daysUntil = calculateDaysUntil(fuelDate);
 
             return {
                 sitename: row.sitename || 'Unknown Site',
                 regionname: row.regionname || '',
                 cowstatus: row.cowstatus || '',
-                nextfuelingplan: row.nextfuelingplan || '',
+                nextfuelingplan: nextfuelingplan || '',
                 lat: lat,
                 lng: lng,
                 fuelDate: fuelDate,
-                daysUntilFuel: calculateDaysUntil(fuelDate),
-                status: getStatus(calculateDaysUntil(fuelDate))
+                daysUntilFuel: daysUntil,
+                status: getStatusNew(daysUntil)
             };
         });
 }
