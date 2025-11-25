@@ -300,10 +300,10 @@ function addMarkersToMap(sites) {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
 
-    const redSites = sites.filter(s => s.status === 'overdue' || s.status === 'today');
+    const redSites = sites.filter(s => s.status === 'due' || s.status === 'today');
 
     sites.forEach(site => {
-        const color = getStatusColor(site.status);
+        const color = site.color || getStatusColor(site.status);
         const icon = L.divIcon({
             className: 'custom-marker',
             html: `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px ${color}; display: flex; align-items: center; justify-content: center;"></div>`,
@@ -315,8 +315,8 @@ function addMarkersToMap(sites) {
             .bindPopup(`
                 <h4>${site.sitename}</h4>
                 <p><strong>Status:</strong> ${getStatusLabel(site.status)}</p>
-                <p><strong>Days:</strong> ${site.daysUntilFuel}</p>
-                <p><strong>Fuel Date:</strong> ${site.nextfuelingplan}</p>
+                <p><strong>Days:</strong> ${site.days !== null ? site.days : 'N/A'}</p>
+                <p><strong>Fuel Date:</strong> ${site.nextfuelingplan || 'No Date'}</p>
             `)
             .addTo(map);
 
@@ -327,7 +327,7 @@ function addMarkersToMap(sites) {
         const group = new L.featureGroup(
             markers.filter(m => {
                 const site = sites.find(s => s.lat === m.getLatLng().lat && s.lng === m.getLatLng().lng);
-                return site && (site.status === 'overdue' || site.status === 'today');
+                return site && (site.status === 'due' || site.status === 'today');
             })
         );
 
