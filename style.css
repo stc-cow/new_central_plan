@@ -364,6 +364,14 @@ body {
     .right-panel {
         padding: 40px;
     }
+
+    .logo {
+        height: 140px;
+    }
+
+    .header-title {
+        font-size: 32px;
+    }
 }
 
 @media (max-width: 1024px) {
