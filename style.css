@@ -380,6 +380,11 @@ body {
     font-weight: 700;
 }
 
+.pulsing-circle {
+    animation: pulse-marker 2s ease-in-out infinite !important;
+    will-change: r;
+}
+
 @media (min-width: 1440px) {
     .cards-container {
         grid-template-columns: 1fr 1fr;
