@@ -11,20 +11,23 @@ body {
 }
 
 .dashboard {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 40% 60%;
     height: 100vh;
     gap: 0;
     background-color: #f5f7fa;
 }
 
 .dashboard-header {
+    grid-column: 1 / -1;
     background-color: #ffffff;
     border-bottom: 1px solid #e2e8f0;
     padding: 12px 24px;
     display: flex;
     align-items: center;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    z-index: 100;
 }
 
 .logo {
@@ -34,7 +37,6 @@ body {
 }
 
 .left-panel {
-    flex: 0 0 40%;
     padding: 24px;
     background-color: #ffffff;
     overflow-y: auto;
@@ -42,19 +44,8 @@ body {
 }
 
 .right-panel {
-    flex: 0 0 60%;
     padding: 24px;
     background-color: #f5f7fa;
-}
-
-.dashboard > div:nth-child(2),
-.dashboard > div:nth-child(3) {
-    display: flex;
-}
-
-.dashboard > div:nth-child(2) {
-    flex-direction: row;
-    flex: 1;
 }
 
 .panel-header {
