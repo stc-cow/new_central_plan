@@ -51,7 +51,7 @@ body {
     grid-template-columns: 40% 60%;
     height: 100vh;
     gap: 0;
-    background-color: #f5f7fa;
+    background-color: #ffffff;
 }
 
 .dashboard-header {
