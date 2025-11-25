@@ -65,15 +65,16 @@ body {
 
 .panel-header {
     margin-bottom: 32px;
-    border-bottom: 2px solid #202b6d;
-    padding-bottom: 16px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--aces-red);
 }
 
 .panel-header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #202b6d;
-    letter-spacing: -0.5px;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--aces-primary);
+    letter-spacing: -0.8px;
+    text-transform: uppercase;
 }
 
 .metrics-grid {
