@@ -720,3 +720,49 @@ body {
         height: 16px;
     }
 }
+/* ====== MINIMIZED HEADER SIZE ====== */
+
+.dashboard-header {
+    padding: 6px 18px !important;   /* Reduce vertical space */
+    min-height: 54px !important;    /* Shorter header */
+}
+
+.header-content {
+    gap: 4px !important;            /* Reduce gaps between text lines */
+}
+
+.brand-group {
+    gap: 10px !important;           /* Reduce spacing between logo/title/actions */
+}
+
+.logo,
+.logo-left,
+.logo-right {
+    height: 32px !important;        /* Smaller logo size */
+}
+
+.header-title {
+    font-size: 18px !important;     /* Smaller main title */
+    line-height: 1.1 !important;
+}
+
+.header-subtitle {
+    font-size: 11px !important;     /* Smaller subtitle */
+}
+
+.eyebrow {
+    font-size: 10px !important;
+    letter-spacing: 1px !important;
+}
+
+/* Buttons (LIVE/AUTO-SYNC) smaller */
+.status-pill {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+    border-radius: 8px !important;
+    gap: 4px !important;
+}
+.status-pill::before {
+    width: 6px !important;
+    height: 6px !important;
+}
