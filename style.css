@@ -432,20 +432,20 @@ body {
     }
 
     .dashboard-header {
-        padding: 16px 20px;
+        padding: 12px 20px;
     }
 
     .header-content {
-        gap: 10px;
+        gap: 20px;
     }
 
     .header-title {
-        font-size: 20px;
-        letter-spacing: 1px;
+        font-size: 18px;
+        letter-spacing: 0.5px;
     }
 
     .logo {
-        height: 80px;
+        height: 60px;
     }
 
     .metrics-grid {
