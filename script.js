@@ -149,24 +149,16 @@ function classify(days) {
     return { label: "next15", color: "#3ad17c" };
 }
 
-function getStatusNew(days) {
-    if (days < 0) return 'overdue';
-    if (days === 0) return 'today';
-    if (days >= 1 && days <= 3) return 'coming';
-    if (days >= 4 && days <= 15) return 'healthy';
-    return 'healthy';
-}
-
 function getStatusColor(status) {
-    return STATUS_COLORS[status] || STATUS_COLORS.healthy;
+    return STATUS_COLORS[status] || STATUS_COLORS.next15;
 }
 
 function getStatusLabel(status) {
     const labels = {
-        overdue: 'Overdue',
+        due: 'Overdue',
         today: 'Today',
-        coming: 'Coming Soon',
-        healthy: 'Healthy'
+        coming3: 'Coming Soon',
+        next15: 'Healthy'
     };
     return labels[status] || 'Unknown';
 }
