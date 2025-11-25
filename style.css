@@ -177,27 +177,27 @@ body {
 }
 
 .overdue-card {
-    border-left: 4px solid #fb6d5d;
+    border-left: 4px solid #ff6b6b;
 }
 
 .overdue-card h3 {
-    color: #fb6d5d;
+    color: #ff6b6b;
 }
 
 .today-card {
-    border-left: 4px solid #fb6d5d;
+    border-left: 4px solid #ff6b6b;
 }
 
 .today-card h3 {
-    color: #fb6d5d;
+    color: #ff6b6b;
 }
 
 .coming-card {
-    border-left: 4px solid #ffc857;
+    border-left: 4px solid #ffbe0b;
 }
 
 .coming-card h3 {
-    color: #ffc857;
+    color: #ffbe0b;
 }
 
 .future-card {
