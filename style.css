@@ -16,6 +16,28 @@
     --border-color: #e2e8f0;
 }
 
+@keyframes pulse-ring {
+    0% {
+        r: 30px;
+        stroke-width: 3px;
+        opacity: 1;
+    }
+    100% {
+        r: 50px;
+        stroke-width: 1px;
+        opacity: 0;
+    }
+}
+
+@keyframes pulse-marker {
+    0%, 100% {
+        r: 35px;
+    }
+    50% {
+        r: 42px;
+    }
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
