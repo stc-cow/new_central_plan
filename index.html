@@ -97,17 +97,22 @@
                 </div>
 
                 <div class="status-card future-card">
-                    <h3>Next 3-15 Days Schedule</h3>
-                    <table class="sites-table">
-                        <thead>
-                            <tr>
-                                <th>Site Name</th>
-                                <th>Days</th>
-                            </tr>
-                        </thead>
-                        <tbody id="futureTableBody">
-                        </tbody>
-                    </table>
+                    <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;" onclick="toggleFutureCard(this)">
+                        <h3 style="margin-bottom: 0;">Next 3-15 Days Schedule</h3>
+                        <span class="collapse-icon" style="font-size: 18px; font-weight: bold; color: #2a8a5f;">−</span>
+                    </div>
+                    <div id="futureCardContent" style="display: block;">
+                        <table class="sites-table">
+                            <thead>
+                                <tr>
+                                    <th>Site Name</th>
+                                    <th>Days</th>
+                                </tr>
+                            </thead>
+                            <tbody id="futureTableBody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
