@@ -348,7 +348,15 @@ body {
 @media (min-width: 1440px) {
     .cards-container {
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
+        gap: 20px;
+    }
+
+    .left-panel {
+        padding: 40px;
+    }
+
+    .right-panel {
+        padding: 40px;
     }
 }
 
