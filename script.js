@@ -88,10 +88,12 @@ function filterAndValidateSites(rawData) {
 
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
+            const sitename = row.sitename || '';
 
             return (
-                regionname === 'Central' &&
+                regionname.includes('Central') &&
                 (cowstatus === 'ON-AIR' || cowstatus === 'IN PROGRESS') &&
+                sitename.trim() !== '' &&
                 !isNaN(lat) &&
                 !isNaN(lng)
             );
