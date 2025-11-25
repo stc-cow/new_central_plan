@@ -177,8 +177,8 @@ function updateMetrics(sites) {
 }
 
 function populateDueTable(sites) {
-    const overdueSites = sites
-        .filter(s => s.status === 'overdue')
+    const dueSites = sites
+        .filter(s => s.status === 'due')
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
     const todaySites = sites
@@ -186,14 +186,14 @@ function populateDueTable(sites) {
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
     const comingSites = sites
-        .filter(s => s.status === 'coming')
+        .filter(s => s.status === 'coming3')
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
     const futureSites = sites
-        .filter(s => s.status === 'healthy' && s.daysUntilFuel >= 4 && s.daysUntilFuel <= 15)
+        .filter(s => s.status === 'next15')
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
-    populateOverdueTable(overdueSites);
+    populateOverdueTable(dueSites);
     populateTodayTable(todaySites);
     populateComingTable(comingSites);
     populateFutureTable(futureSites);
@@ -214,7 +214,7 @@ function populateOverdueTable(sites) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${site.sitename}</td>
-            <td><span style="color: #fb6d5d; font-weight: 600;">${site.daysUntilFuel}</span></td>
+            <td><span style="color: #ff6b6b; font-weight: 600;">${site.days}</span></td>
         `;
         tbody.appendChild(tr);
     });
@@ -256,7 +256,7 @@ function populateComingTable(sites) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${site.sitename}</td>
-            <td><span style="color: #ffc857; font-weight: 600;">${site.daysUntilFuel}</span></td>
+            <td><span style="color: #ffbe0b; font-weight: 600;">${site.days}</span></td>
         `;
         tbody.appendChild(tr);
     });
@@ -277,7 +277,7 @@ function populateFutureTable(sites) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${site.sitename}</td>
-            <td><span style="color: #3ad17c; font-weight: 600;">${site.daysUntilFuel}</span></td>
+            <td><span style="color: #3ad17c; font-weight: 600;">${site.days}</span></td>
         `;
         tbody.appendChild(tr);
     });
