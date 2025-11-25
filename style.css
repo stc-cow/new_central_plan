@@ -56,13 +56,13 @@ body {
 
 .dashboard-header {
     grid-column: 1 / -1;
-    background: linear-gradient(135deg, var(--aces-primary) 0%, #1a1f4f 100%);
-    border-bottom: 3px solid var(--aces-red);
-    padding: 12px 24px;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
+    border-bottom: 2px solid #e2e8f0;
+    padding: 16px 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 20px rgba(32, 43, 109, 0.15);
+    box-shadow: 0 2px 12px rgba(32, 43, 109, 0.08);
     z-index: 100;
 }
 
