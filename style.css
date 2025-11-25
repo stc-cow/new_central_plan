@@ -149,28 +149,30 @@ body {
 }
 
 .legend {
-    background: #f8f9fb;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
     margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(32, 43, 109, 0.08);
 }
 
 .legend h3 {
-    font-size: 14px;
-    font-weight: 700;
-    color: #202b6d;
-    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--aces-primary);
+    margin-bottom: 16px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    font-size: 13px;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .legend-item:last-child {
@@ -178,14 +180,17 @@ body {
 }
 
 .legend-color {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 2px solid white;
 }
 
 .legend-text {
-    color: #475569;
+    color: var(--text-primary);
+    font-weight: 500;
 }
 
 .cards-container {
