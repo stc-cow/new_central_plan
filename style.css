@@ -95,6 +95,11 @@ body {
     filter: brightness(1.05) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
 }
 
+.logo-left {
+    height: 60px;
+    margin-right: 20px;
+}
+
 .left-panel {
     padding: 24px 32px 32px 32px;
     background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
