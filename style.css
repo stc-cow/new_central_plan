@@ -99,11 +99,11 @@ body {
 }
 
 .metric-value.due {
-    color: #fb6d5d;
+    color: #ff6b6b;
 }
 
 .metric-value.today-metric {
-    color: #fb6d5d;
+    color: #ff6b6b;
 }
 
 .metric-value.future {
