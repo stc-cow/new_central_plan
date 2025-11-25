@@ -124,49 +124,33 @@ function filterAndValidateSites(rawData) {
         });
 }
 
-function parseDate(dateString) {
-    if (!dateString) return null;
-
-    const formats = [
-        /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/,
-        /^(\d{4})-(\d{2})-(\d{2})$/,
-        /^(\d{1,2})-(\d{1,2})-(\d{4})$/
-    ];
-
-    for (const format of formats) {
-        const match = dateString.trim().match(format);
-        if (match) {
-            if (format === formats[0]) {
-                const [, month, day, year] = match;
-                return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-            } else if (format === formats[1]) {
-                const [, year, month, day] = match;
-                return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-            } else {
-                const [, day, month, year] = match;
-                return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-            }
-        }
-    }
-
-    return null;
+function parseFuelDate(str) {
+    if (!str || str.includes("#") || str.trim() === "") return null;
+    const d = new Date(str);
+    return isNaN(d) ? null : d;
 }
 
-function isValidDate(dateString) {
-    return parseDate(dateString) !== null;
-}
-
-function calculateDaysUntil(fuelDate) {
-    if (!fuelDate) return Infinity;
+function dayDiff(targetDate) {
+    if (!targetDate) return null;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const targetDate = new Date(fuelDate);
-    targetDate.setHours(0, 0, 0, 0);
+    const t = new Date(targetDate);
+    t.setHours(0, 0, 0, 0);
 
-    const timeDiff = targetDate - today;
-    return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    return Math.round((t - today) / (1000 * 60 * 60 * 24));
+}
+
+function classify(days) {
+    if (days === null) return { label: "next15", color: "#3ad17c" };
+
+    if (days < 0) return { label: "due", color: "#ff6b6b" };
+    if (days === 0) return { label: "today", color: "#ff6b6b" };
+    if (days >= 1 && days <= 3) return { label: "coming3", color: "#ffbe0b" };
+    if (days >= 4 && days <= 15) return { label: "next15", color: "#3ad17c" };
+
+    return { label: "next15", color: "#3ad17c" };
 }
 
 function getStatusNew(days) {
