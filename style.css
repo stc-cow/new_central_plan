@@ -34,19 +34,21 @@ body {
 
 .dashboard-header {
     grid-column: 1 / -1;
-    background-color: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--aces-primary) 0%, #1a1f4f 100%);
+    border-bottom: 3px solid var(--aces-red);
+    padding: 16px 32px;
     display: flex;
     align-items: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(32, 43, 109, 0.15);
     z-index: 100;
 }
 
 .logo {
-    height: 48px;
+    height: 56px;
     width: auto;
     object-fit: contain;
+    filter: brightness(1.1);
 }
 
 .left-panel {
