@@ -277,6 +277,11 @@ body {
     .metric-value {
         font-size: 24px;
     }
+
+    .cards-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -303,12 +308,17 @@ body {
         font-size: 20px;
     }
 
-    #dueTable {
+    .cards-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .sites-table {
         font-size: 12px;
     }
 
-    #dueTable th,
-    #dueTable td {
+    .sites-table th,
+    .sites-table td {
         padding: 8px 6px;
     }
 }
