@@ -320,6 +320,9 @@ function addMarkersToMap(sites) {
     markers = [];
     siteMap = {};
 
+    pulsingCircles.forEach(circle => map.removeLayer(circle));
+    pulsingCircles = [];
+
     sites.forEach(site => {
         const color = site.color || getStatusColor(site.status);
         const icon = L.divIcon({
@@ -340,6 +343,24 @@ function addMarkersToMap(sites) {
 
         markers.push(marker);
         siteMap[site.sitename] = { marker: marker, site: site };
+
+        if (site.status === 'due' || site.status === 'today') {
+            const pulsingCircle = L.circle([site.lat, site.lng], {
+                radius: 300,
+                color: site.color || '#ff6b6b',
+                weight: 2,
+                opacity: 0.4,
+                fillOpacity: 0.1,
+                className: 'pulsing-circle'
+            }).addTo(map);
+
+            const circleElement = pulsingCircle._path;
+            if (circleElement) {
+                circleElement.style.animation = 'pulse-marker 2s ease-in-out infinite';
+            }
+
+            pulsingCircles.push(pulsingCircle);
+        }
     });
 
     if (markers.length > 0) {
