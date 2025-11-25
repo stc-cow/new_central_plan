@@ -397,51 +397,93 @@ body {
 
 @media (max-width: 768px) {
     .dashboard {
-        grid-template-rows: auto 60% 40%;
+        grid-template-rows: auto 55% 45%;
     }
 
     .left-panel {
-        padding: 16px;
+        padding: 20px;
         overflow-y: auto;
     }
 
     .right-panel {
-        padding: 16px;
+        padding: 20px;
         overflow: hidden;
     }
 
     .dashboard-header {
-        padding: 12px 16px;
+        padding: 14px 20px;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
     }
 
     .logo {
-        height: 40px;
+        height: 44px;
     }
 
     .metrics-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: 14px;
     }
 
-    .panel-header h1 {
-        font-size: 20px;
+    .metric-box {
+        padding: 18px;
     }
 
     .metric-value {
-        font-size: 20px;
+        font-size: 32px;
+    }
+
+    .metric-label {
+        font-size: 10px;
+    }
+
+    .panel-header h1 {
+        font-size: 24px;
     }
 
     .cards-container {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 14px;
+    }
+
+    .status-card {
+        padding: 16px;
+    }
+
+    .status-card h3 {
+        font-size: 12px;
+        margin-bottom: 12px;
     }
 
     .sites-table {
         font-size: 12px;
     }
 
-    .sites-table th,
+    .sites-table th {
+        padding: 10px 8px;
+        font-size: 10px;
+    }
+
     .sites-table td {
-        padding: 8px 6px;
+        padding: 8px;
+    }
+
+    .legend {
+        padding: 16px;
+    }
+
+    .legend h3 {
+        font-size: 12px;
+    }
+
+    .legend-item {
+        font-size: 12px;
+        gap: 10px;
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
     }
 }
