@@ -193,14 +193,15 @@ function getStatusLabel(status) {
 
 function updateMetrics(sites) {
     const totalSites = sites.length;
-    const dueSites = sites.filter(s => s.status === 'due').length;
-    const tomorrowSites = sites.filter(s => s.status === 'tomorrow').length;
-    const afterTomorrowSites = sites.filter(s => s.status === 'afterTomorrow').length;
+    const overdueSites = sites.filter(s => s.status === 'overdue').length;
+    const todaySites = sites.filter(s => s.status === 'today').length;
+    const comingSites = sites.filter(s => s.status === 'coming').length;
+    const futureSites = sites.filter(s => s.status === 'healthy' && s.daysUntilFuel >= 4 && s.daysUntilFuel <= 15).length;
 
     document.getElementById('totalSites').textContent = totalSites;
-    document.getElementById('dueSites').textContent = dueSites;
-    document.getElementById('tomorrowSites').textContent = tomorrowSites;
-    document.getElementById('afterTomorrowSites').textContent = afterTomorrowSites;
+    document.getElementById('dueSites').textContent = overdueSites + todaySites;
+    document.getElementById('todaySites').textContent = todaySites;
+    document.getElementById('futureSites').textContent = futureSites;
 }
 
 function populateDueTable(sites) {
