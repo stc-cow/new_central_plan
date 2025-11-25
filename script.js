@@ -7,9 +7,9 @@ const SA_BOUNDS = [
 ];
 
 const STATUS_COLORS = {
-    due: '#fb6d5d',
-    tomorrow: '#ffc857',
-    afterTomorrow: '#ff9f1c',
+    overdue: '#fb6d5d',
+    today: '#fb6d5d',
+    coming: '#ffc857',
     healthy: '#3ad17c'
 };
 
