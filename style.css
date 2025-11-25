@@ -36,7 +36,7 @@ body {
     grid-column: 1 / -1;
     background: linear-gradient(135deg, var(--aces-primary) 0%, #1a1f4f 100%);
     border-bottom: 3px solid var(--aces-red);
-    padding: 20px 32px;
+    padding: 12px 24px;
     display: flex;
     align-items: center;
     justify-content: center;
