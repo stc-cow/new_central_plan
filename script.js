@@ -16,6 +16,8 @@ const STATUS_COLORS = {
 let map;
 let sitesData = [];
 let markers = [];
+let autoZoomIndex = 0;
+let autoZoomInterval = null;
 
 async function fetchCSV() {
     try {
