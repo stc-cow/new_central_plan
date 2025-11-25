@@ -52,15 +52,15 @@ body {
 }
 
 .left-panel {
-    padding: 24px;
-    background-color: #ffffff;
+    padding: 32px;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
     overflow-y: auto;
-    border-right: 1px solid #e2e8f0;
+    border-right: 2px solid #e2e8f0;
 }
 
 .right-panel {
-    padding: 24px;
-    background-color: #f5f7fa;
+    padding: 32px;
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
 }
 
 .panel-header {
