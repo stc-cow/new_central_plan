@@ -157,8 +157,7 @@ body {
     margin-bottom: 0;
 }
 
-.due-card,
-.today-card {
+.status-card {
     background: #f8f9fb;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
@@ -168,16 +167,7 @@ body {
     flex-direction: column;
 }
 
-.due-card {
-    border-left: 4px solid #fb6d5d;
-}
-
-.today-card {
-    border-left: 4px solid #ffc857;
-}
-
-.due-card h3,
-.today-card h3 {
+.status-card h3 {
     font-size: 14px;
     font-weight: 700;
     color: #202b6d;
@@ -186,12 +176,36 @@ body {
     letter-spacing: 0.5px;
 }
 
-.due-card h3 {
+.overdue-card {
+    border-left: 4px solid #fb6d5d;
+}
+
+.overdue-card h3 {
     color: #fb6d5d;
 }
 
+.today-card {
+    border-left: 4px solid #fb6d5d;
+}
+
 .today-card h3 {
+    color: #fb6d5d;
+}
+
+.coming-card {
+    border-left: 4px solid #ffc857;
+}
+
+.coming-card h3 {
     color: #ffc857;
+}
+
+.future-card {
+    border-left: 4px solid #3ad17c;
+}
+
+.future-card h3 {
+    color: #3ad17c;
 }
 
 .sites-table {
