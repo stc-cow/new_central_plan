@@ -53,18 +53,34 @@
                 </div>
             </div>
 
-            <div class="due-list">
-                <h3>Sites Due Today</h3>
-                <table id="dueTable">
-                    <thead>
-                        <tr>
-                            <th>Site Name</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dueTableBody">
-                    </tbody>
-                </table>
+            <div class="cards-container">
+                <div class="due-card">
+                    <h3>Overdue Sites</h3>
+                    <table class="sites-table">
+                        <thead>
+                            <tr>
+                                <th>Site Name</th>
+                                <th>Days</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overdueTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="today-card">
+                    <h3>Due Today</h3>
+                    <table class="sites-table">
+                        <thead>
+                            <tr>
+                                <th>Site Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todayTableBody">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
