@@ -178,7 +178,6 @@ function updateMetrics(sites) {
     document.getElementById('dueSites').textContent = dueSites;
     document.getElementById('todaySites').textContent = todaySites;
     document.getElementById('futureSites').textContent = futureSites;
-    document.getElementById('futureCount').textContent = futureSites;
 }
 
 function populateDueTable(sites) {
