@@ -34,7 +34,7 @@ body {
 }
 
 .left-panel {
-    width: 40%;
+    flex: 0 0 40%;
     padding: 24px;
     background-color: #ffffff;
     overflow-y: auto;
@@ -42,9 +42,19 @@ body {
 }
 
 .right-panel {
-    width: 60%;
+    flex: 0 0 60%;
     padding: 24px;
     background-color: #f5f7fa;
+}
+
+.dashboard > div:nth-child(2),
+.dashboard > div:nth-child(3) {
+    display: flex;
+}
+
+.dashboard > div:nth-child(2) {
+    flex-direction: row;
+    flex: 1;
 }
 
 .panel-header {
