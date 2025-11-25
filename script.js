@@ -194,14 +194,9 @@ function populateDueTable(sites) {
         .filter(s => s.status === 'coming3')
         .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
-    const futureSites = sites
-        .filter(s => s.status === 'next15')
-        .sort((a, b) => a.sitename.localeCompare(b.sitename));
-
     populateOverdueTable(dueSites);
     populateTodayTable(todaySites);
     populateComingTable(comingSites);
-    populateFutureTable(futureSites);
 }
 
 function populateOverdueTable(sites) {
