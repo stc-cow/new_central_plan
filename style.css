@@ -77,11 +77,11 @@ body {
 }
 
 .header-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 800;
     color: white;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
     margin: 0;
     flex: 1;
     text-align: center;
