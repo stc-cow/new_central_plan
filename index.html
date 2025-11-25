@@ -23,16 +23,16 @@
                     <div class="metric-value" id="totalSites">0</div>
                 </div>
                 <div class="metric-box">
-                    <div class="metric-label">Due / Today</div>
+                    <div class="metric-label">Due (Overdue)</div>
                     <div class="metric-value due" id="dueSites">0</div>
                 </div>
                 <div class="metric-box">
-                    <div class="metric-label">Tomorrow</div>
-                    <div class="metric-value tomorrow" id="tomorrowSites">0</div>
+                    <div class="metric-label">Today</div>
+                    <div class="metric-value today-metric" id="todaySites">0</div>
                 </div>
                 <div class="metric-box">
-                    <div class="metric-label">After Tomorrow</div>
-                    <div class="metric-value after-tomorrow" id="afterTomorrowSites">0</div>
+                    <div class="metric-label">Next 3-15 Days</div>
+                    <div class="metric-value future" id="futureSites">0</div>
                 </div>
             </div>
 
@@ -40,25 +40,21 @@
                 <h3>Legend</h3>
                 <div class="legend-item">
                     <span class="legend-color" style="background-color: #fb6d5d;"></span>
-                    <span class="legend-text">Due / Today</span>
+                    <span class="legend-text">Overdue / Today</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color" style="background-color: #ffc857;"></span>
-                    <span class="legend-text">Tomorrow</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color" style="background-color: #ff9f1c;"></span>
-                    <span class="legend-text">After Tomorrow</span>
+                    <span class="legend-text">Coming in 3 Days</span>
                 </div>
                 <div class="legend-item">
                     <span class="legend-color" style="background-color: #3ad17c;"></span>
-                    <span class="legend-text">Healthy</span>
+                    <span class="legend-text">Healthy (4+ Days)</span>
                 </div>
             </div>
 
             <div class="cards-container">
-                <div class="due-card">
-                    <h3>Overdue Sites</h3>
+                <div class="status-card overdue-card">
+                    <h3>Due (Overdue)</h3>
                     <table class="sites-table">
                         <thead>
                             <tr>
@@ -71,16 +67,44 @@
                     </table>
                 </div>
 
-                <div class="today-card">
-                    <h3>Due Today</h3>
+                <div class="status-card today-card">
+                    <h3>Today Schedule</h3>
                     <table class="sites-table">
                         <thead>
                             <tr>
                                 <th>Site Name</th>
-                                <th>Status</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
                         <tbody id="todayTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="status-card coming-card">
+                    <h3>Coming in 3 Days</h3>
+                    <table class="sites-table">
+                        <thead>
+                            <tr>
+                                <th>Site Name</th>
+                                <th>Days</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comingTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="status-card future-card">
+                    <h3>Next 3-15 Days Schedule</h3>
+                    <table class="sites-table">
+                        <thead>
+                            <tr>
+                                <th>Site Name</th>
+                                <th>Days</th>
+                            </tr>
+                        </thead>
+                        <tbody id="futureTableBody">
                         </tbody>
                     </table>
                 </div>
