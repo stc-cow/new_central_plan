@@ -279,6 +279,13 @@ body {
     color: #475569;
 }
 
+@media (min-width: 1440px) {
+    .cards-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+}
+
 @media (max-width: 1024px) {
     .dashboard {
         grid-template-rows: auto 50% 50%;
@@ -309,7 +316,7 @@ body {
     }
 
     .cards-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
 }
