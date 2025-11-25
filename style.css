@@ -373,12 +373,12 @@ body {
     }
 
     .logo {
-        height: 120px;
+        height: 80px;
     }
 
     .header-title {
-        font-size: 32px;
-        letter-spacing: 2px;
+        font-size: 26px;
+        letter-spacing: 1.5px;
     }
 }
 
