@@ -297,11 +297,42 @@ function addMarkersToMap(sites) {
 
         if (group.getLayers().length > 0) {
             map.fitBounds(group.getBounds().pad(0.1));
+            startAutoZoomLoop(dueSites);
         }
     } else if (markers.length > 0) {
         const allGroup = new L.featureGroup(markers);
         map.fitBounds(allGroup.getBounds().pad(0.1));
     }
+}
+
+function startAutoZoomLoop(dueSites) {
+    if (dueSites.length === 0) return;
+
+    if (autoZoomInterval) {
+        clearInterval(autoZoomInterval);
+    }
+
+    autoZoomIndex = 0;
+
+    autoZoomInterval = setInterval(() => {
+        if (dueSites.length === 0) {
+            clearInterval(autoZoomInterval);
+            return;
+        }
+
+        const currentSite = dueSites[autoZoomIndex];
+        const targetMarker = markers.find(m => {
+            const latlng = m.getLatLng();
+            return latlng.lat === currentSite.lat && latlng.lng === currentSite.lng;
+        });
+
+        if (targetMarker) {
+            map.setView(targetMarker.getLatLng(), 10);
+            targetMarker.openPopup();
+        }
+
+        autoZoomIndex = (autoZoomIndex + 1) % dueSites.length;
+    }, 5000);
 }
 
 async function loadDashboard() {
