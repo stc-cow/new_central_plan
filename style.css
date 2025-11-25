@@ -766,3 +766,49 @@ body {
     width: 6px !important;
     height: 6px !important;
 }
+/* ====== HEADER REFINEMENT (CENTER TITLE + BIGGER LOGOS) ====== */
+
+/* Make the full header content centered */
+.header-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 6px !important;
+}
+
+/* Center the brand-group layout */
+.brand-group {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 14px !important;
+}
+
+/* Increase size of both logos */
+.logo,
+.logo-left {
+    height: 52px !important;     /* STC logo bigger */
+}
+
+.logo-right {
+    height: 58px !important;     /* ACES logo bigger */
+}
+
+/* Center the titles */
+.header-title {
+    font-size: 22px !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+}
+
+.header-subtitle,
+.eyebrow {
+    text-align: center !important;
+    width: 100%;
+}
+
+/* Tighter header to maintain small height */
+.dashboard-header {
+    padding: 10px 20px !important;
+}
