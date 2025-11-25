@@ -378,7 +378,7 @@ function startAutoZoomLoop(dueSites) {
         });
 
         if (targetMarker) {
-            map.setView(targetMarker.getLatLng(), 10);
+            map.setView(targetMarker.getLatLng(), 17);
             targetMarker.openPopup();
         }
 
