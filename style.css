@@ -12,9 +12,25 @@ body {
 
 .dashboard {
     display: flex;
+    flex-direction: column;
     height: 100vh;
     gap: 0;
     background-color: #f5f7fa;
+}
+
+.dashboard-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
 }
 
 .left-panel {
