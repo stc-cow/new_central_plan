@@ -201,54 +201,60 @@ body {
 }
 
 .status-card {
-    background: #f8f9fb;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
     height: auto;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 2px 8px rgba(32, 43, 109, 0.08);
+    transition: all 0.3s ease;
+}
+
+.status-card:hover {
+    box-shadow: 0 4px 16px rgba(32, 43, 109, 0.12);
+    border-color: var(--aces-primary);
 }
 
 .status-card h3 {
-    font-size: 14px;
-    font-weight: 700;
-    color: #202b6d;
-    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 16px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .overdue-card {
-    border-left: 4px solid #ff6b6b;
+    border-top: 4px solid var(--aces-red);
 }
 
 .overdue-card h3 {
-    color: #ff6b6b;
+    color: var(--aces-red);
 }
 
 .today-card {
-    border-left: 4px solid #ff6b6b;
+    border-top: 4px solid var(--aces-red);
 }
 
 .today-card h3 {
-    color: #ff6b6b;
+    color: var(--aces-red);
 }
 
 .coming-card {
-    border-left: 4px solid #ffbe0b;
+    border-top: 4px solid var(--aces-yellow);
 }
 
 .coming-card h3 {
-    color: #ffbe0b;
+    color: #d4a100;
 }
 
 .future-card {
-    border-left: 4px solid #3ad17c;
+    border-top: 4px solid var(--aces-green);
 }
 
 .future-card h3 {
-    color: #3ad17c;
+    color: #2a8a5f;
 }
 
 .sites-table {
