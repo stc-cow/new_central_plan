@@ -937,3 +937,49 @@ body {
     font-size: 10px !important;
     border-radius: 6px !important;
 }
+/* ====== REMOVE EXTRA GAP UNDER HEADER ====== */
+
+/* Remove ALL vertical spacing inside header */
+.dashboard-header {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+
+.header-content {
+    gap: 0px !important;              /* No spacing between elements */
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Title block tightened */
+.title-block {
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+}
+
+/* Reduce eyebrow + title + subtitle spacing */
+.eyebrow,
+.header-title,
+.header-subtitle {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.05 !important;
+}
+
+/* Compact logo and title group */
+.brand-group {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Pull status pills UP immediately under the title */
+.header-actions {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Compact pills */
+.status-pill {
+    margin: 0 !important;
+}
