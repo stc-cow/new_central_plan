@@ -84,19 +84,13 @@ function filterAndValidateSites(rawData) {
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
 
-            const nextfuelingplanKey = Object.keys(row).find(key =>
-                key.toLowerCase() === 'nextfuelingplan'
-            );
-            const nextfuelingplan = nextfuelingplanKey ? row[nextfuelingplanKey] : '';
-
             return (
                 regionname === 'Central' &&
                 ['ON-AIR', 'IN PROGRESS', 'IN-PROGRESS'].includes(cowstatus) &&
                 !isNaN(lat) &&
                 !isNaN(lng) &&
                 lat !== 0 &&
-                lng !== 0 &&
-                isValidDate(nextfuelingplan)
+                lng !== 0
             );
         })
         .map(row => {
@@ -107,8 +101,9 @@ function filterAndValidateSites(rawData) {
                 key.toLowerCase() === 'nextfuelingplan'
             );
             const nextfuelingplan = nextfuelingplanKey ? row[nextfuelingplanKey] : '';
-            const fuelDate = parseDate(nextfuelingplan);
-            const daysUntil = calculateDaysUntil(fuelDate);
+            const fuelDate = parseFuelDate(nextfuelingplan);
+            const days = dayDiff(fuelDate);
+            const statusObj = classify(days);
 
             return {
                 sitename: row.sitename || 'Unknown Site',
@@ -118,8 +113,9 @@ function filterAndValidateSites(rawData) {
                 lat: lat,
                 lng: lng,
                 fuelDate: fuelDate,
-                daysUntilFuel: daysUntil,
-                status: getStatusNew(daysUntil)
+                days: days,
+                status: statusObj.label,
+                color: statusObj.color
             };
         });
 }
