@@ -16,8 +16,7 @@ const STATUS_COLORS = {
 let map;
 let sitesData = [];
 let markers = [];
-let autoZoomIndex = 0;
-let autoZoomInterval = null;
+let siteMap = {};
 
 async function fetchCSV() {
     try {
@@ -216,10 +215,12 @@ function populateOverdueTable(sites) {
 
     sites.forEach(site => {
         const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
         tr.innerHTML = `
             <td>${site.sitename}</td>
             <td><span style="color: #ff6b6b; font-weight: 600;">${site.days}</span></td>
         `;
+        tr.addEventListener('click', () => zoomToSite(site.sitename));
         tbody.appendChild(tr);
     });
 }
@@ -237,10 +238,12 @@ function populateTodayTable(sites) {
 
     sites.forEach(site => {
         const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
         tr.innerHTML = `
             <td>${site.sitename}</td>
             <td>${site.nextfuelingplan}</td>
         `;
+        tr.addEventListener('click', () => zoomToSite(site.sitename));
         tbody.appendChild(tr);
     });
 }
@@ -314,8 +317,7 @@ function initMap() {
 function addMarkersToMap(sites) {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
-
-    const redSites = sites.filter(s => s.status === 'due' || s.status === 'today');
+    siteMap = {};
 
     sites.forEach(site => {
         const color = site.color || getStatusColor(site.status);
@@ -336,54 +338,21 @@ function addMarkersToMap(sites) {
             .addTo(map);
 
         markers.push(marker);
+        siteMap[site.sitename] = { marker: marker, site: site };
     });
 
-    if (redSites.length > 0) {
-        const group = new L.featureGroup(
-            markers.filter(m => {
-                const site = sites.find(s => s.lat === m.getLatLng().lat && s.lng === m.getLatLng().lng);
-                return site && (site.status === 'due' || site.status === 'today');
-            })
-        );
-
-        if (group.getLayers().length > 0) {
-            map.fitBounds(group.getBounds().pad(0.1));
-            startAutoZoomLoop(redSites);
-        }
-    } else if (markers.length > 0) {
+    if (markers.length > 0) {
         const allGroup = new L.featureGroup(markers);
         map.fitBounds(allGroup.getBounds().pad(0.1));
     }
 }
 
-function startAutoZoomLoop(dueSites) {
-    if (dueSites.length === 0) return;
-
-    if (autoZoomInterval) {
-        clearInterval(autoZoomInterval);
+function zoomToSite(sitename) {
+    const siteInfo = siteMap[sitename];
+    if (siteInfo && siteInfo.marker) {
+        map.setView(siteInfo.marker.getLatLng(), 17);
+        siteInfo.marker.openPopup();
     }
-
-    autoZoomIndex = 0;
-
-    autoZoomInterval = setInterval(() => {
-        if (dueSites.length === 0) {
-            clearInterval(autoZoomInterval);
-            return;
-        }
-
-        const currentSite = dueSites[autoZoomIndex];
-        const targetMarker = markers.find(m => {
-            const latlng = m.getLatLng();
-            return latlng.lat === currentSite.lat && latlng.lng === currentSite.lng;
-        });
-
-        if (targetMarker) {
-            map.setView(targetMarker.getLatLng(), 17);
-            targetMarker.openPopup();
-        }
-
-        autoZoomIndex = (autoZoomIndex + 1) % dueSites.length;
-    }, 5000);
 }
 
 async function loadDashboard() {
