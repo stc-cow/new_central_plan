@@ -102,12 +102,12 @@ body {
     color: #fb6d5d;
 }
 
-.metric-value.tomorrow {
-    color: #ffc857;
+.metric-value.today-metric {
+    color: #fb6d5d;
 }
 
-.metric-value.after-tomorrow {
-    color: #ff9f1c;
+.metric-value.future {
+    color: #3ad17c;
 }
 
 .legend {
