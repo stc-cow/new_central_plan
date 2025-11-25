@@ -265,28 +265,33 @@ body {
 }
 
 .sites-table thead {
-    background-color: #e0e7ff;
+    background: linear-gradient(90deg, #f0f4ff 0%, #e8ecff 100%);
 }
 
 .sites-table th {
-    padding: 10px 8px;
+    padding: 14px 12px;
     text-align: left;
-    font-weight: 700;
-    color: #202b6d;
-    border-bottom: 1px solid #cbd5e1;
-    font-size: 12px;
+    font-weight: 800;
+    color: var(--aces-primary);
+    border-bottom: 2px solid var(--aces-primary);
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
 }
 
 .sites-table td {
-    padding: 10px 8px;
-    border-bottom: 1px solid #e2e8f0;
-    color: #475569;
+    padding: 12px 12px;
+    border-bottom: 1px solid #e8ecff;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.sites-table tbody tr {
+    transition: all 0.2s ease;
 }
 
 .sites-table tbody tr:hover {
-    background-color: #f1f5f9;
+    background-color: #f8faff;
 }
 
 .sites-table tbody tr:last-child td {
