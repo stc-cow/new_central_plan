@@ -17,6 +17,7 @@ let map;
 let sitesData = [];
 let markers = [];
 let siteMap = {};
+let pulsingCircles = [];
 
 async function fetchCSV() {
     try {
