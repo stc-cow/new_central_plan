@@ -894,3 +894,46 @@ body {
     gap: 8px !important;
 }
 
+/* ====== MINIMIZE HEADER HEIGHT WITH LARGE 100PX LOGOS ====== */
+
+/* Reduce header padding vertically */
+.dashboard-header {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    min-height: 110px !important;   /* tightly fits 100px logos */
+    height: auto !important;
+}
+
+/* Reduce vertical gaps between title + eyebrow + pills */
+.header-content {
+    gap: 2px !important;
+    padding: 0 !important;
+}
+
+/* Title compact */
+.header-title {
+    margin: 0 !important;
+    line-height: 1.1 !important;
+    font-size: 22px !important;
+}
+
+/* Subtitle compact */
+.header-subtitle,
+.eyebrow {
+    margin: 0 !important;
+    line-height: 1.1 !important;
+}
+
+/* Keep logos centered tightly */
+.brand-group {
+    align-items: center !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Status pills compact */
+.status-pill {
+    padding: 3px 7px !important;
+    font-size: 10px !important;
+    border-radius: 6px !important;
+}
