@@ -169,10 +169,11 @@ function calculateDaysUntil(fuelDate) {
     return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 }
 
-function getStatus(days) {
-    if (days <= 0) return 'due';
-    if (days === 1) return 'tomorrow';
-    if (days === 2) return 'afterTomorrow';
+function getStatusNew(days) {
+    if (days < 0) return 'overdue';
+    if (days === 0) return 'today';
+    if (days >= 1 && days <= 3) return 'coming';
+    if (days >= 4 && days <= 15) return 'healthy';
     return 'healthy';
 }
 
@@ -182,9 +183,9 @@ function getStatusColor(status) {
 
 function getStatusLabel(status) {
     const labels = {
-        due: 'Due / Today',
-        tomorrow: 'Tomorrow',
-        afterTomorrow: 'After Tomorrow',
+        overdue: 'Overdue',
+        today: 'Today',
+        coming: 'Coming Soon',
         healthy: 'Healthy'
     };
     return labels[status] || 'Unknown';
