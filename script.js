@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 /* =======================================================================
    CENTRAL FUEL PLAN – FULL FIXED SCRIPT (FINAL VERSION)
-======================================================================= */
 
 >>>>>>> main
 const CSV_URL =
@@ -36,10 +33,6 @@ async function fetchCSV() {
     const response = await fetch(CSV_URL);
     const csvText = await response.text();
     return parseCSV(csvText);
-<<<<<<< HEAD
-  } catch (error) {
-    console.error("Error fetching CSV:", error);
-=======
   } catch (err) {
     console.error("CSV Load Error:", err);
 >>>>>>> main
@@ -49,7 +42,6 @@ async function fetchCSV() {
 
 function parseCSV(csvText) {
   const lines = csvText.trim().split("\n");
-<<<<<<< HEAD
   if (lines.length === 0) return [];
 
   const headers = lines[0].split(",").map((h) => h.trim());
@@ -141,7 +133,6 @@ function filterAndValidateSites(rawData) {
         days: days,
         status: statusObj.label,
         color: statusObj.color,
-=======
   const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
   const out = [];
 
@@ -175,7 +166,6 @@ function parseCSVLine(line) {
 
 /* =====================================================================
    FIXED COLUMN MAPPING FOR YOUR SHEET
-===================================================================== */
 /*
 sitename = Column B
 regionname = Column D
@@ -221,38 +211,22 @@ function filterAndValidateSites(raw) {
         days,
         status: classification.label,
         color: classification.color,
->>>>>>> main
       };
     });
 }
 
 function parseFuelDate(str) {
-<<<<<<< HEAD
-  if (!str || str.includes("#") || str.trim() === "") return null;
-=======
   if (!str) return null;
->>>>>>> main
   const d = new Date(str);
   return isNaN(d) ? null : d;
 }
 
-<<<<<<< HEAD
-function dayDiff(targetDate) {
-  if (!targetDate) return null;
-=======
 function dayDiff(date) {
   if (!date) return null;
->>>>>>> main
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-<<<<<<< HEAD
-  const t = new Date(targetDate);
-  t.setHours(0, 0, 0, 0);
-
-  return Math.round((t - today) / (1000 * 60 * 60 * 24));
-=======
   const t = new Date(date);
   t.setHours(0, 0, 0, 0);
 
@@ -262,7 +236,6 @@ function dayDiff(date) {
 
 function classify(days) {
   if (days === null) return { label: "next15", color: "#3ad17c" };
-<<<<<<< HEAD
 
   if (days < 0) return { label: "due", color: "#ff6b6b" };
   if (days === 0) return { label: "today", color: "#ff6b6b" };
@@ -382,7 +355,6 @@ function populateComingTable(sites) {
             <td>${site.sitename}</td>
             <td><span style="color: #ffbe0b; font-weight: 600;">${site.days}</span></td>
         `;
-=======
   if (days < 0) return { label: "due", color: "#ff6b6b" };
   if (days === 0) return { label: "today", color: "#ff6b6b" };
   if (days <= 3) return { label: "coming3", color: "#ffbe0b" };
@@ -391,7 +363,6 @@ function populateComingTable(sites) {
 
 /* =====================================================================
    METRICS + TABLES RESTORED (FULL FIX)
-===================================================================== */
 
 function updateMetrics(sites) {
   document.getElementById("totalSites").textContent = sites.length;
@@ -437,37 +408,12 @@ function fillTable(id, list, rowFn) {
     tr.innerHTML = rowFn(s);
     tr.style.cursor = "pointer";
     tr.onclick = () => zoomToSite(s.sitename);
->>>>>>> main
     tbody.appendChild(tr);
   });
 }
 
-<<<<<<< HEAD
-function initMap() {
-  map = L.map("map").setView(SA_CENTER, 5);
-  map.setMaxBounds(SA_BOUNDS);
-
-  L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    {
-      attribution: "Tiles © Esri | Maxar",
-      maxZoom: 18,
-      minZoom: 3,
-    },
-  ).addTo(map);
-
-  L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-    {
-      attribution: "Tiles © Esri",
-      maxZoom: 18,
-      minZoom: 3,
-      opacity: 0.9,
-    },
-=======
 /* =====================================================================
    MAP + MARKERS
-===================================================================== */
 
 function initMap() {
   map = L.map("map").setView(SA_CENTER, 6);
@@ -480,7 +426,6 @@ function initMap() {
 }
 
 function addMarkersToMap(sites) {
-<<<<<<< HEAD
   markers.forEach((marker) => map.removeLayer(marker));
   markers = [];
   siteMap = {};
@@ -562,7 +507,6 @@ function zoomToSite(sitename) {
     map.setView(siteInfo.marker.getLatLng(), 17);
     siteInfo.marker.openPopup();
   }
-=======
   markers.forEach((m) => map.removeLayer(m));
   markers = [];
   siteMap = {};
@@ -594,7 +538,6 @@ function zoomToSite(name) {
 
   map.setView(s.marker.getLatLng(), 15);
   s.marker.openPopup();
->>>>>>> main
 }
 
 /* =====================================================================
@@ -642,6 +585,7 @@ function setupSearch() {
   closeBtn.addEventListener("click", () => (popup.style.display = "none"));
 
   searchInitialized = true;
+>>>>>>> main
 }
 
 /* =====================================================================
@@ -649,7 +593,6 @@ function setupSearch() {
 ===================================================================== */
 
 async function loadDashboard() {
-<<<<<<< HEAD
   const rawData = await fetchCSV();
   sitesData = filterAndValidateSites(rawData);
 
@@ -723,7 +666,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initMap();
   loadDashboard();
   setupSearchFunctionality();
-=======
   const raw = await fetchCSV();
   sitesData = filterAndValidateSites(raw);
 
