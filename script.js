@@ -381,7 +381,62 @@ async function loadDashboard() {
 }
 
 
+function setupSearchFunctionality() {
+    const searchInput = document.getElementById('searchInput');
+    const searchPopup = document.getElementById('searchPopup');
+    const closeSearchBtn = document.getElementById('closeSearchBtn');
+    const searchResultContainer = document.getElementById('searchResultContainer');
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toUpperCase();
+
+        if (query.length === 0) {
+            searchPopup.classList.remove('active');
+            return;
+        }
+
+        const results = sitesData.filter(site =>
+            site.sitename.toUpperCase().includes(query)
+        );
+
+        displaySearchResults(results, searchResultContainer);
+        searchPopup.classList.add('active');
+    });
+
+    closeSearchBtn.addEventListener('click', () => {
+        searchPopup.classList.remove('active');
+        searchInput.value = '';
+    });
+
+    searchPopup.addEventListener('click', (e) => {
+        if (e.target === searchPopup) {
+            searchPopup.classList.remove('active');
+            searchInput.value = '';
+        }
+    });
+}
+
+function displaySearchResults(results, container) {
+    if (results.length === 0) {
+        container.innerHTML = '<div class="search-no-results">No sites found matching your search.</div>';
+        return;
+    }
+
+    container.innerHTML = results.map(site => {
+        const fuelDate = site.fuelDate ? new Date(site.fuelDate).toLocaleDateString('en-GB') : 'N/A';
+        return `
+            <div class="search-result-item">
+                <div class="search-result-site-name">${site.sitename}</div>
+                <div class="search-result-fuel-date">
+                    Next fueling date: <strong>${fuelDate}</strong>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
     loadDashboard();
+    setupSearchFunctionality();
 });
