@@ -1097,3 +1097,46 @@ body {
     margin: 0 !important;
     padding: 0 !important;
 }
+/* ===== FIX: SHOW SEARCH BAR ===== */
+.panel-header {
+    display: block !important;
+    margin-bottom: 20px;
+}
+
+.search-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+#siteSearchInput {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+}
+
+#searchBtn {
+    padding: 10px 16px;
+    background: var(--aces-primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#searchBtn:hover {
+    background: #1a2558;
+}
+
+.search-result {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    display: none;
+}
