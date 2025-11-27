@@ -18,6 +18,10 @@ let sitesData = [];
 let markers = [];
 let siteMap = {};
 let pulsingCircles = [];
+let searchInitialized = false;
+let searchModal;
+let searchModalBody;
+let searchModalClose;
 
 async function fetchCSV() {
     try {
@@ -42,7 +46,7 @@ function parseCSV(csvText) {
         if (!line.trim()) continue;
 
         const values = parseCSVLine(line);
-        const row = {};
+        const row = { _values: values.map(v => (v ? v.trim() : '')) };
 
         headers.forEach((header, index) => {
             row[header.toLowerCase()] = values[index] ? values[index].trim() : '';
@@ -76,6 +80,14 @@ function parseCSVLine(line) {
     return result;
 }
 
+const SITE_NAME_INDEX = 1; // Column B
+const NEXT_FUEL_PLAN_INDEX = 35; // Column AJ
+
+function getColumnByIndex(row, index) {
+    if (!row || !Array.isArray(row._values)) return '';
+    return row._values[index] || '';
+}
+
 function filterAndValidateSites(rawData) {
     return rawData
         .filter(row => {
@@ -88,7 +100,7 @@ function filterAndValidateSites(rawData) {
 
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
-            const sitename = row.sitename || '';
+            const sitename = getColumnByIndex(row, SITE_NAME_INDEX) || row.sitename || '';
 
             return (
                 regionname.includes('Central') &&
@@ -102,18 +114,25 @@ function filterAndValidateSites(rawData) {
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
 
+            const cowIdKey = Object.keys(row).find(
+                key => key.replace(/\s+/g, '') === 'cowid'
+            );
+            const cowId = cowIdKey ? row[cowIdKey] : '';
+
             const nextfuelingplanKey = Object.keys(row).find(key =>
                 key.toLowerCase() === 'nextfuelingplan'
             );
-            const nextfuelingplan = nextfuelingplanKey ? row[nextfuelingplanKey] : '';
+            const nextfuelingplan = getColumnByIndex(row, NEXT_FUEL_PLAN_INDEX) ||
+                (nextfuelingplanKey ? row[nextfuelingplanKey] : '');
             const fuelDate = parseFuelDate(nextfuelingplan);
             const days = dayDiff(fuelDate);
             const statusObj = classify(days);
 
             return {
-                sitename: row.sitename || 'Unknown Site',
+                sitename: (getColumnByIndex(row, SITE_NAME_INDEX) || row.sitename || 'Unknown Site').trim(),
                 regionname: row.regionname || '',
                 cowstatus: row.cowstatus || '',
+                cowid: cowId || row.sitename || '',
                 nextfuelingplan: nextfuelingplan || '',
                 lat: lat,
                 lng: lng,
@@ -129,6 +148,13 @@ function parseFuelDate(str) {
     if (!str || str.includes("#") || str.trim() === "") return null;
     const d = new Date(str);
     return isNaN(d) ? null : d;
+}
+
+function formatFuelDateDisplay(rawValue, parsedDate) {
+    if (parsedDate instanceof Date && !isNaN(parsedDate)) {
+        return parsedDate.toLocaleDateString('en-GB');
+    }
+    return rawValue || 'N/A';
 }
 
 function dayDiff(targetDate) {
@@ -378,59 +404,103 @@ async function loadDashboard() {
     updateMetrics(sitesData);
     populateDueTable(sitesData);
     addMarkersToMap(sitesData);
+    setupSearch();
 }
 
+function setupSearch() {
+    if (searchInitialized) return;
+    const input = document.getElementById('siteSearchInput');
+    const button = document.getElementById('searchBtn');
+    const resultBox = document.getElementById('searchResult');
+    searchModal = document.getElementById('searchModal');
+    searchModalBody = document.getElementById('searchModalBody');
+    searchModalClose = document.getElementById('searchModalClose');
 
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    loadDashboard();
-    function setupSearch(sites) {
-    const input = document.getElementById("siteSearchInput");
-    const button = document.getElementById("searchBtn");
-    const resultBox = document.getElementById("searchResult");
-
-    button.addEventListener("click", () => {
+    const performSearch = () => {
         const query = input.value.trim().toUpperCase();
+
         if (!query) {
-            resultBox.style.display = "block";
-            resultBox.innerHTML = "⚠️ Please enter a Site ID.";
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = '⚠️ Please enter a site name to search.';
             return;
         }
 
-        // Search exact site match
-        const site = sites.find(s => s.sitename.toUpperCase() === query);
+        const site = sitesData.find(s => (s.sitename || '').toUpperCase() === query);
 
         if (!site) {
-            resultBox.style.display = "block";
-            resultBox.innerHTML = `❌ Site <strong>${query}</strong> not found.`;
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = `❌ Site name <strong>${query}</strong> not found.`;
             return;
         }
 
-        // Show result
-        resultBox.style.display = "block";
-        resultBox.innerHTML = `
-            <strong>Site:</strong> ${site.sitename}<br>
-            <strong>Next Fuel Date:</strong> ${site.nextfuelingplan || "N/A"}<br>
-            <strong>Status:</strong> ${site.status.toUpperCase()}<br>
-            <strong>Days:</strong> ${site.days}
-        `;
+        resultBox.style.display = 'none';
+        showSearchModal(site);
 
-        // Zoom map
         zoomToSite(site.sitename);
 
-        // Add a highlight pulse circle
         L.circle([site.lat, site.lng], {
             radius: 250,
-            color: "#1e3a8a",
+            color: '#1e3a8a',
             weight: 3,
-            fillColor: "#3b82f6",
+            fillColor: '#3b82f6',
             fillOpacity: 0.35
         }).addTo(map);
 
         setTimeout(() => {
             map.setView([site.lat, site.lng], 15);
         }, 200);
+    };
+
+    const showSearchModal = site => {
+        if (!searchModal || !searchModalBody) return;
+
+        const formattedDate = formatFuelDateDisplay(site.nextfuelingplan, site.fuelDate);
+
+        searchModalBody.innerHTML = `
+            <h4>${site.sitename}</h4>
+            <div class="modal-field">
+                <span class="field-label">COW ID</span>
+                <span>${site.cowid || 'N/A'}</span>
+            </div>
+            <div class="modal-field">
+                <span class="field-label">Next fueling date</span>
+                <span>${formattedDate}</span>
+            </div>
+        `;
+
+        searchModal.classList.remove('hidden');
+    };
+
+    const closeSearchModal = () => {
+        if (searchModal) {
+            searchModal.classList.add('hidden');
+        }
+    };
+
+    button.addEventListener('click', performSearch);
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            performSearch();
+        }
     });
+
+    if (searchModalClose) {
+        searchModalClose.addEventListener('click', closeSearchModal);
+    }
+
+    if (searchModal) {
+        searchModal.addEventListener('click', event => {
+            if (event.target === searchModal) {
+                closeSearchModal();
+            }
+        });
+    }
+
+    searchInitialized = true;
 }
 
+
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+    loadDashboard();
 });

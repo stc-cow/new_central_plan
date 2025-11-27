@@ -13,7 +13,7 @@
     <div class="header-content">
         <div class="brand-group">
             <!-- Left Logo -->
-            <img src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Fc540452a3db046ac922bafa84f938adc?format=webp&width=800" 
+            <img src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Fc540452a3db046ac922bafa84f938adc?format=webp&width=800"
                  alt="STC Logo" class="logo logo-left">
             <!-- Center Title + Live Data Group -->
             <div class="title-block" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
@@ -24,7 +24,7 @@
                 </div>
             </div>
             <!-- Right Logo -->
-            <img src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F2a2ac0238b1444ef9a1b89619ad94b40?format=webp&width=400" 
+            <img src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F2a2ac0238b1444ef9a1b89619ad94b40?format=webp&width=400"
                  alt="ACES Managed Services Logo" class="logo logo-right">
         </div>
     </div>
@@ -32,8 +32,8 @@
 
         <div class="left-panel">
           <div class="panel-header">
-    <div class="search-container">
-        <input id="siteSearchInput" type="text" placeholder="Search Site ID... (e.g., COW020)">
+        <div class="search-container">
+        <input id="siteSearchInput" type="text" placeholder="Search Site Name... (e.g., COW020)">
         <button id="searchBtn">Search</button>
     </div>
     <div id="searchResult" class="search-result"></div>
@@ -112,5 +112,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="script.js"></script>
+
+    <div id="searchModal" class="search-modal hidden">
+        <div class="search-modal-content">
+            <button id="searchModalClose" class="modal-close" aria-label="Close search result">×</button>
+            <div id="searchModalBody" class="search-modal-body"></div>
+        </div>
+    </div>
 </body>
 </html>
