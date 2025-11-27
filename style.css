@@ -16,6 +16,7 @@
   --border-color: #e2e8f0;
 }
 
+
 @keyframes pulse-ring {
   0% {
     r: 30px;
