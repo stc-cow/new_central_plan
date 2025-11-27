@@ -381,7 +381,59 @@ async function loadDashboard() {
 }
 
 
+function formatFuelDate(fuelDate) {
+    if (!fuelDate) return 'N/A';
+    const d = new Date(fuelDate);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
+function searchSite(siteName) {
+    const searchTerm = siteName.trim().toUpperCase();
+    const result = sitesData.find(site => site.sitename.toUpperCase() === searchTerm);
+
+    const modal = document.getElementById('searchModal');
+    const resultDiv = document.getElementById('searchResult');
+
+    if (result) {
+        const formattedDate = formatFuelDate(result.fuelDate);
+        resultDiv.innerHTML = `
+            <div class="search-result-item">
+                <div class="search-result-site-name">${result.sitename}</div>
+                <div class="search-result-date">Next Fueling Date:</div>
+                <div class="search-result-date-value">${formattedDate}</div>
+            </div>
+        `;
+    } else {
+        resultDiv.innerHTML = `<div class="search-no-result">No site found with name "${siteName}"</div>`;
+    }
+
+    modal.classList.add('active');
+}
+
+function closeSearchModal() {
+    const modal = document.getElementById('searchModal');
+    modal.classList.remove('active');
+    document.getElementById('searchInput').value = '';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
     loadDashboard();
+
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchSite(searchInput.value);
+        }
+    });
+
+    const modal = document.getElementById('searchModal');
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeSearchModal();
+        }
+    });
 });
