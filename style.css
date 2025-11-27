@@ -107,6 +107,31 @@ body {
     border-right: 2px solid #e2e8f0;
 }
 
+.search-bar-container {
+    margin-bottom: 24px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    border: 2px solid #e8ecff;
+    border-radius: 12px;
+    background: white;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--aces-primary);
+    box-shadow: 0 0 0 3px rgba(32, 43, 109, 0.1);
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
 .right-panel {
     padding: 32px;
     background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
