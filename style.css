@@ -16,7 +16,6 @@
   --border-color: #e2e8f0;
 }
 
-
 @keyframes pulse-ring {
   0% {
     r: 30px;
@@ -71,13 +70,13 @@ body {
 }
 
 .header-content {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    max-width: 800px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  max-width: 800px;
 }
 
 .header-title {
