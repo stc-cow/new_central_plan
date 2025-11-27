@@ -212,51 +212,56 @@ function zoomToSite(key) {
 function setupSearch() {
     if (searchInitialized) return;
 
-    const input = document.getElementById("siteSearchInput");
-    const button = document.getElementById("searchBtn");
-    const resultBox = document.getElementById("searchResult");
+    const input = document.getElementById('siteSearchInput');
+    const button = document.getElementById('searchBtn');
+    const popup = document.getElementById('searchPopup');
+    const popupContent = document.getElementById('popupContent');
+    const popupClose = document.getElementById('popupClose');
 
-    const searchNow = () => {
-        const q = input.value.trim().toUpperCase();
-        if (!q) {
-            resultBox.innerHTML = "⚠️ Enter SiteName or COW ID";
-            resultBox.style.display = "block";
+    const performSearch = () => {
+        const query = input.value.trim().toUpperCase();
+
+        if (!query) {
+            popupContent.innerHTML = "⚠️ Please enter a Site ID or COW ID.";
+            popup.style.display = "block";
             return;
         }
 
-        let found =
-            siteMap[q] ||
-            sitesData.find(
-                s => s.sitename.toUpperCase() === q || s.cowid.toUpperCase() === q
-            );
+        const site = sitesData.find(s =>
+            s.sitename.toUpperCase() === query ||
+            (s.cowid || "").toUpperCase() === query
+        );
 
-        if (!found) {
-            resultBox.innerHTML = `❌ No match for <b>${q}</b>`;
-            resultBox.style.display = "block";
+        if (!site) {
+            popupContent.innerHTML = `❌ No match found for <strong>${query}</strong>.`;
+            popup.style.display = "block";
             return;
         }
 
-        const site = found.site || found;
-
-        resultBox.style.display = "block";
-        resultBox.innerHTML = `
-            <strong>Site:</strong> ${site.sitename}<br>
-            <strong>COW ID:</strong> ${site.cowid}<br>
-            <strong>Next Fuel Date:</strong> ${site.nextfuelingplan || "N/A"}<br>
-            <strong>Status:</strong> ${site.status}<br>
-            <strong>Days:</strong> ${site.days}
+        // Fill popup content
+        popupContent.innerHTML = `
+            <strong>Site ID:</strong> ${site.sitename}<br>
+            <strong>Next Fueling Date:</strong> ${site.nextfuelingplan || "N/A"}<br>
         `;
 
+        popup.style.display = "block";
+
+        // Zoom to site on map
         zoomToSite(site.sitename);
     };
 
-    button.onclick = searchNow;
-    input.addEventListener("keydown", e => {
-        if (e.key === "Enter") searchNow();
+    button.addEventListener('click', performSearch);
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') performSearch();
+    });
+
+    popupClose.addEventListener('click', () => {
+        popup.style.display = 'none';
     });
 
     searchInitialized = true;
 }
+
 
 /* =====================================================================
    MAIN
