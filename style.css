@@ -472,6 +472,119 @@ body {
     }
 }
 
+.search-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.3s ease;
+}
+
+.search-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.search-modal-content {
+    background-color: white;
+    padding: 32px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(32, 43, 109, 0.2);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.search-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 32px;
+    font-weight: bold;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.search-modal-close:hover {
+    background-color: #f3f4f6;
+    color: var(--aces-primary);
+}
+
+.search-result {
+    text-align: center;
+}
+
+.search-result-item {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
+    border: 2px solid #e8ecff;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
+.search-result-site-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--aces-primary);
+    margin-bottom: 12px;
+}
+
+.search-result-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.search-result-date-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #3ad17c;
+}
+
+.search-no-result {
+    font-size: 16px;
+    color: var(--text-secondary);
+    padding: 24px;
+}
+
 @media (max-width: 1024px) {
     .dashboard {
         grid-template-rows: auto 50% 50%;
