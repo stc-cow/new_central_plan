@@ -542,7 +542,6 @@ function zoomToSite(name) {
 
 /* =====================================================================
    SEARCH POPUP
-===================================================================== */
 
 function setupSearch() {
   if (searchInitialized) return;
