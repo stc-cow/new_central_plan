@@ -384,4 +384,53 @@ async function loadDashboard() {
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
     loadDashboard();
+    function setupSearch(sites) {
+    const input = document.getElementById("siteSearchInput");
+    const button = document.getElementById("searchBtn");
+    const resultBox = document.getElementById("searchResult");
+
+    button.addEventListener("click", () => {
+        const query = input.value.trim().toUpperCase();
+        if (!query) {
+            resultBox.style.display = "block";
+            resultBox.innerHTML = "⚠️ Please enter a Site ID.";
+            return;
+        }
+
+        // Search exact site match
+        const site = sites.find(s => s.sitename.toUpperCase() === query);
+
+        if (!site) {
+            resultBox.style.display = "block";
+            resultBox.innerHTML = `❌ Site <strong>${query}</strong> not found.`;
+            return;
+        }
+
+        // Show result
+        resultBox.style.display = "block";
+        resultBox.innerHTML = `
+            <strong>Site:</strong> ${site.sitename}<br>
+            <strong>Next Fuel Date:</strong> ${site.nextfuelingplan || "N/A"}<br>
+            <strong>Status:</strong> ${site.status.toUpperCase()}<br>
+            <strong>Days:</strong> ${site.days}
+        `;
+
+        // Zoom map
+        zoomToSite(site.sitename);
+
+        // Add a highlight pulse circle
+        L.circle([site.lat, site.lng], {
+            radius: 250,
+            color: "#1e3a8a",
+            weight: 3,
+            fillColor: "#3b82f6",
+            fillOpacity: 0.35
+        }).addTo(map);
+
+        setTimeout(() => {
+            map.setView([site.lat, site.lng], 15);
+        }, 200);
+    });
+}
+
 });
