@@ -446,6 +446,120 @@ body {
     will-change: r;
 }
 
+.search-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-popup.active {
+    display: flex;
+}
+
+.search-popup-content {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(32, 43, 109, 0.2);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.search-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 24px 16px 24px;
+    border-bottom: 2px solid #e8ecff;
+}
+
+.search-popup-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--aces-primary);
+    margin: 0;
+}
+
+.search-popup-close {
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.search-popup-close:hover {
+    color: var(--aces-primary);
+}
+
+.search-result-container {
+    padding: 24px;
+}
+
+.search-result-item {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
+    border: 2px solid #e8ecff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.search-result-item:last-child {
+    margin-bottom: 0;
+}
+
+.search-result-site-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--aces-primary);
+    margin-bottom: 12px;
+}
+
+.search-result-fuel-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.search-result-fuel-date strong {
+    color: var(--aces-primary);
+    font-weight: 700;
+}
+
+.search-no-results {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 40px 24px;
+    font-size: 14px;
+}
+
 @media (min-width: 1440px) {
     .cards-container {
         grid-template-columns: 1fr 1fr;
