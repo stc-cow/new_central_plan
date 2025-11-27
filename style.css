@@ -80,33 +80,32 @@ body {
 }
 
 .header-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin: 0;
-  flex: 1;
-  text-align: center;
+    font-size: 18px;
+    font-weight: 900;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+    flex: 1;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .logo {
-    height: 12px;
+    height: 28px;
     width: auto;
     flex-shrink: 0;
     object-fit: contain;
-    filter: brightness(1.1) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+    filter: brightness(1.2) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
 }
 
 .logo-left {
-    height: 10px;
-    margin-right: auto;
     order: -1;
-}
-
-.logo {
-    margin-left: auto;
-    order: 1;
 }
 
 .left-panel {
