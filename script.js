@@ -20,6 +20,10 @@ let siteMap = {};
 let pulsingCircles = [];
 let searchInitialized = false;
 
+/* ===========================================================================
+   LOAD CSV
+   =========================================================================== */
+
 async function fetchCSV() {
     try {
         const response = await fetch(CSV_URL);
@@ -76,6 +80,10 @@ function parseCSVLine(line) {
     result.push(current);
     return result;
 }
+
+/* ===========================================================================
+   FILTER + VALIDATE
+   =========================================================================== */
 
 function filterAndValidateSites(rawData) {
     return rawData
@@ -161,48 +169,21 @@ function classify(days) {
     return { label: "next15", color: "#3ad17c" };
 }
 
-function getStatusColor(status) {
-    return STATUS_COLORS[status] || STATUS_COLORS.next15;
-}
-
-function getStatusLabel(status) {
-    const labels = {
-        due: 'Overdue',
-        today: 'Today',
-        coming3: 'Coming Soon',
-        next15: 'Healthy'
-    };
-    return labels[status] || 'Unknown';
-}
+/* ===========================================================================
+   METRICS + TABLES
+   =========================================================================== */
 
 function updateMetrics(sites) {
-    const totalSites = sites.length;
-    const dueSites = sites.filter(s => s.status === 'due').length;
-    const todaySites = sites.filter(s => s.status === 'today').length;
-    const futureSites = sites.filter(s => s.status === 'next15').length;
-
-    document.getElementById('totalSites').textContent = totalSites;
-    document.getElementById('dueSites').textContent = dueSites;
-    document.getElementById('todaySites').textContent = todaySites;
-    document.getElementById('futureSites').textContent = futureSites;
+    document.getElementById('totalSites').textContent = sites.length;
+    document.getElementById('dueSites').textContent = sites.filter(s => s.status === 'due').length;
+    document.getElementById('todaySites').textContent = sites.filter(s => s.status === 'today').length;
+    document.getElementById('futureSites').textContent = sites.filter(s => s.status === 'next15').length;
 }
 
 function populateDueTable(sites) {
-    const dueSites = sites
-        .filter(s => s.status === 'due')
-        .sort((a, b) => a.sitename.localeCompare(b.sitename));
-
-    const todaySites = sites
-        .filter(s => s.status === 'today')
-        .sort((a, b) => a.sitename.localeCompare(b.sitename));
-
-    const comingSites = sites
-        .filter(s => s.status === 'coming3')
-        .sort((a, b) => a.sitename.localeCompare(b.sitename));
-
-    populateOverdueTable(dueSites);
-    populateTodayTable(todaySites);
-    populateComingTable(comingSites);
+    populateOverdueTable(sites.filter(s => s.status === 'due'));
+    populateTodayTable(sites.filter(s => s.status === 'today'));
+    populateComingTable(sites.filter(s => s.status === 'coming3'));
 }
 
 function populateOverdueTable(sites) {
@@ -210,19 +191,15 @@ function populateOverdueTable(sites) {
     tbody.innerHTML = '';
 
     if (sites.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No overdue sites</td>';
-        tbody.appendChild(tr);
+        tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:12px;">No overdue sites</td></tr>`;
         return;
     }
 
     sites.forEach(site => {
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
-        tr.innerHTML = `
-            <td>${site.sitename}</td>
-            <td><span style="color: #ff6b6b; font-weight: 600;">${site.days}</span></td>
-        `;
+        tr.innerHTML = `<td>${site.sitename}</td>
+                        <td><span style="color:#ff6b6b;font-weight:600;">${site.days}</span></td>`;
         tr.addEventListener('click', () => zoomToSite(site.sitename));
         tbody.appendChild(tr);
     });
@@ -233,19 +210,14 @@ function populateTodayTable(sites) {
     tbody.innerHTML = '';
 
     if (sites.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No sites due today</td>';
-        tbody.appendChild(tr);
+        tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:12px;">No sites due today</td></tr>`;
         return;
     }
 
     sites.forEach(site => {
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
-        tr.innerHTML = `
-            <td>${site.sitename}</td>
-            <td>${site.nextfuelingplan}</td>
-        `;
+        tr.innerHTML = `<td>${site.sitename}</td><td>${site.nextfuelingplan}</td>`;
         tr.addEventListener('click', () => zoomToSite(site.sitename));
         tbody.appendChild(tr);
     });
@@ -256,45 +228,38 @@ function populateComingTable(sites) {
     tbody.innerHTML = '';
 
     if (sites.length === 0) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No sites coming in 3 days</td>';
-        tbody.appendChild(tr);
+        tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:12px;">No sites coming in 3 days</td></tr>`;
         return;
     }
 
     sites.forEach(site => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${site.sitename}</td>
-            <td><span style="color: #ffbe0b; font-weight: 600;">${site.days}</span></td>
-        `;
+        tr.innerHTML = `<td>${site.sitename}</td>
+                        <td><span style="color:#ffbe0b;font-weight:600;">${site.days}</span></td>`;
         tbody.appendChild(tr);
     });
 }
 
+/* ===========================================================================
+   MAP + MARKERS
+   =========================================================================== */
 
 function initMap() {
     map = L.map('map').setView(SA_CENTER, 5);
     map.setMaxBounds(SA_BOUNDS);
 
-    L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        {
-            attribution: 'Tiles © Esri | Maxar',
-            maxZoom: 18,
-            minZoom: 3
-        }
-    ).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri | Maxar',
+        maxZoom: 18,
+        minZoom: 3
+    }).addTo(map);
 
-    L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-        {
-            attribution: 'Tiles © Esri',
-            maxZoom: 18,
-            minZoom: 3,
-            opacity: 0.9
-        }
-    ).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri',
+        maxZoom: 18,
+        minZoom: 3,
+        opacity: 0.9
+    }).addTo(map);
 }
 
 function addMarkersToMap(sites) {
@@ -306,61 +271,37 @@ function addMarkersToMap(sites) {
     pulsingCircles = [];
 
     sites.forEach(site => {
-        const color = site.color || getStatusColor(site.status);
+        const color = site.color;
+
         const icon = L.divIcon({
             className: 'custom-marker',
-            html: `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px ${color}; display: flex; align-items: center; justify-content: center;"></div>`,
+            html: `<div style="background:${color};width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 2px ${color};"></div>`,
             iconSize: [30, 30],
             popupAnchor: [0, -15]
         });
 
-        const marker = L.marker([site.lat, site.lng], { icon: icon })
+        const marker = L.marker([site.lat, site.lng], { icon })
             .bindPopup(`
                 <h4>${site.sitename}</h4>
                 <p><strong>Status:</strong> ${getStatusLabel(site.status)}</p>
-                <p><strong>Days:</strong> ${site.days !== null ? site.days : 'N/A'}</p>
+                <p><strong>Days:</strong> ${site.days ?? 'N/A'}</p>
                 <p><strong>Fuel Date:</strong> ${site.nextfuelingplan || 'No Date'}</p>
             `)
             .addTo(map);
 
         markers.push(marker);
-        siteMap[site.sitename] = { marker: marker, site: site };
+        siteMap[site.sitename.toUpperCase()] = { marker, site };
 
         if (site.status === 'due' || site.status === 'today') {
-            const baseRadius = 300;
-            const pulsingCircle = L.circle([site.lat, site.lng], {
-                radius: baseRadius,
-                color: site.color || '#ff6b6b',
+            const pulse = L.circle([site.lat, site.lng], {
+                radius: 300,
+                color: color,
                 weight: 2,
-                opacity: 0.8,
                 fillOpacity: 0.25,
                 className: 'pulsing-circle'
             }).addTo(map);
 
-            let pulseStartTime = Date.now();
-            const pulseDuration = 2500;
-
-            const animatePulse = () => {
-                const elapsed = (Date.now() - pulseStartTime) % pulseDuration;
-                const progress = elapsed / pulseDuration;
-                const easeProgress = 0.5 - Math.cos(progress * Math.PI) / 2;
-
-                const minRadius = 200;
-                const maxRadius = 75000;
-                const newRadius = minRadius + (maxRadius - minRadius) * easeProgress;
-
-                const minOpacity = 0.4;
-                const maxOpacity = 0.95;
-                const newOpacity = maxOpacity - (maxOpacity - minOpacity) * easeProgress;
-
-                pulsingCircle.setRadius(newRadius);
-                pulsingCircle.setStyle({ opacity: newOpacity });
-
-                requestAnimationFrame(animatePulse);
-            };
-
-            animatePulse();
-            pulsingCircles.push(pulsingCircle);
+            pulsingCircles.push(pulse);
         }
     });
 
@@ -371,12 +312,74 @@ function addMarkersToMap(sites) {
 }
 
 function zoomToSite(sitename) {
-    const siteInfo = siteMap[sitename];
-    if (siteInfo && siteInfo.marker) {
+    const key = sitename.toUpperCase();
+    const siteInfo = siteMap[key];
+    if (siteInfo) {
         map.setView(siteInfo.marker.getLatLng(), 17);
         siteInfo.marker.openPopup();
     }
 }
+
+/* ===========================================================================
+   SEARCH BAR FEATURE
+   =========================================================================== */
+
+function setupSearch() {
+    if (searchInitialized) return;
+
+    const input = document.getElementById('siteSearchInput');
+    const button = document.getElementById('searchBtn');
+    const resultBox = document.getElementById('searchResult');
+
+    const performSearch = () => {
+        const query = input.value.trim().toUpperCase();
+
+        if (!query) {
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = '⚠️ Please enter a Site ID or COW ID.';
+            return;
+        }
+
+        const site = sitesData.find(s =>
+            (s.cowid || '').toUpperCase() === query ||
+            (s.sitename || '').toUpperCase() === query
+        );
+
+        if (!site) {
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = `❌ No match found for <strong>${query}</strong>.`;
+            return;
+        }
+
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `
+            <strong>Site:</strong> ${site.sitename}<br>
+            <strong>COW ID:</strong> ${site.cowid}<br>
+            <strong>Next Fuel Date:</strong> ${site.nextfuelingplan || 'N/A'}<br>
+            <strong>Status:</strong> ${site.status.toUpperCase()}<br>
+            <strong>Days Remaining:</strong> ${site.days}
+        `;
+
+        zoomToSite(site.sitename);
+
+        L.circle([site.lat, site.lng], {
+            radius: 300,
+            color: '#1e3a8a',
+            weight: 3,
+            fillColor: '#3b82f6',
+            fillOpacity: 0.35
+        }).addTo(map);
+    };
+
+    button.addEventListener('click', performSearch);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
+
+    searchInitialized = true;
+}
+
+/* ===========================================================================
+   MAIN
+   =========================================================================== */
 
 async function loadDashboard() {
     const rawData = await fetchCSV();
@@ -387,68 +390,6 @@ async function loadDashboard() {
     addMarkersToMap(sitesData);
     setupSearch();
 }
-
-function setupSearch() {
-    if (searchInitialized) return;
-    const input = document.getElementById('siteSearchInput');
-    const button = document.getElementById('searchBtn');
-    const resultBox = document.getElementById('searchResult');
-
-    const performSearch = () => {
-        const query = input.value.trim().toUpperCase();
-
-        if (!query) {
-            resultBox.style.display = 'block';
-            resultBox.innerHTML = '⚠️ Please enter a COW ID.';
-            return;
-        }
-
-        const site = sitesData.find(s => {
-            const cowId = (s.cowid || '').toUpperCase();
-            const siteName = (s.sitename || '').toUpperCase();
-            return cowId === query || siteName === query;
-        });
-
-        if (!site) {
-            resultBox.style.display = 'block';
-            resultBox.innerHTML = `❌ COW ID <strong>${query}</strong> not found.`;
-            return;
-        }
-
-        resultBox.style.display = 'block';
-        resultBox.innerHTML = `
-            <strong>COW ID:</strong> ${site.cowid || 'N/A'}<br>
-            <strong>Site:</strong> ${site.sitename}<br>
-            <strong>Next Fuel Plan Date:</strong> ${site.nextfuelingplan || 'N/A'}<br>
-            <strong>Status:</strong> ${site.status.toUpperCase()}<br>
-            <strong>Days:</strong> ${site.days}
-        `;
-
-        zoomToSite(site.sitename);
-
-        L.circle([site.lat, site.lng], {
-            radius: 250,
-            color: '#1e3a8a',
-            weight: 3,
-            fillColor: '#3b82f6',
-            fillOpacity: 0.35
-        }).addTo(map);
-
-        setTimeout(() => {
-            map.setView([site.lat, site.lng], 15);
-        }, 200);
-    };
-
-    button.addEventListener('click', performSearch);
-    input.addEventListener('keydown', event => {
-        if (event.key === 'Enter') {
-            performSearch();
-        }
-    });
-
-    searchInitialized = true;
-}
-
 
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
