@@ -18,6 +18,7 @@ let sitesData = [];
 let markers = [];
 let siteMap = {};
 let pulsingCircles = [];
+let searchInitialized = false;
 
 async function fetchCSV() {
     try {
@@ -102,6 +103,11 @@ function filterAndValidateSites(rawData) {
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
 
+            const cowIdKey = Object.keys(row).find(
+                key => key.replace(/\s+/g, '') === 'cowid'
+            );
+            const cowId = cowIdKey ? row[cowIdKey] : '';
+
             const nextfuelingplanKey = Object.keys(row).find(key =>
                 key.toLowerCase() === 'nextfuelingplan'
             );
@@ -114,6 +120,7 @@ function filterAndValidateSites(rawData) {
                 sitename: row.sitename || 'Unknown Site',
                 regionname: row.regionname || '',
                 cowstatus: row.cowstatus || '',
+                cowid: cowId || row.sitename || '',
                 nextfuelingplan: nextfuelingplan || '',
                 lat: lat,
                 lng: lng,
@@ -378,59 +385,72 @@ async function loadDashboard() {
     updateMetrics(sitesData);
     populateDueTable(sitesData);
     addMarkersToMap(sitesData);
+    setupSearch();
 }
 
+function setupSearch() {
+    if (searchInitialized) return;
+    const input = document.getElementById('siteSearchInput');
+    const button = document.getElementById('searchBtn');
+    const resultBox = document.getElementById('searchResult');
 
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    loadDashboard();
-    function setupSearch(sites) {
-    const input = document.getElementById("siteSearchInput");
-    const button = document.getElementById("searchBtn");
-    const resultBox = document.getElementById("searchResult");
-
-    button.addEventListener("click", () => {
+    const performSearch = () => {
         const query = input.value.trim().toUpperCase();
+
         if (!query) {
-            resultBox.style.display = "block";
-            resultBox.innerHTML = "⚠️ Please enter a Site ID.";
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = '⚠️ Please enter a COW ID.';
             return;
         }
 
-        // Search exact site match
-        const site = sites.find(s => s.sitename.toUpperCase() === query);
+        const site = sitesData.find(s => {
+            const cowId = (s.cowid || '').toUpperCase();
+            const siteName = (s.sitename || '').toUpperCase();
+            return cowId === query || siteName === query;
+        });
 
         if (!site) {
-            resultBox.style.display = "block";
-            resultBox.innerHTML = `❌ Site <strong>${query}</strong> not found.`;
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = `❌ COW ID <strong>${query}</strong> not found.`;
             return;
         }
 
-        // Show result
-        resultBox.style.display = "block";
+        resultBox.style.display = 'block';
         resultBox.innerHTML = `
+            <strong>COW ID:</strong> ${site.cowid || 'N/A'}<br>
             <strong>Site:</strong> ${site.sitename}<br>
-            <strong>Next Fuel Date:</strong> ${site.nextfuelingplan || "N/A"}<br>
+            <strong>Next Fuel Plan Date:</strong> ${site.nextfuelingplan || 'N/A'}<br>
             <strong>Status:</strong> ${site.status.toUpperCase()}<br>
             <strong>Days:</strong> ${site.days}
         `;
 
-        // Zoom map
         zoomToSite(site.sitename);
 
-        // Add a highlight pulse circle
         L.circle([site.lat, site.lng], {
             radius: 250,
-            color: "#1e3a8a",
+            color: '#1e3a8a',
             weight: 3,
-            fillColor: "#3b82f6",
+            fillColor: '#3b82f6',
             fillOpacity: 0.35
         }).addTo(map);
 
         setTimeout(() => {
             map.setView([site.lat, site.lng], 15);
         }, 200);
+    };
+
+    button.addEventListener('click', performSearch);
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            performSearch();
+        }
     });
+
+    searchInitialized = true;
 }
 
+
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+    loadDashboard();
 });
