@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+<<<<<<< HEAD
     <div class="dashboard">
       <div class="dashboard-header">
         <div class="header-content">
@@ -35,8 +36,163 @@
             class="search-bar"
             placeholder="Search by Site Name..."
           />
+=======
+    <div class="dashboard">
+      <div class="dashboard-header">
+        <div class="header-content">
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Fc540452a3db046ac922bafa84f938adc?format=webp&width=800"
+            alt="STC Logo"
+            class="logo logo-left"
+          />
+          <h1 class="header-title">Central Fuel Plan Dashboard</h1>
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F2a2ac0238b1444ef9a1b89619ad94b40?format=webp&width=400"
+            alt="ACES Managed Services Logo"
+            class="logo"
+          />
         </div>
+      </div>
+      <div class="left-panel">
+        <div class="search-bar-container">
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search by Site Name..."
+          />
 
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="dashboard">
+
+        <!-- ===================== HEADER ===================== -->
+        <div class="dashboard-header">
+            <div class="header-content">
+
+                <div class="brand-group">
+                    <!-- Left Logo -->
+                    <img src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Fc540452a3db046ac922bafa84f938adc?format=webp&width=800" 
+                         alt="STC Logo" class="logo logo-left">
+
+                    <!-- Center Title -->
+                    <div class="title-block">
+                        <h1 class="header-title">Central Fuel Plan Dashboard</h1>
+
+                        <div class="header-actions">
+                            <span class="status-pill live">Live Data</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Logo -->
+                    <img src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F2a2ac0238b1444ef9a1b89619ad94b40?format=webp&width=400" 
+                         alt="ACES Managed Services Logo" class="logo logo-right">
+                </div>
+
+            </div>
+        </div>
+        <!-- =================================================== -->
+
+
+        <!-- ===================== LEFT PANEL ===================== -->
+        <div class="left-panel">
+
+            <!-- Search Bar Block -->
+            <div class="panel-header">
+
+                <div class="search-container">
+                    <input id="siteSearchInput" 
+                        type="text" 
+                        placeholder="Search Site ID / COW ID... 
+                    >
+
+                    <button id="searchBtn">Search</button>
+                </div>
+
+                <div id="searchResult" class="search-result"></div>
+
+            </div>
+
+            <!-- Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-label">Total Sites</div>
+                    <div class="metric-value" id="totalSites">0</div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-label">Due (Overdue)</div>
+                    <div class="metric-value due" id="dueSites">0</div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-label">Today</div>
+                    <div class="metric-value today-metric" id="todaySites">0</div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-label">Next 3–15 Days</div>
+                    <div class="metric-value future" id="futureSites">0</div>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div class="cards-container">
+
+                <!-- Overdue -->
+                <div class="status-card overdue-card">
+                    <h3>Due (Overdue)</h3>
+                    <table class="sites-table">
+                        <thead>
+                            <tr>
+                                <th>Site Name</th>
+                                <th>Days</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overdueTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Today -->
+                <div class="status-card today-card">
+                    <h3>Today Schedule</h3>
+                    <table class="sites-table">
+                        <thead>
+                            <tr>
+                                <th>Site Name</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todayTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Coming Soon -->
+                <div class="status-card coming-card">
+                    <h3>Coming in 3 Days</h3>
+                    <table class="sites-table">
+                        <thead>
+                            <tr>
+                                <th>Site Name</th>
+                                <th>Days</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comingTableBody"></tbody>
+                    </table>
+                </div>
+
+            </div>
+>>>>>>> ae0ff34d6fa2e6edc41b3189d94c21d9cfcc0c34
+        </div>
+        <!-- ========================================================= -->
+
+<<<<<<< HEAD
         <div class="metrics-grid">
           <div class="metric-box">
             <div class="metric-label">Total Sites</div>
@@ -112,9 +268,67 @@
           <!-- Results displayed here -->
         </div>
       </div>
+=======
+
+          <div class="status-card coming-card">
+            <h3>Coming in 3 Days</h3>
+            <table class="sites-table">
+              <thead>
+                <tr>
+                  <th>Site Name</th>
+                  <th>Days</th>
+                </tr>
+              </thead>
+              <tbody id="comingTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div id="map" class="map-container"></div>
+      </div>
     </div>
 
+    <div id="searchPopup" class="search-popup">
+      <div class="search-popup-content">
+        <div class="search-popup-header">
+          <h2 class="search-popup-title">Search Result</h2>
+          <button id="closeSearchBtn" class="search-popup-close">
+            &times;
+          </button>
+        </div>
+        <div id="searchResultContainer" class="search-result-container">
+          <!-- Search results will be displayed here -->
+        </div>
+      </div>
+
+        <!-- ===================== RIGHT PANEL ===================== -->
+        <div class="right-panel">
+            <div id="map" class="map-container"></div>
+        </div>
+        <!-- ========================================================= -->
+
+>>>>>>> main
+>>>>>>> ae0ff34d6fa2e6edc41b3189d94c21d9cfcc0c34
+    </div>
+
+    <!-- JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="script.js"></script>
+<<<<<<< HEAD
   </body>
+=======
+<!-- SEARCH RESULT POPUP -->
+<div id="searchPopup" class="search-popup">
+    <div class="popup-inner">
+        <span id="popupClose" class="popup-close">&times;</span>
+        <h3>Search Result</h3>
+        <p id="popupContent"></p>
+    </div>
+</div>
+
+</body>
+>>>>>>> main
+>>>>>>> ae0ff34d6fa2e6edc41b3189d94c21d9cfcc0c34
 </html>
