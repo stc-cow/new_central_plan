@@ -18,6 +18,10 @@ let sitesData = [];
 let markers = [];
 let siteMap = {};
 let pulsingCircles = [];
+let searchInitialized = false;
+let searchModal;
+let searchModalBody;
+let searchModalClose;
 
 async function fetchCSV() {
     try {
@@ -102,6 +106,11 @@ function filterAndValidateSites(rawData) {
             const lat = parseFloat(row.lat || row.latitude || '');
             const lng = parseFloat(row.lng || row.longitude || '');
 
+            const cowIdKey = Object.keys(row).find(
+                key => key.replace(/\s+/g, '') === 'cowid'
+            );
+            const cowId = cowIdKey ? row[cowIdKey] : '';
+
             const nextfuelingplanKey = Object.keys(row).find(key =>
                 key.toLowerCase() === 'nextfuelingplan'
             );
@@ -114,6 +123,7 @@ function filterAndValidateSites(rawData) {
                 sitename: row.sitename || 'Unknown Site',
                 regionname: row.regionname || '',
                 cowstatus: row.cowstatus || '',
+                cowid: cowId || row.sitename || '',
                 nextfuelingplan: nextfuelingplan || '',
                 lat: lat,
                 lng: lng,
@@ -378,59 +388,101 @@ async function loadDashboard() {
     updateMetrics(sitesData);
     populateDueTable(sitesData);
     addMarkersToMap(sitesData);
+    setupSearch();
 }
 
+function setupSearch() {
+    if (searchInitialized) return;
+    const input = document.getElementById('siteSearchInput');
+    const button = document.getElementById('searchBtn');
+    const resultBox = document.getElementById('searchResult');
+    searchModal = document.getElementById('searchModal');
+    searchModalBody = document.getElementById('searchModalBody');
+    searchModalClose = document.getElementById('searchModalClose');
 
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    loadDashboard();
-    function setupSearch(sites) {
-    const input = document.getElementById("siteSearchInput");
-    const button = document.getElementById("searchBtn");
-    const resultBox = document.getElementById("searchResult");
-
-    button.addEventListener("click", () => {
+    const performSearch = () => {
         const query = input.value.trim().toUpperCase();
+
         if (!query) {
-            resultBox.style.display = "block";
-            resultBox.innerHTML = "⚠️ Please enter a Site ID.";
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = '⚠️ Please enter a COW ID.';
             return;
         }
 
-        // Search exact site match
-        const site = sites.find(s => s.sitename.toUpperCase() === query);
+        const site = sitesData.find(s => (s.sitename || '').toUpperCase() === query);
 
         if (!site) {
-            resultBox.style.display = "block";
-            resultBox.innerHTML = `❌ Site <strong>${query}</strong> not found.`;
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = `❌ Site name <strong>${query}</strong> not found.`;
             return;
         }
 
-        // Show result
-        resultBox.style.display = "block";
-        resultBox.innerHTML = `
-            <strong>Site:</strong> ${site.sitename}<br>
-            <strong>Next Fuel Date:</strong> ${site.nextfuelingplan || "N/A"}<br>
-            <strong>Status:</strong> ${site.status.toUpperCase()}<br>
-            <strong>Days:</strong> ${site.days}
-        `;
+        resultBox.style.display = 'none';
+        showSearchModal(site);
 
-        // Zoom map
         zoomToSite(site.sitename);
 
-        // Add a highlight pulse circle
         L.circle([site.lat, site.lng], {
             radius: 250,
-            color: "#1e3a8a",
+            color: '#1e3a8a',
             weight: 3,
-            fillColor: "#3b82f6",
+            fillColor: '#3b82f6',
             fillOpacity: 0.35
         }).addTo(map);
 
         setTimeout(() => {
             map.setView([site.lat, site.lng], 15);
         }, 200);
+    };
+
+    const showSearchModal = site => {
+        if (!searchModal || !searchModalBody) return;
+
+        searchModalBody.innerHTML = `
+            <h4>${site.sitename}</h4>
+            <div class="modal-field">
+                <span class="field-label">COW ID</span>
+                <span>${site.cowid || 'N/A'}</span>
+            </div>
+            <div class="modal-field">
+                <span class="field-label">Next fueling date</span>
+                <span>${site.nextfuelingplan || 'N/A'}</span>
+            </div>
+        `;
+
+        searchModal.classList.remove('hidden');
+    };
+
+    const closeSearchModal = () => {
+        if (searchModal) {
+            searchModal.classList.add('hidden');
+        }
+    };
+
+    button.addEventListener('click', performSearch);
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            performSearch();
+        }
     });
+
+    if (searchModalClose) {
+        searchModalClose.addEventListener('click', closeSearchModal);
+    }
+
+    if (searchModal) {
+        searchModal.addEventListener('click', event => {
+            if (event.target === searchModal) {
+                closeSearchModal();
+            }
+        });
+    }
+
+    searchInitialized = true;
 }
 
+
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+    loadDashboard();
 });
