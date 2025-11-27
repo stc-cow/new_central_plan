@@ -2,7 +2,6 @@
 here is full css modify it :
 /* =========================================================
    SEARCH BAR — ACES THEME
-========================================================= */
 
 .search-container {
     display: flex;
@@ -193,7 +192,6 @@ here is full css modify it :
 }
 
 body {
-<<<<<<< HEAD
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
     "Cantarell", sans-serif;
@@ -292,7 +290,6 @@ body {
 .right-panel {
   padding: 32px;
   background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
-=======
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     background: radial-gradient(circle at 20% 20%, rgba(32, 43, 109, 0.08), transparent 30%),
         radial-gradient(circle at 80% 0%, rgba(58, 209, 124, 0.12), transparent 26%),
@@ -458,7 +455,6 @@ body {
 }
 
 .metrics-grid {
-<<<<<<< HEAD
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
@@ -516,7 +512,6 @@ body {
   font-weight: 800;
   color: var(--aces-primary);
   line-height: 1;
-=======
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 18px;
@@ -644,12 +639,10 @@ body {
 }
 
 .cards-container {
-<<<<<<< HEAD
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 0;
-=======
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px;
@@ -662,7 +655,6 @@ body {
 }
 
 .status-card {
-<<<<<<< HEAD
   background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
   border: 2px solid #e8ecff;
   border-radius: 20px;
@@ -689,7 +681,6 @@ body {
 
 .overdue-card {
   border-top: 4px solid var(--aces-red);
-=======
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.94) 0%, rgba(247, 250, 255, 0.92) 100%);
     border: 1px solid rgba(232, 236, 255, 0.9);
     border-radius: 18px;
@@ -738,9 +729,6 @@ body {
 }
 
 .today-card {
-<<<<<<< HEAD
-  border-top: 4px solid var(--aces-red);
-=======
     border-top: 4px solid var(--aces-red);
     background: linear-gradient(160deg, rgba(255, 107, 107, 0.08), transparent 55%),
         linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 255, 0.92));
@@ -752,9 +740,6 @@ body {
 }
 
 .coming-card {
-<<<<<<< HEAD
-  border-top: 4px solid var(--aces-yellow);
-=======
     border-top: 4px solid var(--aces-yellow);
     background: linear-gradient(160deg, rgba(255, 190, 11, 0.08), transparent 55%),
         linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 255, 0.92));
@@ -766,9 +751,6 @@ body {
 }
 
 .future-card {
-<<<<<<< HEAD
-  border-top: 4px solid var(--aces-green);
-=======
     border-top: 4px solid var(--aces-green);
     background: linear-gradient(160deg, rgba(58, 209, 124, 0.08), transparent 55%),
         linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 255, 0.92));
@@ -807,7 +789,6 @@ body {
 }
 
 .sites-table {
-<<<<<<< HEAD
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
@@ -834,7 +815,6 @@ body {
   border-bottom: 1px solid #e8ecff;
   color: var(--text-primary);
   font-weight: 500;
-=======
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -874,9 +854,6 @@ body {
 }
 
 .sites-table tbody tr:hover {
-<<<<<<< HEAD
-  background-color: #f8faff;
-=======
     background-color: rgba(32, 43, 109, 0.06);
     transform: translateX(2px);
 >>>>>>> main
@@ -887,14 +864,12 @@ body {
 }
 
 .map-container {
-<<<<<<< HEAD
   width: 100%;
   height: 100%;
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(32, 43, 109, 0.12);
   overflow: hidden;
   border: 2px solid #e8ecff;
-=======
     width: 100%;
     height: 100%;
     border-radius: 22px;
@@ -1076,16 +1051,6 @@ body {
     padding: 40px;
   }
 
-<<<<<<< HEAD
-  .logo {
-    height: 80px;
-  }
-
-  .header-title {
-    font-size: 26px;
-    letter-spacing: 1.5px;
-  }
-=======
     .logo {
         height: 82px;
     }
@@ -1094,7 +1059,6 @@ body {
         font-size: 30px;
         letter-spacing: 1.2px;
     }
->>>>>>> main
 }
 
 @media (max-width: 1024px) {
@@ -1113,12 +1077,6 @@ body {
     overflow: hidden;
   }
 
-<<<<<<< HEAD
-  .metrics-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-=======
     .header-content {
         gap: 10px;
     }
@@ -1138,21 +1096,14 @@ body {
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
     }
->>>>>>> main
 
   .metric-box {
     padding: 16px 12px;
   }
 
-<<<<<<< HEAD
-  .metric-value {
-    font-size: 24px;
-  }
-=======
     .metric-value {
         font-size: 26px;
     }
->>>>>>> main
 
   .cards-container {
     grid-template-columns: 1fr 1fr;
@@ -1175,24 +1126,6 @@ body {
     overflow: hidden;
   }
 
-<<<<<<< HEAD
-  .dashboard-header {
-    padding: 12px 20px;
-  }
-
-  .header-content {
-    gap: 20px;
-  }
-
-  .header-title {
-    font-size: 18px;
-    letter-spacing: 0.5px;
-  }
-
-  .logo {
-    height: 60px;
-  }
-=======
     .dashboard-header {
         padding: 14px 18px;
     }
@@ -1215,8 +1148,8 @@ body {
     .logo {
         height: 54px;
     }
->>>>>>> main
 
+>>>>>>> main
   .metrics-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
@@ -1226,11 +1159,6 @@ body {
     padding: 18px;
   }
 
-<<<<<<< HEAD
-  .metric-value {
-    font-size: 32px;
-  }
-=======
     .metric-value {
         font-size: 28px;
     }
