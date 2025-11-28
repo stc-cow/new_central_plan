@@ -456,7 +456,7 @@ body {
   color: var(--aces-primary);
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin: 0 0 16px 0;
+  margin: 24px 0 16px 0;
   padding: 0;
 }
 
