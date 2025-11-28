@@ -479,35 +479,46 @@ function formatDateTimeForExcel() {
 }
 
 function downloadExcel() {
-  const timestamp = formatDateTimeForExcel();
+  try {
+    if (!window.XLSX) {
+      alert("Excel library is still loading. Please try again.");
+      console.error("XLSX library not available");
+      return;
+    }
 
-  const exportData = sitesData
-    .filter((site) => site.regionname && site.regionname.includes("Central"))
-    .map((site) => ({
-      "Site Name": site.sitename,
-      "Region Name": site.regionname,
-      "District Name": site.districtname || "",
-      "City Name": site.cityname || "",
-      "COW Status": site.cowstatus,
-      Latitude: site.lat,
-      Longitude: site.lng,
-      "Last Fueling Date": site.lastfuelingdate || "",
-      "Last Fueling QTY": site.lastfuelingqty || "",
-      "Next Fueling Plan": site.nextfuelingplan || "",
-    }));
+    const timestamp = formatDateTimeForExcel();
 
-  if (exportData.length === 0) {
-    alert("No data to export");
-    return;
+    const exportData = sitesData
+      .filter((site) => site.regionname && site.regionname.includes("Central"))
+      .map((site) => ({
+        "Site Name": site.sitename,
+        "Region Name": site.regionname,
+        "District Name": site.districtname || "",
+        "City Name": site.cityname || "",
+        "COW Status": site.cowstatus,
+        Latitude: site.lat,
+        Longitude: site.lng,
+        "Last Fueling Date": site.lastfuelingdate || "",
+        "Last Fueling QTY": site.lastfuelingqty || "",
+        "Next Fueling Plan": site.nextfuelingplan || "",
+      }));
+
+    if (exportData.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Central Fuel Plan");
+
+    const fileName = `Central_Fuel_Plan_${timestamp.replace(/[/:]/g, "-")}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  } catch (error) {
+    console.error("Error downloading Excel:", error);
+    alert("Failed to download Excel file. Please try again.");
   }
-
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(exportData);
-
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Central Fuel Plan");
-
-  const fileName = `Central_Fuel_Plan_${timestamp.replace(/[/:]/g, "-")}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
