@@ -410,12 +410,21 @@ function zoomToSite(sitename) {
 }
 
 async function loadDashboard() {
+  console.log("Starting loadDashboard...");
   const rawData = await fetchCSV();
+  console.log("Raw data from CSV:", rawData.length, "rows");
+
   sitesData = filterAndValidateSites(rawData);
+  console.log("Filtered sites data:", sitesData.length, "sites");
+
+  if (sitesData.length === 0) {
+    console.warn("No sites data available after filtering");
+  }
 
   updateMetrics(sitesData);
   populateDueTable(sitesData);
   addMarkersToMap(sitesData);
+  console.log("Dashboard loaded successfully");
 }
 
 function formatFuelDate(fuelDate) {
