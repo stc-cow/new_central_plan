@@ -428,6 +428,49 @@ function closeSearchModal() {
   document.getElementById("searchInput").value = "";
 }
 
+function formatDateTimeForExcel() {
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const yy = String(now.getFullYear()).slice(-2);
+  const h = String(now.getHours()).padStart(2, "0");
+  const m = String(now.getMinutes()).padStart(2, "0");
+  const s = String(now.getSeconds()).padStart(2, "0");
+  return `${dd}/${mm}/${yy} ${h}:${m}:${s}`;
+}
+
+function downloadExcel() {
+  const timestamp = formatDateTimeForExcel();
+
+  const exportData = sitesData
+    .filter((site) => site.regionname && site.regionname.includes("Central"))
+    .map((site) => ({
+      "Site Name": site.sitename,
+      "Region Name": site.regionname,
+      "District Name": site.districtname || "",
+      "City Name": site.cityname || "",
+      "COW Status": site.cowstatus,
+      Latitude: site.lat,
+      Longitude: site.lng,
+      "Last Fueling Date": site.lastfuelingdate || "",
+      "Last Fueling QTY": site.lastfuelingqty || "",
+      "Next Fueling Plan": site.nextfuelingplan || "",
+    }));
+
+  if (exportData.length === 0) {
+    alert("No data to export");
+    return;
+  }
+
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Central Fuel Plan");
+
+  const fileName = `Central_Fuel_Plan_${timestamp.replace(/[/:]/g, "-")}.xlsx`;
+  XLSX.writeFile(workbook, fileName);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
   loadDashboard();
