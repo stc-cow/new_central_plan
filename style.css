@@ -78,6 +78,7 @@ body {
   gap: 24px;
   width: 100%;
   max-width: 100%;
+  position: relative;
 }
 
 .header-date {
@@ -90,6 +91,9 @@ body {
 }
 
 .header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 18px;
   font-weight: 900;
   color: white;
