@@ -450,6 +450,16 @@ body {
   border-bottom: none;
 }
 
+.map-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--aces-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 16px 0;
+  padding: 0;
+}
+
 .map-container {
   width: 100%;
   height: 100%;
