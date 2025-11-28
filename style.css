@@ -82,6 +82,7 @@ body {
 }
 
 .date-section {
+  grid-column: 1 / -1;
   padding: 16px 32px 0;
   background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
   border-bottom: 1px solid #e2e8f0;
