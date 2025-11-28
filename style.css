@@ -677,7 +677,7 @@ body {
 
 @media (max-width: 768px) {
   .dashboard {
-    grid-template-rows: auto 55% 45%;
+    grid-template-rows: auto auto 55% 45%;
   }
 
   .left-panel {
