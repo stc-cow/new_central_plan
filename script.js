@@ -113,13 +113,37 @@ function filterAndValidateSites(rawData) {
       const days = dayDiff(fuelDate);
       const statusObj = classify(days);
 
+      const lastfuelingdateKey = Object.keys(row).find(
+        (key) => key.toLowerCase() === "lastfuelingdate",
+      );
+      const lastfuelingdate = lastfuelingdateKey ? row[lastfuelingdateKey] : "";
+
+      const lastfuelingqtyKey = Object.keys(row).find(
+        (key) => key.toLowerCase() === "lastfuelingqty",
+      );
+      const lastfuelingqty = lastfuelingqtyKey ? row[lastfuelingqtyKey] : "";
+
+      const districtKey = Object.keys(row).find(
+        (key) => key.toLowerCase() === "districtname",
+      );
+      const districtname = districtKey ? row[districtKey] : "";
+
+      const cityKey = Object.keys(row).find(
+        (key) => key.toLowerCase() === "cityname",
+      );
+      const cityname = cityKey ? row[cityKey] : "";
+
       return {
         sitename: row.sitename || "Unknown Site",
         regionname: row.regionname || "",
+        districtname: districtname || "",
+        cityname: cityname || "",
         cowstatus: row.cowstatus || "",
-        nextfuelingplan: nextfuelingplan || "",
         lat: lat,
         lng: lng,
+        lastfuelingdate: lastfuelingdate || "",
+        lastfuelingqty: lastfuelingqty || "",
+        nextfuelingplan: nextfuelingplan || "",
         fuelDate: fuelDate,
         days: days,
         status: statusObj.label,
