@@ -547,7 +547,8 @@ body {
     padding: 40px;
   }
 
-  .logo {
+  .logo,
+  .logo-text {
     height: 96px;
   }
 
