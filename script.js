@@ -521,9 +521,31 @@ function downloadExcel() {
   }
 }
 
+function updateHeaderDate() {
+  const headerDateElement = document.getElementById("headerDate");
+  if (headerDateElement) {
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    headerDateElement.textContent = formattedDate;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
   loadDashboard();
+
+  updateHeaderDate();
+  setInterval(updateHeaderDate, 1000);
+
+  setInterval(() => {
+    console.log("Auto-refreshing dashboard...");
+    loadDashboard();
+  }, 120000);
 
   const searchInput = document.getElementById("searchInput");
   searchInput.addEventListener("keypress", (e) => {
