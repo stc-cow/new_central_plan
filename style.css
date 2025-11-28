@@ -81,13 +81,21 @@ body {
   position: relative;
 }
 
+.logo-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 .header-date {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .header-title {
