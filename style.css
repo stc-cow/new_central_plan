@@ -734,7 +734,8 @@ body {
     letter-spacing: 0.5px;
   }
 
-  .logo {
+  .logo,
+  .logo-text {
     height: 68px;
   }
 
