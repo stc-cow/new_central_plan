@@ -522,6 +522,48 @@ function downloadExcel() {
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(exportData);
 
+    const navyColor = "202B6D";
+    const whiteFill = "FFFFFF";
+    const blackFont = "000000";
+    const whiteFont = "FFFFFF";
+
+    const borderStyle = {
+      top: { style: "thin", color: { rgb: "000000" } },
+      bottom: { style: "thin", color: { rgb: "000000" } },
+      left: { style: "thin", color: { rgb: "000000" } },
+      right: { style: "thin", color: { rgb: "000000" } },
+    };
+
+    const headerStyle = {
+      fill: { fgColor: { rgb: navyColor } },
+      font: { bold: true, color: { rgb: whiteFont }, size: 12 },
+      alignment: { horizontal: "center", vertical: "center", wrapText: true },
+      border: borderStyle,
+    };
+
+    const dataStyle = {
+      font: { color: { rgb: blackFont } },
+      alignment: { horizontal: "left", vertical: "center" },
+      border: borderStyle,
+    };
+
+    const headerRow = Object.keys(exportData[0]);
+    headerRow.forEach((key, idx) => {
+      const cellRef = XLSX.utils.encode_cell({ r: 0, c: idx });
+      worksheet[cellRef].s = headerStyle;
+    });
+
+    exportData.forEach((row, rowIdx) => {
+      Object.keys(row).forEach((key, colIdx) => {
+        const cellRef = XLSX.utils.encode_cell({ r: rowIdx + 1, c: colIdx });
+        if (worksheet[cellRef]) {
+          worksheet[cellRef].s = dataStyle;
+        }
+      });
+    });
+
+    worksheet["!cols"] = Array(Object.keys(exportData[0]).length).fill({ wch: 18 });
+
     XLSX.utils.book_append_sheet(workbook, worksheet, "Central Fuel Plan");
 
     const fileName = `Central_Fuel_Plan_${timestamp.replace(/[/:]/g, "-")}.xlsx`;
