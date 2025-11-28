@@ -61,6 +61,7 @@ body {
   grid-column: 1 / -1;
   background: linear-gradient(135deg, var(--aces-primary) 0%, #1a1f4f 100%);
   border-bottom: 4px solid var(--aces-red);
+  height: 50px;
   padding: 16px 32px;
   display: flex;
   align-items: center;
