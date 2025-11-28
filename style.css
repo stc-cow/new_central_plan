@@ -127,13 +127,14 @@ body {
   justify-content: center;
   flex-shrink: 0;
   color: white;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-align: center;
   text-transform: uppercase;
-  line-height: 1.2;
+  line-height: 1;
   letter-spacing: 0.5px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
 }
 
 .logo:hover {
