@@ -23,8 +23,14 @@ let pulsingCircles = [];
 async function fetchCSV() {
   try {
     const response = await fetch(CSV_URL);
+    if (!response.ok) {
+      throw new Error(`HTTP Error: ${response.status}`);
+    }
     const csvText = await response.text();
-    return parseCSV(csvText);
+    console.log("CSV fetched successfully, length:", csvText.length);
+    const parsed = parseCSV(csvText);
+    console.log("Parsed CSV rows:", parsed.length);
+    return parsed;
   } catch (error) {
     console.error("Error fetching CSV:", error);
     return [];
