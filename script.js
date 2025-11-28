@@ -22,17 +22,38 @@ let pulsingCircles = [];
 
 async function fetchCSV() {
   try {
-    const response = await fetch(CSV_URL);
+    console.log("Attempting to fetch CSV from:", CSV_URL);
+    const response = await fetch(CSV_URL, {
+      method: "GET",
+      headers: {
+        "Accept": "text/csv",
+      },
+      mode: "cors",
+      credentials: "omit",
+    });
+
     if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status}`);
+      throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
     }
+
     const csvText = await response.text();
     console.log("CSV fetched successfully, length:", csvText.length);
+
+    if (!csvText.trim()) {
+      console.warn("CSV response is empty");
+      return [];
+    }
+
     const parsed = parseCSV(csvText);
     console.log("Parsed CSV rows:", parsed.length);
     return parsed;
   } catch (error) {
     console.error("Error fetching CSV:", error);
+    console.error("Error details:", {
+      message: error.message,
+      type: error.constructor.name,
+      url: CSV_URL,
+    });
     return [];
   }
 }
