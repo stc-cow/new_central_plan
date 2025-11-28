@@ -531,7 +531,13 @@ function updateHeaderDate() {
       month: "short",
       day: "numeric",
     });
-    headerDateElement.textContent = formattedDate;
+    const formattedTime = now.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+    headerDateElement.textContent = `${formattedDate} ${formattedTime}`;
   }
 }
 
