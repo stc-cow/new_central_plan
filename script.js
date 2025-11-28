@@ -562,7 +562,9 @@ function downloadExcel() {
       });
     });
 
-    worksheet["!cols"] = Array(Object.keys(exportData[0]).length).fill({ wch: 18 });
+    worksheet["!cols"] = Array(Object.keys(exportData[0]).length).fill({
+      wch: 18,
+    });
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "Central Fuel Plan");
 
