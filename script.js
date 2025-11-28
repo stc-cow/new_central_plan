@@ -327,21 +327,11 @@ function initMap() {
   map.setMaxBounds(SA_BOUNDS);
 
   L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
     {
-      attribution: "Tiles © Esri | Maxar",
+      attribution: "Tiles © Esri | OpenStreetMap",
       maxZoom: 18,
       minZoom: 3,
-    },
-  ).addTo(map);
-
-  L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-    {
-      attribution: "Tiles © Esri",
-      maxZoom: 18,
-      minZoom: 3,
-      opacity: 0.9,
     },
   ).addTo(map);
 }
