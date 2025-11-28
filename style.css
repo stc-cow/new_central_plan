@@ -642,7 +642,7 @@ body {
 
 @media (max-width: 1024px) {
   .dashboard {
-    grid-template-rows: auto 50% 50%;
+    grid-template-rows: auto auto 50% 50%;
     grid-template-columns: 1fr;
   }
 
