@@ -80,19 +80,13 @@ body {
   max-width: 100%;
 }
 
-.header-left {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
-
 .header-date {
   font-size: 12px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
 .header-title {
