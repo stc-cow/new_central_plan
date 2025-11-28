@@ -92,7 +92,7 @@ body {
 }
 
 .logo {
-  height: 28px;
+  height: 36px;
   width: auto;
   flex-shrink: 0;
   object-fit: contain;
@@ -498,7 +498,7 @@ body {
   }
 
   .logo {
-    height: 80px;
+    height: 96px;
   }
 
   .header-title {
@@ -684,7 +684,7 @@ body {
   }
 
   .logo {
-    height: 60px;
+    height: 68px;
   }
 
   .metrics-grid {
