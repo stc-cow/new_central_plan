@@ -26,7 +26,7 @@ async function fetchCSV() {
     const response = await fetch(CSV_URL, {
       method: "GET",
       headers: {
-        "Accept": "text/csv",
+        Accept: "text/csv",
       },
       mode: "cors",
       credentials: "omit",
