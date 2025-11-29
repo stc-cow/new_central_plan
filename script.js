@@ -227,7 +227,8 @@ function isDueSite(site) {
     return false;
   }
 
-  const validStatus = site.cowstatus === "ON-AIR" || site.cowstatus === "In Progress";
+  const validStatus =
+    site.cowstatus === "ON-AIR" || site.cowstatus === "In Progress";
   if (!validStatus) {
     return false;
   }
