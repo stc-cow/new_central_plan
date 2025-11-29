@@ -222,9 +222,34 @@ function getStatusLabel(status) {
   return labels[status] || "Unknown";
 }
 
+function isDueSite(site) {
+  if (!site.regionname || !site.regionname.includes("Central")) {
+    return false;
+  }
+
+  const validStatus = site.cowstatus === "ON-AIR" || site.cowstatus === "In Progress";
+  if (!validStatus) {
+    return false;
+  }
+
+  if (!site.nextfuelingplan || !site.nextfuelingplan.trim()) {
+    return false;
+  }
+
+  const nextFuelingDate = new Date(site.nextfuelingplan);
+  if (isNaN(nextFuelingDate.getTime())) {
+    return false;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return nextFuelingDate < today;
+}
+
 function updateMetrics(sites) {
   const totalSites = sites.length;
-  const dueSites = sites.filter((s) => s.status === "due").length;
+  const dueSites = sites.filter((s) => isDueSite(s)).length;
   const todaySites = sites.filter((s) => s.status === "today").length;
   const futureSites = sites.filter((s) => s.status === "next15").length;
 
