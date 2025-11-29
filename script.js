@@ -409,9 +409,9 @@ function addMarkersToMap(sites) {
     const color = site.color || getStatusColor(site.status);
     const icon = L.divIcon({
       className: "custom-marker",
-      html: `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px ${color}; display: flex; align-items: center; justify-content: center;"></div>`,
-      iconSize: [30, 30],
-      popupAnchor: [0, -15],
+      html: `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"></div>`,
+      iconSize: [24, 24],
+      popupAnchor: [0, -12],
     });
 
     const marker = L.marker([site.lat, site.lng], { icon: icon })
