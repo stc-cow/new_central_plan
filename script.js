@@ -51,13 +51,36 @@ async function fetchCSV() {
     console.log("Parsed CSV rows:", parsed.length);
     return parsed;
   } catch (error) {
-    console.error("Error fetching CSV:", error);
-    console.error("Error details:", {
-      message: error.message,
-      type: error.constructor.name,
-      url: CSV_URL,
-    });
-    return [];
+    console.error("Error fetching CSV directly:", error);
+    console.log("Attempting fallback with CORS proxy...");
+
+    try {
+      const proxyUrl = PROXIED_CSV_URL;
+      const proxyResponse = await fetch(proxyUrl, {
+        method: "GET",
+        headers: {
+          Accept: "text/csv",
+        },
+      });
+
+      if (!proxyResponse.ok) {
+        throw new Error(`HTTP Error: ${proxyResponse.status}`);
+      }
+
+      const csvText = await proxyResponse.text();
+      console.log("CSV fetched via proxy, length:", csvText.length);
+
+      if (!csvText.trim()) {
+        return [];
+      }
+
+      const parsed = parseCSV(csvText);
+      console.log("Parsed CSV rows from proxy:", parsed.length);
+      return parsed;
+    } catch (proxyError) {
+      console.error("Proxy fetch also failed:", proxyError);
+      return [];
+    }
   }
 }
 
