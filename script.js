@@ -261,7 +261,7 @@ function updateMetrics(sites) {
 
 function populateDueTable(sites) {
   const dueSites = sites
-    .filter((s) => s.status === "due")
+    .filter((s) => isDueSite(s))
     .sort((a, b) => a.sitename.localeCompare(b.sitename));
 
   const todaySites = sites
