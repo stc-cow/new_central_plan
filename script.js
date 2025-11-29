@@ -356,6 +356,15 @@ function populateComingTable(sites) {
   const tbody = document.getElementById("comingTableBody");
   tbody.innerHTML = "";
 
+  const oneDay = sites.filter((s) => s.days === 1).length;
+  const twoDays = sites.filter((s) => s.days === 2).length;
+  const threeDays = sites.filter((s) => s.days === 3).length;
+
+  const summaryElement = document.getElementById("comingSummary");
+  if (summaryElement) {
+    summaryElement.textContent = `- One day (${oneDay}), Two days (${twoDays}), Three days (${threeDays})`;
+  }
+
   if (sites.length === 0) {
     const tr = document.createElement("tr");
     tr.innerHTML =
