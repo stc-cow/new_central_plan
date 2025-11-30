@@ -872,14 +872,42 @@ body {
   color: var(--text-primary);
 }
 
-.ol-popup-content h4 {
+.ol-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 12px;
-  margin-top: 0;
+}
+
+.ol-popup-content h4 {
+  margin: 0;
   font-weight: 800;
   color: var(--aces-primary);
   font-size: 15px;
   border-bottom: 2px solid var(--aces-red);
   padding-bottom: 8px;
+  flex: 1;
+}
+
+.ol-popup-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  font-weight: 700;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  transition: color 0.2s ease;
+}
+
+.ol-popup-close:hover {
+  color: #333;
 }
 
 .ol-popup-content p {
