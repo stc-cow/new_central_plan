@@ -194,12 +194,18 @@ function filterAndValidateSites(rawData) {
       );
       const cityname = cityKey ? row[cityKey] : "";
 
+      const sitelabelKey = Object.keys(row).find(
+        (key) => key.toLowerCase() === "sitelabel",
+      );
+      const sitelabel = sitelabelKey ? row[sitelabelKey] : "";
+
       return {
         sitename: row.sitename || "Unknown Site",
         regionname: row.regionname || "",
         districtname: districtname || "",
         cityname: cityname || "",
         cowstatus: row.cowstatus || "",
+        sitelabel: sitelabel || "",
         lat: lat,
         lng: lng,
         lastfuelingdate: lastfuelingdate || "",
