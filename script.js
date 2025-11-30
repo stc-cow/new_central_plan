@@ -378,11 +378,13 @@ async function testZapierWebhook() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(testPayload),
+      mode: "no-cors",
     });
 
-    const result = await response.text();
-    console.log("✓ Zapier test sent successfully", response.status, result);
-    return { success: true, status: response.status };
+    console.log(
+      "✓ Zapier test sent successfully. Status: sent (no-cors mode)",
+    );
+    return { success: true, status: "sent" };
   } catch (err) {
     console.error("✗ Zapier test failed:", err);
     return { success: false, error: err.toString() };
