@@ -522,9 +522,8 @@ function addMarkersToMap(sites) {
       popup.className = 'ol-popup';
 
       // Remove old popup if exists
-      const oldPopup = document.querySelector('.ol-popup');
-      if (oldPopup) {
-        oldPopup.remove();
+      if (currentPopupOverlay) {
+        map.removeOverlay(currentPopupOverlay);
       }
 
       // Add new popup to map
@@ -537,6 +536,7 @@ function addMarkersToMap(sites) {
       });
       map.addOverlay(overlay);
       overlay.setPosition(feature.getGeometry().getCoordinates());
+      currentPopupOverlay = overlay;
     }
   });
 
