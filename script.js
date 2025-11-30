@@ -89,6 +89,13 @@ function parseCSV(csvText) {
   if (lines.length === 0) return [];
 
   const headers = lines[0].split(",").map((h) => h.trim());
+  console.log("CSV Headers:", headers);
+  console.log("Total headers:", headers.length);
+
+  // Check if sitelabel is in headers
+  const sitelabelIndex = headers.findIndex((h) => h.toLowerCase().includes("label"));
+  console.log("Site Label column index:", sitelabelIndex, "Header:", headers[sitelabelIndex]);
+
   const data = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -105,6 +112,7 @@ function parseCSV(csvText) {
     data.push(row);
   }
 
+  console.log("Sample parsed row:", data[0]);
   return data;
 }
 
