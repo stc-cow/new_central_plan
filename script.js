@@ -23,6 +23,7 @@ let markers = [];
 let siteMap = {};
 let pulsingCircles = [];
 let markersLayer;
+let currentPopupOverlay = null;
 
 async function fetchCSV() {
   try {
