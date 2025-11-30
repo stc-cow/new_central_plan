@@ -357,99 +357,81 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
 }
 
 async function sendFuelUpdateToZapier() {
-  const GOOGLE_SHEETS_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
-  const ZAPIER_WEBHOOK_URL =
-    "https://hooks.zapier.com/hooks/catch/24787962/ukrraio/";
-
   try {
+    const sheetUrl =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
+    const corsProxy = "https://api.allorigins.win/raw?url=";
+
     console.log("📤 Fetching Google Sheets CSV...");
-    const csvResponse = await fetch(
-      "https://api.allorigins.win/raw?url=" +
-        encodeURIComponent(GOOGLE_SHEETS_CSV_URL),
-    );
-    const csvText = await csvResponse.text();
+    const csvResp = await fetch(corsProxy + encodeURIComponent(sheetUrl));
+    const csv = await csvResp.text();
 
-    const lines = csvText
-      .split("\n")
-      .filter((line) => line.trim().length > 0);
-    const header = lines[0]
-      .split(",")
-      .map((h) => h.trim().toLowerCase());
+    const rows = csv.split("\n").map((r) => r.split(","));
+    const header = rows[0].map((h) => h.trim().toLowerCase());
 
-    const idxSite = header.indexOf("sitename");
-    const idxLat = header.indexOf("lat");
-    const idxLng = header.indexOf("lng");
-    const idxFuel = header.indexOf("nextfuelingplan");
+    const iSite = header.indexOf("sitename");
+    const iLat = header.indexOf("lat");
+    const iLng = header.indexOf("lng");
+    const iFuel = header.indexOf("nextfuelingplan");
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayTime = today.getTime();
 
     let todayList = [];
     let dueList = [];
 
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(",").map((c) => c.trim());
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
 
-      const site = cols[idxSite];
-      const fuelDateStr = cols[idxFuel];
-      const lat = cols[idxLat];
-      const lng = cols[idxLng];
+      const site = r[iSite]?.trim();
+      const lat = r[iLat]?.trim();
+      const lng = r[iLng]?.trim();
+      const dateStr = r[iFuel]?.trim();
 
-      if (!fuelDateStr || !site || fuelDateStr === "") continue;
+      if (!site || !dateStr) continue;
 
-      const fuelDate = new Date(fuelDateStr);
-      fuelDate.setHours(0, 0, 0, 0);
+      const fd = new Date(dateStr);
+      fd.setHours(0, 0, 0, 0);
+      const fdTime = fd.getTime();
 
-      if (isNaN(fuelDate.getTime())) continue;
+      if (isNaN(fdTime)) continue;
 
-      if (fuelDate.getTime() === today.getTime()) {
-        todayList.push({
-          site,
-          date: fuelDateStr,
-          lat: lat || null,
-          lng: lng || null,
-        });
-      } else if (fuelDate < today) {
-        dueList.push({
-          site,
-          date: fuelDateStr,
-          lat: lat || null,
-          lng: lng || null,
-        });
+      if (fdTime === todayTime) {
+        todayList.push({ site, date: dateStr, lat, lng });
+      } else if (fdTime < todayTime) {
+        dueList.push({ site, date: dateStr, lat, lng });
       }
     }
-
-    const payload = {
-      today: todayList,
-      due: dueList,
-      timestamp: new Date().toISOString(),
-      totalToday: todayList.length,
-      totalDue: dueList.length,
-      environment: "production",
-    };
 
     console.log("📤 Sending to Zapier webhook...", {
       today: todayList.length,
       due: dueList.length,
     });
 
-    const zapResponse = await fetch(ZAPIER_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      mode: "no-cors",
-    });
+    const zapResp = await fetch(
+      "https://hooks.zapier.com/hooks/catch/24787962/ukrraio/",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          today: todayList,
+          due: dueList,
+        }),
+        mode: "no-cors",
+      },
+    );
+
+    const zapText = await zapResp.text();
 
     console.log("✅ Zapier webhook delivered successfully");
     console.log(`   📊 Today: ${todayList.length} | Due: ${dueList.length}`);
-    console.log(`   📝 Timestamp: ${payload.timestamp}`);
 
     return {
       success: true,
-      today: todayList.length,
-      due: dueList.length,
-      timestamp: payload.timestamp,
+      todayCount: todayList.length,
+      dueCount: dueList.length,
+      zapierResponse: zapText,
     };
   } catch (err) {
     console.error(
