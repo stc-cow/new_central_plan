@@ -605,6 +605,21 @@ function addMarkersToMap(sites) {
   siteMap = {};
   pulsingCircles = [];
 
+  // Remove existing pulsing layer if present
+  const layersToRemove = [];
+  map.getLayers().forEach((layer) => {
+    if (layer instanceof ol.layer.Vector && layer !== markersLayer) {
+      const source = layer.getSource();
+      if (source && source.getFeatures().length > 0) {
+        const firstFeature = source.getFeatures()[0];
+        if (firstFeature && firstFeature.get("pulseScale") !== undefined) {
+          layersToRemove.push(layer);
+        }
+      }
+    }
+  });
+  layersToRemove.forEach((layer) => map.removeLayer(layer));
+
   const features = [];
   const bounds = [];
 
