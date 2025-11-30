@@ -734,6 +734,38 @@ body {
   font-weight: 700;
 }
 
+.ol-popup-content {
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto" !important;
+  color: var(--text-primary);
+}
+
+.ol-popup-content h4 {
+  margin-bottom: 12px;
+  margin-top: 0;
+  font-weight: 800;
+  color: var(--aces-primary);
+  font-size: 15px;
+  border-bottom: 2px solid var(--aces-red);
+  padding-bottom: 8px;
+}
+
+.ol-popup-content p {
+  margin: 6px 0;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.ol-popup-content strong {
+  color: var(--aces-primary);
+  font-weight: 700;
+}
+
 .pulsing-circle {
   animation: pulse-marker 2s ease-in-out infinite !important;
   will-change: r;
