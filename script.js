@@ -730,6 +730,20 @@ function showVVVIPModal() {
   } else {
     vvvipSites.forEach((site) => {
       const tr = document.createElement("tr");
+
+      let rowColor = "#f3f0ff";
+      if (site.status === "due") {
+        rowColor = "#ffebee";
+      } else if (site.status === "today") {
+        rowColor = "#fff8e1";
+      } else if (site.status === "coming3") {
+        rowColor = "#fff8e1";
+      } else if (site.status === "next15") {
+        rowColor = "#e8f5e9";
+      }
+
+      tr.style.backgroundColor = rowColor;
+
       tr.innerHTML = `
         <td>${site.sitename}</td>
         <td>${site.nextfuelingplan || "N/A"}</td>
