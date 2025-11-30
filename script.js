@@ -589,6 +589,9 @@ function addMarkersToMap(sites) {
   const zoom = map.getView().getZoom();
   updateMapVisualization(zoom);
 
+  // Add pulsing circles for red sites (due/overdue)
+  addPulsingCircles(features);
+
   // Add click handler for markers
   map.on("click", function (evt) {
     const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
