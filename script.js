@@ -441,78 +441,66 @@ function initMap() {
 }
 
 function addMarkersToMap(sites) {
-  markers.forEach((marker) => map.removeLayer(marker));
+  // Clear existing markers and features
+  markersLayer.getSource().clear();
   markers = [];
   siteMap = {};
-
-  pulsingCircles.forEach((circle) => map.removeLayer(circle));
   pulsingCircles = [];
+
+  const features = [];
+  const bounds = [];
 
   sites.forEach((site) => {
     const color = site.color || getStatusColor(site.status);
-    const icon = L.divIcon({
-      className: "custom-marker",
-      html: `<div style="background-color: ${color}; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"></div>`,
-      iconSize: [16, 16],
-      popupAnchor: [0, -8],
+    const coords = ol.proj.fromLonLat([site.lng, site.lat]);
+
+    // Create marker feature
+    const feature = new ol.Feature({
+      geometry: new ol.geom.Point(coords),
+      siteName: site.sitename,
+      status: site.status,
+      days: site.days,
+      nextFuelingPlan: site.nextfuelingplan,
+      statusLabel: getStatusLabel(site.status),
     });
 
-    const marker = L.marker([site.lat, site.lng], { icon: icon })
-      .bindPopup(
-        `
-                <h4>${site.sitename}</h4>
-                <p><strong>Status:</strong> ${getStatusLabel(site.status)}</p>
-                <p><strong>Days:</strong> ${site.days !== null ? site.days : "N/A"}</p>
-                <p><strong>Fuel Date:</strong> ${site.nextfuelingplan || "No Date"}</p>
-            `,
-      )
-      .addTo(map);
+    // Set style for the marker
+    const style = new ol.style.Style({
+      image: new ol.style.Circle({
+        radius: 8,
+        fill: new ol.style.Fill({
+          color: color,
+        }),
+        stroke: new ol.style.Stroke({
+          color: 'white',
+          width: 2,
+        }),
+      }),
+    });
+    feature.setStyle(style);
 
-    markers.push(marker);
-    siteMap[site.sitename] = { marker: marker, site: site };
+    features.push(feature);
+    bounds.push(coords);
 
-    if (site.status === "due" || site.status === "today") {
-      const baseRadius = 300;
-      const pulsingCircle = L.circle([site.lat, site.lng], {
-        radius: baseRadius,
-        color: site.color || "#ff6b6b",
-        weight: 2,
-        opacity: 0.8,
-        fillOpacity: 0.25,
-        className: "pulsing-circle",
-      }).addTo(map);
-
-      let pulseStartTime = Date.now();
-      const pulseDuration = 2500;
-
-      const animatePulse = () => {
-        const elapsed = (Date.now() - pulseStartTime) % pulseDuration;
-        const progress = elapsed / pulseDuration;
-        const easeProgress = 0.5 - Math.cos(progress * Math.PI) / 2;
-
-        const minRadius = 290;
-        const maxRadius = 310;
-        const newRadius = minRadius + (maxRadius - minRadius) * easeProgress;
-
-        const minOpacity = 0.6;
-        const maxOpacity = 0.7;
-        const newOpacity =
-          maxOpacity - (maxOpacity - minOpacity) * easeProgress;
-
-        pulsingCircle.setRadius(newRadius);
-        pulsingCircle.setStyle({ opacity: newOpacity });
-
-        requestAnimationFrame(animatePulse);
-      };
-
-      animatePulse();
-      pulsingCircles.push(pulsingCircle);
-    }
+    // Store marker info for interaction
+    markers.push(feature);
+    siteMap[site.sitename] = {
+      feature: feature,
+      site: site,
+      coords: coords,
+    };
   });
 
-  if (markers.length > 0) {
-    const allGroup = new L.featureGroup(markers);
-    map.fitBounds(allGroup.getBounds().pad(0.1));
+  // Add all features to the layer
+  markersLayer.getSource().addFeatures(features);
+
+  // Fit map to bounds
+  if (bounds.length > 0) {
+    const extent = ol.extent.boundingExtent(bounds);
+    map.getView().fit(extent, {
+      padding: [50, 50, 50, 50],
+      maxZoom: 17,
+    });
   }
 }
 
