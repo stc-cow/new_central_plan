@@ -766,10 +766,18 @@ function showCamelModal() {
   const tbody = document.getElementById("camelTableBody");
   tbody.innerHTML = "";
 
-  const camelSites = sitesData.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("CAMEL"));
+  const camelFestivalSites = [
+    "CWH076", "CWH022", "CWH188", "COW652", "CWH094", "CWS808",
+    "CWH973", "CWH941", "CWH942", "CWH940", "CWH943", "CWH944",
+    "CWH945", "COW636", "CWH352", "CWH937"
+  ];
+
+  const camelSites = sitesData.filter((s) =>
+    camelFestivalSites.includes(s.sitename)
+  );
 
   if (camelSites.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">No Camel Festival sites</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">No Camel Festival sites found</td></tr>';
   } else {
     camelSites.forEach((site) => {
       const tr = document.createElement("tr");
