@@ -10,12 +10,8 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const csvResponse = await fetch(GOOGLE_SHEETS_CSV_URL);
     const csvText = await csvResponse.text();
 
-    const lines = csvText
-      .split("\n")
-      .filter((line) => line.trim().length > 0);
-    const header = lines[0]
-      .split(",")
-      .map((h) => h.trim().toLowerCase());
+    const lines = csvText.split("\n").filter((line) => line.trim().length > 0);
+    const header = lines[0].split(",").map((h) => h.trim().toLowerCase());
 
     const idxSite = header.indexOf("sitename");
     const idxLat = header.indexOf("lat");

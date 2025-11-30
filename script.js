@@ -1,7 +1,6 @@
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
-
 const SA_CENTER = [23.8859, 45.0792];
 const SA_BOUNDS = [
   [16.3, 32.0],
@@ -22,7 +21,6 @@ let siteMap = {};
 let pulsingCircles = [];
 let markersLayer;
 let currentPopupOverlay = null;
-
 
 async function fetchCSV() {
   try {
@@ -373,10 +371,12 @@ async function triggerFuelUpdateToZapier() {
     return result;
   } catch (err) {
     console.error("✗ Failed to trigger fuel update:", err);
-    return { success: false, error: err instanceof Error ? err.message : String(err) };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
   }
 }
-
 
 function populateDueTable(sites) {
   const dueSites = sites
