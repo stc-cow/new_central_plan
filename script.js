@@ -737,7 +737,7 @@ function formatDateTimeForExcel() {
   return `${dd}/${mm}/${yy} ${h}:${m}:${s}`;
 }
 
-function downloadExcel() {
+window.downloadExcel = function downloadExcel() {
   try {
     if (!window.XLSX) {
       alert("Excel library is still loading. Please try again.");
