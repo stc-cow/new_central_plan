@@ -657,6 +657,52 @@ function updateHeaderDate() {
   }
 }
 
+function updateEventCards(sites) {
+  const vvvipSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("VVVIP"));
+  const camelSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("CAMEL"));
+  const mdlSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("MDL"));
+
+  document.getElementById("vvvipCount").textContent = vvvipSites.length;
+  document.getElementById("camelCount").textContent = camelSites.length;
+  document.getElementById("mdlCount").textContent = mdlSites.length;
+}
+
+function showVVVIPModal() {
+  const modal = document.getElementById("vvvipModal");
+  const tbody = document.getElementById("vvvipTableBody");
+  tbody.innerHTML = "";
+
+  const vvvipSites = sitesData.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("VVVIP"));
+
+  if (vvvipSites.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999; padding: 20px;">No VVVIP sites</td></tr>';
+  } else {
+    vvvipSites.forEach((site) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${site.sitename}</td>
+        <td>${site.nextfuelingplan || "N/A"}</td>
+        <td>${site.sitelabel || "N/A"}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  modal.style.display = "block";
+}
+
+function closeVVVIPModal() {
+  const modal = document.getElementById("vvvipModal");
+  modal.style.display = "none";
+}
+
+window.addEventListener("click", (event) => {
+  const modal = document.getElementById("vvvipModal");
+  if (event.target === modal) {
+    closeVVVIPModal();
+  }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
   loadDashboard();
