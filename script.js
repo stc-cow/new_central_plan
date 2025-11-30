@@ -506,9 +506,23 @@ function addMarkersToMap(sites) {
 
 function zoomToSite(sitename) {
   const siteInfo = siteMap[sitename];
-  if (siteInfo && siteInfo.marker) {
-    map.setView(siteInfo.marker.getLatLng(), 17);
-    siteInfo.marker.openPopup();
+  if (siteInfo && siteInfo.coords) {
+    map.getView().animate({
+      center: siteInfo.coords,
+      zoom: 17,
+      duration: 500,
+    });
+
+    // Show popup with site info
+    const popup = document.createElement('div');
+    popup.innerHTML = `
+      <div style="background: white; padding: 10px; border-radius: 5px; min-width: 200px;">
+        <h4 style="margin-top: 0;">${siteInfo.site.sitename}</h4>
+        <p><strong>Status:</strong> ${siteInfo.site.status}</p>
+        <p><strong>Days:</strong> ${siteInfo.site.days !== null ? siteInfo.site.days : "N/A"}</p>
+        <p><strong>Fuel Date:</strong> ${siteInfo.site.nextfuelingplan || "No Date"}</p>
+      </div>
+    `;
   }
 }
 
