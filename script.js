@@ -356,41 +356,6 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
   }
 }
 
-async function sendFuelUpdateToZapier() {
-  try {
-    console.log("📤 Sending fuel update to Zapier via API...");
-
-    const apiResp = await fetch("/api/send-fuel-update-to-zapier", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (!apiResp.ok) {
-      throw new Error(`API request failed with status ${apiResp.status}`);
-    }
-
-    const result = await apiResp.json();
-
-    if (result.success) {
-      console.log("✅ Zapier webhook delivered successfully");
-      console.log(`   📊 Today: ${result.today} | Due: ${result.due}`);
-    } else {
-      throw new Error(result.error || "Unknown API error");
-    }
-
-    return result;
-  } catch (err) {
-    console.error(
-      "❌ Error sending to Zapier:",
-      err instanceof Error ? err.message : String(err),
-    );
-
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : String(err),
-    };
-  }
-}
 
 function populateDueTable(sites) {
   const dueSites = sites
