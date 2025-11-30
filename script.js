@@ -1,8 +1,6 @@
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
-const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
-const PROXIED_CSV_URL = CORS_PROXY + CSV_URL;
 
 const SA_CENTER = [23.8859, 45.0792];
 const SA_BOUNDS = [
