@@ -761,10 +761,57 @@ function closeVVVIPModal() {
   modal.style.display = "none";
 }
 
+function showCamelModal() {
+  const modal = document.getElementById("camelModal");
+  const tbody = document.getElementById("camelTableBody");
+  tbody.innerHTML = "";
+
+  const camelSites = sitesData.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("CAMEL"));
+
+  if (camelSites.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">No Camel Festival sites</td></tr>';
+  } else {
+    camelSites.forEach((site) => {
+      const tr = document.createElement("tr");
+
+      let rowColor = "#fffbf0";
+      if (site.status === "due") {
+        rowColor = "#ffebee";
+      } else if (site.status === "today") {
+        rowColor = "#fff8e1";
+      } else if (site.status === "coming3") {
+        rowColor = "#fff8e1";
+      } else if (site.status === "next15") {
+        rowColor = "#e8f5e9";
+      }
+
+      tr.style.backgroundColor = rowColor;
+
+      tr.innerHTML = `
+        <td>${site.sitename}</td>
+        <td>${site.nextfuelingplan || "N/A"}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  modal.style.display = "block";
+}
+
+function closeCamelModal() {
+  const modal = document.getElementById("camelModal");
+  modal.style.display = "none";
+}
+
 window.addEventListener("click", (event) => {
-  const modal = document.getElementById("vvvipModal");
-  if (event.target === modal) {
+  const vvvipModal = document.getElementById("vvvipModal");
+  const camelModal = document.getElementById("camelModal");
+
+  if (event.target === vvvipModal) {
     closeVVVIPModal();
+  }
+  if (event.target === camelModal) {
+    closeCamelModal();
   }
 });
 
