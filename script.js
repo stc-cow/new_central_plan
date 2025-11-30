@@ -565,22 +565,8 @@ function addMarkersToMap(sites) {
       days: site.days,
       nextFuelingPlan: site.nextfuelingplan,
       statusLabel: getStatusLabel(site.status),
+      color: color,
     });
-
-    // Set style for the marker
-    const style = new ol.style.Style({
-      image: new ol.style.Circle({
-        radius: 8,
-        fill: new ol.style.Fill({
-          color: color,
-        }),
-        stroke: new ol.style.Stroke({
-          color: "white",
-          width: 2,
-        }),
-      }),
-    });
-    feature.setStyle(style);
 
     features.push(feature);
     bounds.push(coords);
