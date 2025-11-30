@@ -364,6 +364,30 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
   }
 }
 
+async function testZapierWebhook() {
+  const testPayload = {
+    today: [{ site: "TEST-1", date: "2025-11-30" }],
+    due: [{ site: "TEST-2", date: "2025-11-28" }],
+    timestamp: new Date().toISOString(),
+    test: true,
+  };
+
+  try {
+    const response = await fetch(ZAPIER_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(testPayload),
+    });
+
+    const result = await response.text();
+    console.log("✓ Zapier test sent successfully", response.status, result);
+    return { success: true, status: response.status };
+  } catch (err) {
+    console.error("✗ Zapier test failed:", err);
+    return { success: false, error: err.toString() };
+  }
+}
+
 async function sendToZapier() {
   try {
     const csvResponse = await fetch(GOOGLE_SHEETS_CSV_URL);
