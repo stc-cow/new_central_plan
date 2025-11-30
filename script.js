@@ -311,6 +311,56 @@ function updateMetrics(sites) {
   updateKPIChart(totalSites, dueSites, todaySites);
 }
 
+function updateKPIChart(totalSites, dueSites, todaySites) {
+  const performanceCount = dueSites + todaySites;
+  const performancePercentage =
+    totalSites > 0
+      ? Math.round((performanceCount / totalSites) * 100)
+      : 0;
+  const remainingPercentage = 100 - performancePercentage;
+
+  document.getElementById("kpiPercentage").textContent =
+    performancePercentage + "%";
+
+  const ctx = document.getElementById("kpiChart");
+  if (!ctx) return;
+
+  if (window.kpiChartInstance) {
+    window.kpiChartInstance.data.datasets[0].data = [
+      performancePercentage,
+      remainingPercentage,
+    ];
+    window.kpiChartInstance.update();
+  } else {
+    window.kpiChartInstance = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        datasets: [
+          {
+            data: [performancePercentage, remainingPercentage],
+            backgroundColor: ["#ff6b6b", "#e8ecff"],
+            borderColor: ["#ff6b6b", "#e8ecff"],
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            enabled: false,
+          },
+        },
+        cutout: "70%",
+      },
+    });
+  }
+}
+
 function populateDueTable(sites) {
   const dueSites = sites
     .filter((s) => isDueSite(s))
