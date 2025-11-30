@@ -2,6 +2,12 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "crons": [
+    {
+      "path": "/api/send-fuel-update-to-zapier",
+      "schedule": "0 * * * *"
+    }
+  ],
   "routes": [
     {
       "src": "^/(?:assets|favicon)\\/.*",
