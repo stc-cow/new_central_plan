@@ -409,9 +409,9 @@ function initMap() {
   map.setMaxBounds(SA_BOUNDS);
 
   L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+    "https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
     {
-      attribution: "Tiles © Esri | OpenStreetMap",
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       maxZoom: 18,
       minZoom: 3,
     },
