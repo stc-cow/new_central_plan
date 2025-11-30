@@ -496,6 +496,7 @@ async function loadDashboard() {
   updateMetrics(sitesData);
   populateDueTable(sitesData);
   addMarkersToMap(sitesData);
+  updateEventCards(sitesData);
   console.log("Dashboard loaded successfully");
 }
 
