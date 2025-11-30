@@ -518,7 +518,7 @@ function addPulsingCircles(features) {
   features.forEach((feature) => {
     if (feature.get("status") === "due") {
       const circleFeature = new ol.Feature({
-        geometry: new ol.geom.Circle(feature.getGeometry().getCoordinates(), 2000),
+        geometry: new ol.geom.Circle(feature.getGeometry().getCoordinates(), 40000),
       });
       circleFeature.set("pulseScale", 1);
       pulsingLayer.getSource().addFeature(circleFeature);
