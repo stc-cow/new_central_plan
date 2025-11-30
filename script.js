@@ -680,6 +680,17 @@ function updateEventCards(sites) {
   const camelSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("CAMEL"));
   const mdlSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("MDL"));
 
+  console.log("Event Cards Debug:");
+  console.log("Total sites:", sites.length);
+  console.log("Sites with sitelabel field:", sites.filter((s) => s.sitelabel).length);
+  console.log("VVVIP sites:", vvvipSites);
+  console.log("VVVIP count:", vvvipSites.length);
+
+  // Show sample site data for debugging
+  if (sites.length > 0) {
+    console.log("Sample site structure:", sites[0]);
+  }
+
   document.getElementById("vvvipCount").textContent = vvvipSites.length;
   document.getElementById("camelCount").textContent = camelSites.length;
   document.getElementById("mdlCount").textContent = mdlSites.length;
