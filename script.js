@@ -391,7 +391,8 @@ async function testZapierWebhook() {
 
 async function sendToZapier() {
   try {
-    const csvResponse = await fetch(GOOGLE_SHEETS_CSV_URL);
+    const proxiedUrl = CORS_PROXY + encodeURIComponent(GOOGLE_SHEETS_CSV_URL);
+    const csvResponse = await fetch(proxiedUrl);
     const csvText = await csvResponse.text();
 
     const lines = csvText.split("\n").filter((line) => line.trim().length > 0);
