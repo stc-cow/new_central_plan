@@ -657,7 +657,6 @@ async function loadDashboard() {
   populateDueTable(sitesData);
   addMarkersToMap(sitesData);
   updateEventCards(sitesData);
-  triggerFuelUpdateToZapier();
 
   console.log("Dashboard loaded successfully");
 }
