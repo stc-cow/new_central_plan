@@ -658,8 +658,25 @@ function updateHeaderDate() {
   }
 }
 
+function isVVVIPSite(site) {
+  if (!site.regionname || !site.regionname.includes("Central")) {
+    return false;
+  }
+
+  const validStatus = site.cowstatus === "ON-AIR" || site.cowstatus === "In Progress";
+  if (!validStatus) {
+    return false;
+  }
+
+  if (!site.sitelabel || !site.sitelabel.toUpperCase().includes("VVVIP")) {
+    return false;
+  }
+
+  return true;
+}
+
 function updateEventCards(sites) {
-  const vvvipSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("VVVIP"));
+  const vvvipSites = sites.filter((s) => isVVVIPSite(s));
   const camelSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("CAMEL"));
   const mdlSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("MDL"));
 
@@ -673,7 +690,7 @@ function showVVVIPModal() {
   const tbody = document.getElementById("vvvipTableBody");
   tbody.innerHTML = "";
 
-  const vvvipSites = sitesData.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("VVVIP"));
+  const vvvipSites = sitesData.filter((s) => isVVVIPSite(s));
 
   if (vvvipSites.length === 0) {
     tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999; padding: 20px;">No VVVIP sites</td></tr>';
