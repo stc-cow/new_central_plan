@@ -315,9 +315,7 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
   const nonCompliantCount = dueSites + todaySites;
   const compliantCount = totalSites - nonCompliantCount;
   const performancePercentage =
-    totalSites > 0
-      ? Math.round((compliantCount / totalSites) * 100)
-      : 0;
+    totalSites > 0 ? Math.round((compliantCount / totalSites) * 100) : 0;
   const nonCompliantPercentage = 100 - performancePercentage;
 
   document.getElementById("kpiPercentage").textContent =
