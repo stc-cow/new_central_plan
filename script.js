@@ -964,6 +964,13 @@ function showMDLModal() {
 
   const mdlSites = sitesData.filter((s) => mdlBeastSites.includes(s.sitename));
 
+  console.log("MDL Beast debug:", {
+    totalSites: sitesData.length,
+    mdlBeastSitesToMatch: mdlBeastSites,
+    foundSites: mdlSites.length,
+    allSiteNames: sitesData.map((s) => s.sitename),
+  });
+
   if (mdlSites.length === 0) {
     tbody.innerHTML =
       '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">No MDL Beast sites found</td></tr>';
