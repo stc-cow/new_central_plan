@@ -360,7 +360,7 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
 
 async function triggerFuelUpdateToZapier() {
   try {
-    const response = await fetch("/.netlify/functions/send-fuel-update-to-zapier");
+    const response = await fetch("/api/send-fuel-update-to-zapier");
     const result = await response.json();
 
     if (result.success) {
