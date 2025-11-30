@@ -822,7 +822,7 @@ window.downloadExcel = function downloadExcel() {
     console.error("Error downloading Excel:", error);
     alert("Failed to download Excel file. Please try again.");
   }
-}
+};
 
 function updateHeaderDate() {
   const headerDateElement = document.getElementById("headerDate");
