@@ -3,7 +3,7 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 const GOOGLE_SHEETS_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 const ZAPIER_WEBHOOK_URL =
-  "https://hooks.zapier.com/hooks/catch/24787962/ukrtq5i/";
+  "https://hooks.zapier.com/hooks/catch/24787962/ukrraio/";
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   try {
