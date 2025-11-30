@@ -644,7 +644,7 @@ function addMarkersToMap(sites) {
   }
 }
 
-function zoomToSite(sitename) {
+window.zoomToSite = function zoomToSite(sitename) {
   const siteInfo = siteMap[sitename];
   if (siteInfo && siteInfo.coords) {
     map.getView().animate({
@@ -664,7 +664,7 @@ function zoomToSite(sitename) {
       </div>
     `;
   }
-}
+};
 
 async function loadDashboard() {
   console.log("Starting loadDashboard...");
