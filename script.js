@@ -417,14 +417,14 @@ function initMap() {
   // Transit layer from OSM data (using a public transit overlay)
   const transitLayer = new ol.layer.Tile({
     source: new ol.source.XYZ({
-      url: 'https://tiles.openptmap.org/ptlines/{z}/{x}/{y}.png',
-      attributions: '© OpenStreetMap contributors | © OpenPT Map',
+      url: "https://tiles.openptmap.org/ptlines/{z}/{x}/{y}.png",
+      attributions: "© OpenStreetMap contributors | © OpenPT Map",
     }),
   });
 
   // Initialize map
   map = new ol.Map({
-    target: 'map',
+    target: "map",
     layers: [baseLayer, transitLayer],
     view: new ol.View({
       center: ol.proj.fromLonLat([SA_CENTER[1], SA_CENTER[0]]),
@@ -473,7 +473,7 @@ function addMarkersToMap(sites) {
           color: color,
         }),
         stroke: new ol.style.Stroke({
-          color: 'white',
+          color: "white",
           width: 2,
         }),
       }),
@@ -496,17 +496,17 @@ function addMarkersToMap(sites) {
   markersLayer.getSource().addFeatures(features);
 
   // Add click handler for markers
-  map.on('click', function (evt) {
+  map.on("click", function (evt) {
     const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
       return feature;
     });
 
     if (feature && markersLayer.getSource().getFeatures().includes(feature)) {
-      const siteName = feature.get('siteName');
-      const status = feature.get('status');
-      const days = feature.get('days');
-      const nextFuelingPlan = feature.get('nextFuelingPlan');
-      const statusLabel = feature.get('statusLabel');
+      const siteName = feature.get("siteName");
+      const status = feature.get("status");
+      const days = feature.get("days");
+      const nextFuelingPlan = feature.get("nextFuelingPlan");
+      const statusLabel = feature.get("statusLabel");
 
       const popupContent = `
         <div class="ol-popup-content">
@@ -517,9 +517,9 @@ function addMarkersToMap(sites) {
         </div>
       `;
 
-      const popup = document.createElement('div');
+      const popup = document.createElement("div");
       popup.innerHTML = popupContent;
-      popup.className = 'ol-popup';
+      popup.className = "ol-popup";
 
       // Remove old popup if exists
       if (currentPopupOverlay) {
@@ -529,7 +529,7 @@ function addMarkersToMap(sites) {
       // Add new popup to map
       const overlay = new ol.Overlay({
         element: popup,
-        positioning: 'bottom-center',
+        positioning: "bottom-center",
         offset: [0, -8],
         autoPan: true,
         autoPanMargin: 250,
@@ -560,7 +560,7 @@ function zoomToSite(sitename) {
     });
 
     // Show popup with site info
-    const popup = document.createElement('div');
+    const popup = document.createElement("div");
     popup.innerHTML = `
       <div style="background: white; padding: 10px; border-radius: 5px; min-width: 200px;">
         <h4 style="margin-top: 0;">${siteInfo.site.sitename}</h4>
