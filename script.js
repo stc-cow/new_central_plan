@@ -312,12 +312,13 @@ function updateMetrics(sites) {
 }
 
 function updateKPIChart(totalSites, dueSites, todaySites) {
-  const performanceCount = dueSites + todaySites;
+  const nonCompliantCount = dueSites + todaySites;
+  const compliantCount = totalSites - nonCompliantCount;
   const performancePercentage =
     totalSites > 0
-      ? Math.round((performanceCount / totalSites) * 100)
+      ? Math.round((compliantCount / totalSites) * 100)
       : 0;
-  const remainingPercentage = 100 - performancePercentage;
+  const nonCompliantPercentage = 100 - performancePercentage;
 
   document.getElementById("kpiPercentage").textContent =
     performancePercentage + "%";
@@ -328,7 +329,7 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
   if (window.kpiChartInstance) {
     window.kpiChartInstance.data.datasets[0].data = [
       performancePercentage,
-      remainingPercentage,
+      nonCompliantPercentage,
     ];
     window.kpiChartInstance.update();
   } else {
@@ -337,9 +338,9 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
       data: {
         datasets: [
           {
-            data: [performancePercentage, remainingPercentage],
-            backgroundColor: ["#ff6b6b", "#e8ecff"],
-            borderColor: ["#ff6b6b", "#e8ecff"],
+            data: [performancePercentage, nonCompliantPercentage],
+            backgroundColor: ["#3ad17c", "#ff6b6b"],
+            borderColor: ["#3ad17c", "#ff6b6b"],
             borderWidth: 2,
           },
         ],
