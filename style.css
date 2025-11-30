@@ -201,6 +201,13 @@ body {
   object-fit: contain;
 }
 
+.mdl-beast-logo {
+  height: 60px;
+  width: auto;
+  margin-right: 15px;
+  object-fit: contain;
+}
+
 .modal-close {
   font-size: 28px;
   font-weight: 700;
