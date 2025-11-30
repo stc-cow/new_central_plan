@@ -494,6 +494,51 @@ function addMarkersToMap(sites) {
   // Add all features to the layer
   markersLayer.getSource().addFeatures(features);
 
+  // Add click handler for markers
+  map.on('click', function (evt) {
+    const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+      return feature;
+    });
+
+    if (feature && markersLayer.getSource().getFeatures().includes(feature)) {
+      const siteName = feature.get('siteName');
+      const status = feature.get('status');
+      const days = feature.get('days');
+      const nextFuelingPlan = feature.get('nextFuelingPlan');
+      const statusLabel = feature.get('statusLabel');
+
+      const popupContent = `
+        <div class="ol-popup-content">
+          <h4>${siteName}</h4>
+          <p><strong>Status:</strong> ${statusLabel}</p>
+          <p><strong>Days:</strong> ${days !== null ? days : "N/A"}</p>
+          <p><strong>Fuel Date:</strong> ${nextFuelingPlan || "No Date"}</p>
+        </div>
+      `;
+
+      const popup = document.createElement('div');
+      popup.innerHTML = popupContent;
+      popup.className = 'ol-popup';
+
+      // Remove old popup if exists
+      const oldPopup = document.querySelector('.ol-popup');
+      if (oldPopup) {
+        oldPopup.remove();
+      }
+
+      // Add new popup to map
+      const overlay = new ol.Overlay({
+        element: popup,
+        positioning: 'bottom-center',
+        offset: [0, -8],
+        autoPan: true,
+        autoPanMargin: 250,
+      });
+      map.addOverlay(overlay);
+      overlay.setPosition(feature.getGeometry().getCoordinates());
+    }
+  });
+
   // Fit map to bounds
   if (bounds.length > 0) {
     const extent = ol.extent.boundingExtent(bounds);
