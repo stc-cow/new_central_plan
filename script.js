@@ -922,15 +922,73 @@ function closeCamelModal() {
   modal.style.display = "none";
 }
 
+function showMDLModal() {
+  const modal = document.getElementById("mdlModal");
+  const tbody = document.getElementById("mdlTableBody");
+  tbody.innerHTML = "";
+
+  const mdlBeastSites = [
+    "COW017",
+    "COW018",
+    "COW019",
+    "COW036",
+    "COW762",
+    "COW805",
+  ];
+
+  const mdlSites = sitesData.filter((s) =>
+    mdlBeastSites.includes(s.sitename),
+  );
+
+  if (mdlSites.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">No MDL Beast sites found</td></tr>';
+  } else {
+    mdlSites.forEach((site) => {
+      const tr = document.createElement("tr");
+
+      let rowColor = "#fce7f3";
+      if (site.status === "due") {
+        rowColor = "#ffebee";
+      } else if (site.status === "today") {
+        rowColor = "#fff8e1";
+      } else if (site.status === "coming3") {
+        rowColor = "#fff8e1";
+      } else if (site.status === "next15") {
+        rowColor = "#e8f5e9";
+      }
+
+      tr.style.backgroundColor = rowColor;
+
+      tr.innerHTML = `
+        <td>${site.sitename}</td>
+        <td>${site.nextfuelingplan || "N/A"}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  modal.style.display = "block";
+}
+
+function closeMDLModal() {
+  const modal = document.getElementById("mdlModal");
+  modal.style.display = "none";
+}
+
 window.addEventListener("click", (event) => {
   const vvvipModal = document.getElementById("vvvipModal");
   const camelModal = document.getElementById("camelModal");
+  const mdlModal = document.getElementById("mdlModal");
 
   if (event.target === vvvipModal) {
     closeVVVIPModal();
   }
   if (event.target === camelModal) {
     closeCamelModal();
+  }
+  if (event.target === mdlModal) {
+    closeMDLModal();
   }
 });
 
