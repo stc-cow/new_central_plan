@@ -481,7 +481,7 @@ function populateOverdueTable(sites) {
     tr.style.cursor = "pointer";
     tr.innerHTML = `
             <td>${site.sitename}</td>
-            <td><span style="color: #ff6b6b; font-weight: 600;">${site.days}</span></td>
+            <td>${site.nextfuelingplan}</td>
         `;
     tr.addEventListener("click", () => zoomToSite(site.sitename));
     tbody.appendChild(tr);
