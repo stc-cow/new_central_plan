@@ -418,11 +418,12 @@ async function sendFuelUpdateToZapier() {
           today: todayList,
           due: dueList,
         }),
-        mode: "no-cors",
       },
     );
 
-    const zapText = await zapResp.text();
+    if (!zapResp.ok) {
+      throw new Error(`Zapier webhook failed with status ${zapResp.status}`);
+    }
 
     console.log("✅ Zapier webhook delivered successfully");
     console.log(`   📊 Today: ${todayList.length} | Due: ${dueList.length}`);
@@ -431,7 +432,6 @@ async function sendFuelUpdateToZapier() {
       success: true,
       todayCount: todayList.length,
       dueCount: dueList.length,
-      zapierResponse: zapText,
     };
   } catch (err) {
     console.error(
