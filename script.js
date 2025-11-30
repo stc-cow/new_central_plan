@@ -823,9 +823,7 @@ function updateEventCards(sites) {
     "COW762",
     "COW805",
   ];
-  const mdlSites = sites.filter((s) =>
-    mdlBeastSites.includes(s.sitename),
-  );
+  const mdlSites = sites.filter((s) => mdlBeastSites.includes(s.sitename));
 
   console.log("Final VVVIP sites (after criteria filter):", vvvipSites.length);
   console.log("VVVIP criteria check details:");
@@ -964,9 +962,7 @@ function showMDLModal() {
     "COW805",
   ];
 
-  const mdlSites = sitesData.filter((s) =>
-    mdlBeastSites.includes(s.sitename),
-  );
+  const mdlSites = sitesData.filter((s) => mdlBeastSites.includes(s.sitename));
 
   if (mdlSites.length === 0) {
     tbody.innerHTML =
