@@ -356,7 +356,6 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
   }
 }
 
-
 function populateDueTable(sites) {
   const dueSites = sites
     .filter((s) => isDueSite(s))
