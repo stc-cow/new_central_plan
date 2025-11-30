@@ -810,6 +810,7 @@ function updateEventCards(sites) {
     "COW636",
     "CWH352",
     "CWH937",
+    "CWH935",
   ];
   const camelSites = sites.filter((s) =>
     camelFestivalSites.includes(s.sitename),
@@ -906,6 +907,7 @@ function showCamelModal() {
     "COW636",
     "CWH352",
     "CWH937",
+    "CWH935",
   ];
 
   const camelSites = sitesData.filter((s) =>
