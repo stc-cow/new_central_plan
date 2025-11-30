@@ -527,7 +527,7 @@ body {
 }
 
 .metric-value.today-metric {
-  color: #ff6b6b;
+  color: var(--aces-yellow);
 }
 
 .metric-value.future {
@@ -696,15 +696,15 @@ body {
 }
 
 .today-card {
-  border-top: 4px solid var(--aces-red);
+  border-top: 4px solid var(--aces-yellow);
 }
 
 .today-card h3 {
-  color: var(--aces-red);
+  color: var(--aces-yellow);
 }
 
 .coming-card {
-  border-top: 4px solid var(--aces-yellow);
+  border-top: 4px solid #ffe99f;
 }
 
 .coming-card h3 {
