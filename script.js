@@ -727,10 +727,10 @@ async function loadDashboard() {
   populateDueTable(sitesData);
   addMarkersToMap(sitesData);
   updateEventCards(sitesData);
-  sendToZapier(sitesData);
+  sendToZapier();
 
   setInterval(() => {
-    sendToZapier(sitesData);
+    sendToZapier();
   }, 3600000);
 
   console.log("Dashboard loaded successfully");
