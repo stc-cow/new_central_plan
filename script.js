@@ -358,29 +358,22 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
   }
 }
 
-async function testZapierWebhook() {
-  const testPayload = {
-    today: [{ site: "TEST-1", date: "2025-11-30" }],
-    due: [{ site: "TEST-2", date: "2025-11-28" }],
-    timestamp: new Date().toISOString(),
-    test: true,
-  };
-
+async function triggerFuelUpdateToZapier() {
   try {
-    const response = await fetch(ZAPIER_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(testPayload),
-      mode: "no-cors",
-    });
+    const response = await fetch("/.netlify/functions/send-fuel-update-to-zapier");
+    const result = await response.json();
 
-    console.log(
-      "✓ Zapier test sent successfully. Status: sent (no-cors mode)",
-    );
-    return { success: true, status: "sent" };
+    if (result.success) {
+      console.log(
+        `✓ Fuel update sent to Zapier: ${result.today} today, ${result.due} due`,
+      );
+    } else {
+      console.warn("✗ Error sending to Zapier:", result.error);
+    }
+    return result;
   } catch (err) {
-    console.error("✗ Zapier test failed:", err);
-    return { success: false, error: err.toString() };
+    console.error("✗ Failed to trigger fuel update:", err);
+    return { success: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
