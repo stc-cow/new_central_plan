@@ -684,19 +684,27 @@ function isVVVIPSite(site) {
 }
 
 function updateEventCards(sites) {
+  console.log("=== Event Cards Debug ===");
+  console.log("Total sites:", sites.length);
+
+  // Show all unique sitelabel values
+  const uniqueLabels = [...new Set(sites.map((s) => s.sitelabel).filter(Boolean))];
+  console.log("Unique SiteLabels in data:", uniqueLabels);
+
+  // Show sites that have VVVIP in sitelabel
+  const sitesWithVVVIP = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("VVVIP"));
+  console.log("Sites with VVVIP label:", sitesWithVVVIP.map((s) => ({ name: s.sitename, label: s.sitelabel, region: s.regionname, status: s.cowstatus })));
+
   const vvvipSites = sites.filter((s) => isVVVIPSite(s));
   const camelSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("CAMEL"));
   const mdlSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("MDL"));
 
-  console.log("Event Cards Debug:");
-  console.log("Total sites:", sites.length);
-  console.log("Sites with sitelabel field:", sites.filter((s) => s.sitelabel).length);
-  console.log("VVVIP sites:", vvvipSites);
-  console.log("VVVIP count:", vvvipSites.length);
-
-  // Show sample site data for debugging
-  if (sites.length > 0) {
-    console.log("Sample site structure:", sites[0]);
+  console.log("Final VVVIP sites (after criteria filter):", vvvipSites.length);
+  console.log("VVVIP criteria check details:");
+  if (sitesWithVVVIP.length > 0) {
+    sitesWithVVVIP.forEach((s) => {
+      console.log(`  ${s.sitename}: Region=${s.regionname}, Status=${s.cowstatus}, Pass=${isVVVIPSite(s)}`);
+    });
   }
 
   document.getElementById("vvvipCount").textContent = vvvipSites.length;
