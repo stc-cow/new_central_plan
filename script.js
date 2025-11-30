@@ -481,11 +481,66 @@ function initMap() {
     }),
   });
 
-  // Store markers layer
+  // Store markers layer for heatmap
   markersLayer = new ol.layer.Vector({
     source: new ol.source.Vector(),
   });
   map.addLayer(markersLayer);
+
+  // Listen for zoom changes to toggle between heatmap and markers
+  map.getView().on("change:resolution", function () {
+    const zoom = map.getView().getZoom();
+    updateMapVisualization(zoom);
+  });
+}
+
+function updateMapVisualization(zoom) {
+  const HEATMAP_THRESHOLD = 10;
+  const features = markersLayer.getSource().getFeatures();
+
+  features.forEach((feature) => {
+    if (zoom >= HEATMAP_THRESHOLD) {
+      // Show individual markers at high zoom
+      const color = feature.get("color") || STATUS_COLORS[feature.get("status")];
+      const style = new ol.style.Style({
+        image: new ol.style.Circle({
+          radius: 8,
+          fill: new ol.style.Fill({ color: color }),
+          stroke: new ol.style.Stroke({ color: "white", width: 2 }),
+        }),
+      });
+      feature.setStyle(style);
+    } else {
+      // Show heatmap-style visualization at low zoom
+      const color = feature.get("color") || STATUS_COLORS[feature.get("status")];
+      const opacity = 0.6;
+      const rgbColor = hexToRgb(color);
+      const style = new ol.style.Style({
+        image: new ol.style.Circle({
+          radius: 15 - (zoom || 5),
+          fill: new ol.style.Fill({
+            color: `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`,
+          }),
+          stroke: new ol.style.Stroke({
+            color: `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)`,
+            width: 1,
+          }),
+        }),
+      });
+      feature.setStyle(style);
+    }
+  });
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : { r: 0, g: 0, b: 0 };
 }
 
 function addMarkersToMap(sites) {
