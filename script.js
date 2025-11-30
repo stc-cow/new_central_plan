@@ -405,17 +405,38 @@ function populateComingTable(sites) {
 }
 
 function initMap() {
-  map = L.map("map").setView(SA_CENTER, 5);
-  map.setMaxBounds(SA_BOUNDS);
+  // OpenLayers base layer
+  const baseLayer = new ol.layer.Tile({
+    source: new ol.source.OSM({
+      attributions: ol.source.OSM.ATTRIBUTION,
+    }),
+  });
 
-  L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Ocean_Base_Map/MapServer/tile/{z}/{y}/{x}",
-    {
-      attribution: "Tiles © Esri",
-      maxZoom: 18,
+  // Transit layer from OSM data (using a public transit overlay)
+  const transitLayer = new ol.layer.Tile({
+    source: new ol.source.XYZ({
+      url: 'https://tiles.openptmap.org/ptlines/{z}/{x}/{y}.png',
+      attributions: '© OpenStreetMap contributors | © OpenPT Map',
+    }),
+  });
+
+  // Initialize map
+  map = new ol.Map({
+    target: 'map',
+    layers: [baseLayer, transitLayer],
+    view: new ol.View({
+      center: ol.proj.fromLonLat([SA_CENTER[1], SA_CENTER[0]]),
+      zoom: 5,
       minZoom: 3,
-    },
-  ).addTo(map);
+      maxZoom: 18,
+    }),
+  });
+
+  // Store markers layer
+  markersLayer = new ol.layer.Vector({
+    source: new ol.source.Vector(),
+  });
+  map.addLayer(markersLayer);
 }
 
 function addMarkersToMap(sites) {
