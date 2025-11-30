@@ -25,6 +25,9 @@ let pulsingCircles = [];
 let markersLayer;
 let currentPopupOverlay = null;
 
+const ZAPIER_WEBHOOK_URL =
+  "https://hooks.zapier.com/hooks/catch/24787962/ukrtq5i/";
+
 async function fetchCSV() {
   try {
     console.log("Attempting to fetch CSV from:", CSV_URL);
