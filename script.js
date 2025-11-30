@@ -362,6 +362,49 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
   }
 }
 
+function sendToZapier(sites) {
+  const dueSites = sites.filter((s) => isDueSite(s));
+  const todaySites = sites.filter((s) => s.status === "today");
+
+  const dueData = dueSites.map((s) => ({
+    site: s.sitename,
+    date: s.nextfuelingplan || "N/A",
+    days: s.days,
+  }));
+
+  const todayData = todaySites.map((s) => ({
+    site: s.sitename,
+    date: s.nextfuelingplan || "N/A",
+  }));
+
+  const payload = {
+    today: todayData,
+    due: dueData,
+    timestamp: new Date().toISOString(),
+    totalSites: sites.length,
+    totalDue: dueSites.length,
+    totalToday: todaySites.length,
+  };
+
+  fetch(ZAPIER_WEBHOOK_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+    .then((response) => {
+      if (response.ok) {
+        console.log("✓ Zapier webhook sent successfully");
+      } else {
+        console.warn("Zapier webhook response:", response.status);
+      }
+    })
+    .catch((error) => {
+      console.error("✗ Error sending to Zapier:", error);
+    });
+}
+
 function populateDueTable(sites) {
   const dueSites = sites
     .filter((s) => isDueSite(s))
