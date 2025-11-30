@@ -93,8 +93,15 @@ function parseCSV(csvText) {
   console.log("Total headers:", headers.length);
 
   // Check if sitelabel is in headers
-  const sitelabelIndex = headers.findIndex((h) => h.toLowerCase().includes("label"));
-  console.log("Site Label column index:", sitelabelIndex, "Header:", headers[sitelabelIndex]);
+  const sitelabelIndex = headers.findIndex((h) =>
+    h.toLowerCase().includes("label"),
+  );
+  console.log(
+    "Site Label column index:",
+    sitelabelIndex,
+    "Header:",
+    headers[sitelabelIndex],
+  );
 
   const data = [];
 
@@ -677,7 +684,8 @@ function isVVVIPSite(site) {
     return false;
   }
 
-  const validStatus = site.cowstatus === "ON-AIR" || site.cowstatus === "In Progress";
+  const validStatus =
+    site.cowstatus === "ON-AIR" || site.cowstatus === "In Progress";
   if (!validStatus) {
     return false;
   }
@@ -694,22 +702,40 @@ function updateEventCards(sites) {
   console.log("Total sites:", sites.length);
 
   // Show all unique sitelabel values
-  const uniqueLabels = [...new Set(sites.map((s) => s.sitelabel).filter(Boolean))];
+  const uniqueLabels = [
+    ...new Set(sites.map((s) => s.sitelabel).filter(Boolean)),
+  ];
   console.log("Unique SiteLabels in data:", uniqueLabels);
 
   // Show sites that have VVVIP in sitelabel
-  const sitesWithVVVIP = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("VVVIP"));
-  console.log("Sites with VVVIP label:", sitesWithVVVIP.map((s) => ({ name: s.sitename, label: s.sitelabel, region: s.regionname, status: s.cowstatus })));
+  const sitesWithVVVIP = sites.filter(
+    (s) => s.sitelabel && s.sitelabel.toUpperCase().includes("VVVIP"),
+  );
+  console.log(
+    "Sites with VVVIP label:",
+    sitesWithVVVIP.map((s) => ({
+      name: s.sitename,
+      label: s.sitelabel,
+      region: s.regionname,
+      status: s.cowstatus,
+    })),
+  );
 
   const vvvipSites = sites.filter((s) => isVVVIPSite(s));
-  const camelSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("CAMEL"));
-  const mdlSites = sites.filter((s) => s.sitelabel && s.sitelabel.toUpperCase().includes("MDL"));
+  const camelSites = sites.filter(
+    (s) => s.sitelabel && s.sitelabel.toUpperCase().includes("CAMEL"),
+  );
+  const mdlSites = sites.filter(
+    (s) => s.sitelabel && s.sitelabel.toUpperCase().includes("MDL"),
+  );
 
   console.log("Final VVVIP sites (after criteria filter):", vvvipSites.length);
   console.log("VVVIP criteria check details:");
   if (sitesWithVVVIP.length > 0) {
     sitesWithVVVIP.forEach((s) => {
-      console.log(`  ${s.sitename}: Region=${s.regionname}, Status=${s.cowstatus}, Pass=${isVVVIPSite(s)}`);
+      console.log(
+        `  ${s.sitename}: Region=${s.regionname}, Status=${s.cowstatus}, Pass=${isVVVIPSite(s)}`,
+      );
     });
   }
 
@@ -726,7 +752,8 @@ function showVVVIPModal() {
   const vvvipSites = sitesData.filter((s) => isVVVIPSite(s));
 
   if (vvvipSites.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999; padding: 20px;">No VVVIP sites</td></tr>';
+    tbody.innerHTML =
+      '<tr><td colspan="3" style="text-align: center; color: #999; padding: 20px;">No VVVIP sites</td></tr>';
   } else {
     vvvipSites.forEach((site) => {
       const tr = document.createElement("tr");
@@ -767,17 +794,31 @@ function showCamelModal() {
   tbody.innerHTML = "";
 
   const camelFestivalSites = [
-    "CWH076", "CWH022", "CWH188", "COW652", "CWH094", "CWS808",
-    "CWH973", "CWH941", "CWH942", "CWH940", "CWH943", "CWH944",
-    "CWH945", "COW636", "CWH352", "CWH937"
+    "CWH076",
+    "CWH022",
+    "CWH188",
+    "COW652",
+    "CWH094",
+    "CWS808",
+    "CWH973",
+    "CWH941",
+    "CWH942",
+    "CWH940",
+    "CWH943",
+    "CWH944",
+    "CWH945",
+    "COW636",
+    "CWH352",
+    "CWH937",
   ];
 
   const camelSites = sitesData.filter((s) =>
-    camelFestivalSites.includes(s.sitename)
+    camelFestivalSites.includes(s.sitename),
   );
 
   if (camelSites.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">No Camel Festival sites found</td></tr>';
+    tbody.innerHTML =
+      '<tr><td colspan="2" style="text-align: center; color: #999; padding: 20px;">No Camel Festival sites found</td></tr>';
   } else {
     camelSites.forEach((site) => {
       const tr = document.createElement("tr");
