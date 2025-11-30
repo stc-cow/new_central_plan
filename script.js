@@ -678,7 +678,10 @@ function addMarkersToMap(sites) {
 
       const popupContent = `
         <div class="ol-popup-content">
-          <h4>${siteName}</h4>
+          <div class="ol-popup-header">
+            <h4>${siteName}</h4>
+            <button class="ol-popup-close">&times;</button>
+          </div>
           <p><strong>Status:</strong> ${statusLabel}</p>
           <p><strong>Days:</strong> ${days !== null ? days : "N/A"}</p>
           <p><strong>Fuel Date:</strong> ${nextFuelingPlan || "No Date"}</p>
@@ -692,6 +695,17 @@ function addMarkersToMap(sites) {
       // Remove old popup if exists
       if (currentPopupOverlay) {
         map.removeOverlay(currentPopupOverlay);
+      }
+
+      // Add close button handler
+      const closeBtn = popup.querySelector(".ol-popup-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+          if (currentPopupOverlay) {
+            map.removeOverlay(currentPopupOverlay);
+            currentPopupOverlay = null;
+          }
+        });
       }
 
       // Add new popup to map
