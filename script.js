@@ -695,7 +695,7 @@ function formatFuelDate(fuelDate) {
   return `${day}/${month}/${year}`;
 }
 
-function searchSite(siteName) {
+window.searchSite = function searchSite(siteName) {
   const searchTerm = siteName.trim().toUpperCase();
   const result = sitesData.find(
     (site) => site.sitename.toUpperCase() === searchTerm,
@@ -718,13 +718,13 @@ function searchSite(siteName) {
   }
 
   modal.classList.add("active");
-}
+};
 
-function closeSearchModal() {
+window.closeSearchModal = function closeSearchModal() {
   const modal = document.getElementById("searchModal");
   modal.classList.remove("active");
   document.getElementById("searchInput").value = "";
-}
+};
 
 function formatDateTimeForExcel() {
   const now = new Date();
