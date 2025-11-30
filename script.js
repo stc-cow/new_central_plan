@@ -936,7 +936,7 @@ function updateEventCards(sites) {
   document.getElementById("mdlCount").textContent = mdlSites.length;
 }
 
-function showVVVIPModal() {
+window.showVVVIPModal = function showVVVIPModal() {
   const modal = document.getElementById("vvvipModal");
   const tbody = document.getElementById("vvvipTableBody");
   tbody.innerHTML = "";
@@ -973,14 +973,14 @@ function showVVVIPModal() {
   }
 
   modal.style.display = "block";
-}
+};
 
-function closeVVVIPModal() {
+window.closeVVVIPModal = function closeVVVIPModal() {
   const modal = document.getElementById("vvvipModal");
   modal.style.display = "none";
-}
+};
 
-function showCamelModal() {
+window.showCamelModal = function showCamelModal() {
   const modal = document.getElementById("camelModal");
   const tbody = document.getElementById("camelTableBody");
   tbody.innerHTML = "";
