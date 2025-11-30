@@ -141,5 +141,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="script.js"></script>
+
+    <!-- VVVIP Modal -->
+    <div id="vvvipModal" class="modal">
+      <div class="modal-content vvvip-modal-content">
+        <div class="modal-header">
+          <h2>VVVIP Sites</h2>
+          <button class="modal-close" onclick="closeVVVIPModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <table class="vvvip-table">
+            <thead>
+              <tr>
+                <th>Site Name</th>
+                <th>Next Fueling Plan</th>
+                <th>Site Label</th>
+              </tr>
+            </thead>
+            <tbody id="vvvipTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
