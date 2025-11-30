@@ -583,6 +583,10 @@ function addMarkersToMap(sites) {
   // Add all features to the layer
   markersLayer.getSource().addFeatures(features);
 
+  // Initialize map visualization
+  const zoom = map.getView().getZoom();
+  updateMapVisualization(zoom);
+
   // Add click handler for markers
   map.on("click", function (evt) {
     const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
