@@ -501,7 +501,8 @@ function updateMapVisualization(zoom) {
   features.forEach((feature) => {
     if (zoom >= HEATMAP_THRESHOLD) {
       // Show individual markers at high zoom
-      const color = feature.get("color") || STATUS_COLORS[feature.get("status")];
+      const color =
+        feature.get("color") || STATUS_COLORS[feature.get("status")];
       const style = new ol.style.Style({
         image: new ol.style.Circle({
           radius: 8,
@@ -512,7 +513,8 @@ function updateMapVisualization(zoom) {
       feature.setStyle(style);
     } else {
       // Show heatmap-style visualization at low zoom
-      const color = feature.get("color") || STATUS_COLORS[feature.get("status")];
+      const color =
+        feature.get("color") || STATUS_COLORS[feature.get("status")];
       const opacity = 0.6;
       const rgbColor = hexToRgb(color);
       const style = new ol.style.Style({
