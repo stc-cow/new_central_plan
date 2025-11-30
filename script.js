@@ -364,47 +364,88 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
   }
 }
 
-function sendToZapier(sites) {
-  const dueSites = sites.filter((s) => isDueSite(s));
-  const todaySites = sites.filter((s) => s.status === "today");
+async function sendToZapier() {
+  try {
+    const csvResponse = await fetch(GOOGLE_SHEETS_CSV_URL);
+    const csvText = await csvResponse.text();
 
-  const dueData = dueSites.map((s) => ({
-    site: s.sitename,
-    date: s.nextfuelingplan || "N/A",
-    days: s.days,
-  }));
+    const lines = csvText.split("\n").filter((line) => line.trim().length > 0);
+    const header = lines[0].split(",").map((h) => h.trim().toLowerCase());
 
-  const todayData = todaySites.map((s) => ({
-    site: s.sitename,
-    date: s.nextfuelingplan || "N/A",
-  }));
+    const idxSite = header.indexOf("sitename");
+    const idxLat = header.indexOf("lat");
+    const idxLng = header.indexOf("lng");
+    const idxFuel = header.indexOf("nextfuelingplan");
 
-  const payload = {
-    today: todayData,
-    due: dueData,
-    timestamp: new Date().toISOString(),
-    totalSites: sites.length,
-    totalDue: dueSites.length,
-    totalToday: todaySites.length,
-  };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  fetch(ZAPIER_WEBHOOK_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  })
-    .then((response) => {
-      if (response.ok) {
-        console.log("✓ Zapier webhook sent successfully");
-      } else {
-        console.warn("Zapier webhook response:", response.status);
+    let todayList = [];
+    let dueList = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",").map((c) => c.trim());
+
+      const site = cols[idxSite];
+      const fuelDateStr = cols[idxFuel];
+      const lat = cols[idxLat];
+      const lng = cols[idxLng];
+
+      if (!fuelDateStr || !site || fuelDateStr === "") continue;
+
+      const fuelDate = new Date(fuelDateStr);
+      fuelDate.setHours(0, 0, 0, 0);
+
+      if (isNaN(fuelDate)) continue;
+
+      if (fuelDate.getTime() === today.getTime()) {
+        todayList.push({
+          site,
+          date: fuelDateStr,
+          lat: lat || null,
+          lng: lng || null,
+        });
+      } else if (fuelDate < today) {
+        dueList.push({
+          site,
+          date: fuelDateStr,
+          lat: lat || null,
+          lng: lng || null,
+        });
       }
-    })
-    .catch((error) => {
-      console.error("✗ Error sending to Zapier:", error);
+    }
+
+    const payload = {
+      today: todayList,
+      due: dueList,
+      timestamp: new Date().toISOString(),
+      totalToday: todayList.length,
+      totalDue: dueList.length,
+    };
+
+    const zapResponse = await fetch(ZAPIER_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
+
+    if (zapResponse.ok) {
+      console.log(
+        `✓ Zapier notified: ${todayList.length} today, ${dueList.length} due`,
+      );
+      return {
+        success: true,
+        today: todayList.length,
+        due: dueList.length,
+      };
+    } else {
+      console.warn("✗ Zapier response:", zapResponse.status);
+      return { success: false, error: zapResponse.status };
+    }
+  } catch (err) {
+    console.error("✗ Error sending to Zapier:", err);
+    return { success: false, error: err.toString() };
+  }
 }
 
 function populateDueTable(sites) {
