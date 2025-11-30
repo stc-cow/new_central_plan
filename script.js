@@ -1038,14 +1038,14 @@ window.showCamelModal = function showCamelModal() {
   }
 
   modal.style.display = "block";
-}
+};
 
-function closeCamelModal() {
+window.closeCamelModal = function closeCamelModal() {
   const modal = document.getElementById("camelModal");
   modal.style.display = "none";
-}
+};
 
-function showMDLModal() {
+window.showMDLModal = function showMDLModal() {
   const modal = document.getElementById("mdlModal");
   const tbody = document.getElementById("mdlTableBody");
   tbody.innerHTML = "";
@@ -1097,12 +1097,12 @@ function showMDLModal() {
   }
 
   modal.style.display = "block";
-}
+};
 
-function closeMDLModal() {
+window.closeMDLModal = function closeMDLModal() {
   const modal = document.getElementById("mdlModal");
   modal.style.display = "none";
-}
+};
 
 window.addEventListener("click", (event) => {
   const vvvipModal = document.getElementById("vvvipModal");
