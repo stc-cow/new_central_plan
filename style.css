@@ -71,9 +71,17 @@ body {
 .login-left {
   flex: 1;
   background:
-    radial-gradient(circle at 20% 50%, rgba(226, 43, 43, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(18, 55, 102, 0.25) 0%, transparent 50%),
-    linear-gradient(135deg, #0A1D3C 0%, #123766 50%, #1a2f5a 100%);
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(226, 43, 43, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(18, 55, 102, 0.25) 0%,
+      transparent 50%
+    ),
+    linear-gradient(135deg, #0a1d3c 0%, #123766 50%, #1a2f5a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,11 +91,15 @@ body {
 }
 
 .login-left::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 420px;
   height: 420px;
-  background: radial-gradient(circle, rgba(226, 43, 43, 0.18) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(226, 43, 43, 0.18) 0%,
+    transparent 70%
+  );
   filter: blur(80px);
   top: -100px;
   left: -50px;
@@ -95,11 +107,15 @@ body {
 }
 
 .login-left::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 350px;
   height: 350px;
-  background: radial-gradient(circle, rgba(20, 80, 200, 0.20) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(20, 80, 200, 0.2) 0%,
+    transparent 70%
+  );
   filter: blur(100px);
   bottom: -50px;
   right: -100px;
@@ -198,7 +214,7 @@ body {
 .form-label {
   font-size: 12px;
   font-weight: 700;
-  color: #0A1D3C;
+  color: #0a1d3c;
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
@@ -221,13 +237,15 @@ body {
 
 .form-input:focus {
   outline: none;
-  border-color: #E22B2B;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), 0 0 0 4px rgba(226, 43, 43, 0.1);
+  border-color: #e22b2b;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 0 0 4px rgba(226, 43, 43, 0.1);
 }
 
 .login-button {
   padding: 14px 28px;
-  background: linear-gradient(135deg, #123766 0%, #0D2349 100%);
+  background: linear-gradient(135deg, #123766 0%, #0d2349 100%);
   color: white;
   border: none;
   border-radius: 14px;
