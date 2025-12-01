@@ -29,7 +29,7 @@ let refreshIntervalId = null;
 
 // Load dashboard on page load
 document.addEventListener("DOMContentLoaded", () => {
-  loadDashboard();
+  startDashboard();
 });
 
 async function fetchCSV() {
