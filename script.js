@@ -64,6 +64,29 @@ function setupLoginForm() {
   });
 }
 
+function setupLogoParallax() {
+  const logo = document.querySelector(".login-logo");
+  if (!logo) return;
+
+  document.addEventListener("mousemove", (e) => {
+    const rect = logo.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    const offsetX = (mouseX - centerX) * 0.08;
+    const offsetY = (mouseY - centerY) * 0.08;
+
+    logo.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.04)`;
+  });
+
+  document.addEventListener("mouseleave", () => {
+    logo.style.transform = "translate(0, 0) scale(1)";
+  });
+}
+
 function handleLogin() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
