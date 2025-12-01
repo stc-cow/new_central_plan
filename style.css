@@ -36,12 +36,15 @@
 
 .login-card {
   background: white;
-  border: 1px solid #e8ecff;
-  box-shadow: 0 30px 60px rgba(32, 43, 109, 0.12);
-  border-radius: 24px;
+  border: 1px solid #e6ecf3;
+  box-shadow: 0 20px 40px rgba(11, 31, 60, 0.08);
+  border-radius: 22px;
   padding: 40px;
   position: relative;
   overflow: hidden;
+  max-width: 500px;
+  width: 100%;
+  backdrop-filter: blur(2px);
 }
 
 .login-card::after {
