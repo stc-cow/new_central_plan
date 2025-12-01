@@ -88,7 +88,7 @@ window.handleLogin = function handleLogin(event) {
 
 window.handleLogout = function handleLogout() {
   localStorage.removeItem("analyticsLoggedIn");
-  showLoginPage();
+  showDashboard();
 };
 
 async function fetchCSV() {
