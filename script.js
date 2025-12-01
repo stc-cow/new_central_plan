@@ -171,8 +171,9 @@ function filterAndValidateSites(rawData) {
       const lng = parseFloat(row.lng || row.longitude || "");
       const sitename = row.sitename || "";
 
+      const siteObj = { regionname };
       return (
-        regionname.includes("Central") &&
+        isInSelectedRegion(siteObj) &&
         (cowstatus === "ON-AIR" || cowstatus === "IN PROGRESS") &&
         sitename.trim() !== "" &&
         !isNaN(lat) &&
