@@ -47,10 +47,19 @@ window.showDashboard = function showDashboard() {
 };
 
 window.showAnalytics = function showAnalytics() {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("analyticsPage").style.display = "block";
-  document.getElementById("dashboardPage").style.display = "none";
-  loadAnalytics();
+  const isLoggedIn = localStorage.getItem("analyticsLoggedIn") === "true";
+  if (!isLoggedIn) {
+    // Show login page if not authenticated
+    document.getElementById("loginPage").style.display = "block";
+    document.getElementById("analyticsPage").style.display = "none";
+    document.getElementById("dashboardPage").style.display = "none";
+  } else {
+    // Show analytics page if authenticated
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("analyticsPage").style.display = "block";
+    document.getElementById("dashboardPage").style.display = "none";
+    loadAnalytics();
+  }
 };
 
 window.handleLogin = function handleLogin(event) {
