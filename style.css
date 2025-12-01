@@ -90,6 +90,7 @@ body {
     rgba(40, 20, 100, 0) 100%
   );
   animation-duration: 22s;
+  transition: background 0.3s ease, filter 0.3s ease;
 }
 
 .blob2 {
@@ -102,6 +103,7 @@ body {
   );
   animation-duration: 26s;
   animation-delay: 2s;
+  transition: background 0.3s ease, filter 0.3s ease;
 }
 
 .blob3 {
@@ -114,6 +116,7 @@ body {
   );
   animation-duration: 30s;
   animation-delay: 4s;
+  transition: background 0.3s ease, filter 0.3s ease;
 }
 
 @keyframes float-blob {
