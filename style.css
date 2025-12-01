@@ -26,7 +26,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0B1F3C 0%, #123766 50%, #0B1F3C 100%);
+  background-image: url('https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Fa8aaa6daec64468a95ee94a03c002e83?format=webp&width=800');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   padding: 20px;
   perspective: 1200px;
   position: relative;
@@ -37,8 +40,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(30, 79, 138, 0.2), transparent 50%),
-    radial-gradient(circle at 80% 50%, rgba(30, 79, 138, 0.15), transparent 50%);
+  background: radial-gradient(circle at 20% 50%, rgba(18, 55, 102, 0.3), transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(30, 79, 138, 0.25), transparent 50%);
+  backdrop-filter: blur(0.5px);
   pointer-events: none;
 }
 
