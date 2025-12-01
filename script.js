@@ -848,7 +848,7 @@ window.downloadExcel = function downloadExcel() {
     const timestamp = formatDateTimeForExcel();
 
     const exportData = sitesData
-      .filter((site) => site.regionname && site.regionname.includes("Central"))
+      .filter((site) => isInSelectedRegion(site))
       .map((site) => ({
         "Site Name": site.sitename,
         "Region Name": site.regionname,
