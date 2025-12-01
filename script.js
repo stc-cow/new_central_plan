@@ -1,6 +1,8 @@
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
+const ACES_ACCESS_CODE = "ACES2025";
+
 const SA_CENTER = [23.8859, 45.0792];
 const SA_BOUNDS = [
   [16.3, 32.0],
@@ -21,11 +23,49 @@ let siteMap = {};
 let pulsingCircles = [];
 let markersLayer;
 let currentPopupOverlay = null;
-
-// Initialize dashboard on page load
+let dashboardInitialized = false;
+let headerIntervalId = null;
+let refreshIntervalId = null;
+// Initialize login gate on page load
 document.addEventListener("DOMContentLoaded", () => {
-  loadDashboard();
+  setupLogin();
 });
+
+function setupLogin() {
+  const loginForm = document.getElementById("loginForm");
+  const loginPage = document.getElementById("loginPage");
+  const dashboardPage = document.getElementById("dashboardPage");
+
+  if (!loginForm || !loginPage || !dashboardPage) {
+    startDashboard();
+    return;
+  }
+
+  const emailInput = document.getElementById("emailInput");
+  const accessCodeInput = document.getElementById("accessCodeInput");
+  const loginError = document.getElementById("loginError");
+
+  loginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const email = emailInput.value.trim();
+    const accessCode = accessCodeInput.value.trim();
+
+    if (validateAccess(email, accessCode)) {
+      loginError.classList.add("is-hidden");
+      loginPage.classList.add("login-page--hidden");
+      setTimeout(() => loginPage.classList.add("is-hidden"), 320);
+      dashboardPage.classList.remove("is-hidden");
+      startDashboard();
+    } else {
+      loginError.classList.remove("is-hidden");
+    }
+  });
+}
+
+function validateAccess(email, accessCode) {
+  const hasEmail = email && email.includes("@");
+  return hasEmail && accessCode.toUpperCase() === ACES_ACCESS_CODE;
+}
 
 async function fetchCSV() {
   try {
@@ -1213,24 +1253,29 @@ window.addEventListener("click", (event) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+function startDashboard() {
+  if (dashboardInitialized) return;
+  dashboardInitialized = true;
+
   initMap();
   loadDashboard();
 
   updateHeaderDate();
-  setInterval(updateHeaderDate, 1000);
+  headerIntervalId = setInterval(updateHeaderDate, 1000);
 
-  setInterval(() => {
+  refreshIntervalId = setInterval(() => {
     console.log("Auto-refreshing dashboard...");
     loadDashboard();
   }, 120000);
 
   const searchInput = document.getElementById("searchInput");
-  searchInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      searchSite(searchInput.value);
-    }
-  });
+  if (searchInput) {
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        searchSite(searchInput.value);
+      }
+    });
+  }
 
   const modal = document.getElementById("searchModal");
   window.addEventListener("click", (e) => {
@@ -1238,4 +1283,4 @@ document.addEventListener("DOMContentLoaded", () => {
       closeSearchModal();
     }
   });
-});
+}
