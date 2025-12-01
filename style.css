@@ -226,26 +226,30 @@ body {
 }
 
 .login-button {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, var(--aces-primary) 0%, #1a1f4f 100%);
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #123766 0%, #0D2349 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 10px;
   font-family: Verdana, sans-serif;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(32, 43, 109, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(18, 55, 102, 0.4);
 }
 
 .login-button:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(18, 55, 102, 0.3);
 }
 
 .login-error {
