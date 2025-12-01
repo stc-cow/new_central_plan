@@ -87,6 +87,19 @@ function handleLogin() {
   }
 }
 
+function handleLogout() {
+  // Clear login status
+  sessionStorage.removeItem("isLoggedIn");
+
+  // Show login page
+  showLoginPage();
+
+  // Clear form fields
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("loginError").style.display = "none";
+}
+
 async function fetchCSV() {
   try {
     console.log("Attempting to fetch CSV from:", CSV_URL);
