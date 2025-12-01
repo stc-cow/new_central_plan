@@ -1239,9 +1239,7 @@ function isInSelectedRegion(site) {
   }
   const regionLower = site.regionname.toLowerCase().trim();
   if (selectedRegion === "CER") {
-    return (
-      regionLower.includes("central") || regionLower.includes("east")
-    );
+    return regionLower.includes("central") || regionLower.includes("east");
   }
   return regionLower.includes(selectedRegion.toLowerCase());
 }
