@@ -90,7 +90,9 @@ body {
     rgba(40, 20, 100, 0) 100%
   );
   animation-duration: 22s;
-  transition: background 0.3s ease, filter 0.3s ease;
+  transition:
+    background 0.3s ease,
+    filter 0.3s ease;
 }
 
 .blob2 {
@@ -103,7 +105,9 @@ body {
   );
   animation-duration: 26s;
   animation-delay: 2s;
-  transition: background 0.3s ease, filter 0.3s ease;
+  transition:
+    background 0.3s ease,
+    filter 0.3s ease;
 }
 
 .blob3 {
@@ -116,7 +120,9 @@ body {
   );
   animation-duration: 30s;
   animation-delay: 4s;
-  transition: background 0.3s ease, filter 0.3s ease;
+  transition:
+    background 0.3s ease,
+    filter 0.3s ease;
 }
 
 @keyframes float-blob {
@@ -167,7 +173,11 @@ body {
   height: 150px;
   top: 5%;
   left: 10%;
-  background: radial-gradient(circle, rgba(255, 100, 200, 0.5) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 100, 200, 0.5) 0%,
+    transparent 100%
+  );
   animation-duration: 12s;
   animation-delay: 0s;
   --tx: 40px;
@@ -179,7 +189,11 @@ body {
   height: 120px;
   top: 20%;
   right: 15%;
-  background: radial-gradient(circle, rgba(100, 200, 255, 0.4) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(100, 200, 255, 0.4) 0%,
+    transparent 100%
+  );
   animation-duration: 14s;
   animation-delay: 1s;
   --tx: -50px;
@@ -191,7 +205,11 @@ body {
   height: 100px;
   bottom: 30%;
   left: 5%;
-  background: radial-gradient(circle, rgba(200, 150, 255, 0.45) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(200, 150, 255, 0.45) 0%,
+    transparent 100%
+  );
   animation-duration: 16s;
   animation-delay: 2s;
   --tx: 30px;
@@ -203,7 +221,11 @@ body {
   height: 130px;
   top: 50%;
   left: 40%;
-  background: radial-gradient(circle, rgba(100, 255, 200, 0.35) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(100, 255, 200, 0.35) 0%,
+    transparent 100%
+  );
   animation-duration: 18s;
   animation-delay: 1.5s;
   --tx: -30px;
@@ -215,7 +237,11 @@ body {
   height: 90px;
   bottom: 10%;
   right: 20%;
-  background: radial-gradient(circle, rgba(255, 150, 100, 0.4) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 150, 100, 0.4) 0%,
+    transparent 100%
+  );
   animation-duration: 15s;
   animation-delay: 0.5s;
   --tx: 45px;
@@ -227,7 +253,11 @@ body {
   height: 110px;
   top: 30%;
   right: 5%;
-  background: radial-gradient(circle, rgba(150, 200, 255, 0.38) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(150, 200, 255, 0.38) 0%,
+    transparent 100%
+  );
   animation-duration: 17s;
   animation-delay: 2.5s;
   --tx: -40px;
@@ -239,7 +269,11 @@ body {
   height: 95px;
   bottom: 40%;
   right: 30%;
-  background: radial-gradient(circle, rgba(255, 200, 100, 0.42) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 200, 100, 0.42) 0%,
+    transparent 100%
+  );
   animation-duration: 13s;
   animation-delay: 1.2s;
   --tx: 35px;
@@ -251,7 +285,11 @@ body {
   height: 125px;
   top: 60%;
   left: 20%;
-  background: radial-gradient(circle, rgba(200, 100, 255, 0.4) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(200, 100, 255, 0.4) 0%,
+    transparent 100%
+  );
   animation-duration: 19s;
   animation-delay: 0.8s;
   --tx: -45px;
@@ -263,7 +301,11 @@ body {
   height: 85px;
   top: 15%;
   left: 60%;
-  background: radial-gradient(circle, rgba(100, 255, 150, 0.38) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(100, 255, 150, 0.38) 0%,
+    transparent 100%
+  );
   animation-duration: 14s;
   animation-delay: 2.2s;
   --tx: 50px;
@@ -275,7 +317,11 @@ body {
   height: 105px;
   bottom: 20%;
   left: 50%;
-  background: radial-gradient(circle, rgba(255, 100, 100, 0.36) 0%, transparent 100%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 100, 100, 0.36) 0%,
+    transparent 100%
+  );
   animation-duration: 16s;
   animation-delay: 1.8s;
   --tx: -35px;

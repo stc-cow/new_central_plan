@@ -96,7 +96,7 @@ function setupLogoParallax() {
     // Update main blobs with physics and color shifts
     const blobs = document.querySelectorAll(".blob");
     blobs.forEach((blob, i) => {
-      const speed = 0.02 + (i * 0.005);
+      const speed = 0.02 + i * 0.005;
       const blobX = (window.innerWidth - mouseX * speed) / (i + 1);
       const blobY = (window.innerHeight - mouseY * speed) / (i + 1);
 
@@ -105,23 +105,25 @@ function setupLogoParallax() {
       blob.style.transform = `translate(${blobX}px, ${blobY}px) scale(${1 + (mouseY / window.innerHeight) * 0.15})`;
 
       // Apply color shifts
-      const hue = (hueShift + (i * 120)) % 360;
+      const hue = (hueShift + i * 120) % 360;
       blob.style.filter = `blur(80px) hue-rotate(${hue}deg) saturate(${saturation}%)`;
     });
 
     // Update particles with physics
     const particles = document.querySelectorAll(".particle");
     particles.forEach((particle, i) => {
-      const particleSpeed = 0.01 + (i * 0.002);
-      const pX = (mouseX * particleSpeed) - (window.innerWidth / 2) * 0.3;
-      const pY = (mouseY * particleSpeed) - (window.innerHeight / 2) * 0.3;
+      const particleSpeed = 0.01 + i * 0.002;
+      const pX = mouseX * particleSpeed - (window.innerWidth / 2) * 0.3;
+      const pY = mouseY * particleSpeed - (window.innerHeight / 2) * 0.3;
 
-      const scale = 1 + ((mouseX + mouseY) / (window.innerWidth + window.innerHeight)) * 0.2;
+      const scale =
+        1 +
+        ((mouseX + mouseY) / (window.innerWidth + window.innerHeight)) * 0.2;
 
       particle.style.transform = `translate(${pX}px, ${pY}px) scale(${scale})`;
 
       // Color shift for particles
-      const pHue = (hueShift + (i * 36)) % 360;
+      const pHue = (hueShift + i * 36) % 360;
       particle.style.filter = `blur(50px) hue-rotate(${pHue}deg) saturate(${saturation}%)`;
     });
 
