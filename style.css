@@ -80,10 +80,9 @@ body {
 }
 
 .login-logo {
-  width: 120px;
-  height: 120px;
-  margin-bottom: 30px;
-  filter: brightness(0) invert(1);
+  width: 200px;
+  height: 200px;
+  margin-bottom: 40px;
 }
 
 .login-title {
