@@ -359,15 +359,15 @@ function updateKPIChart(totalSites, dueSites, todaySites) {
 function populateDueTable(sites) {
   const dueSites = sites
     .filter((s) => isDueSite(s))
-    .sort((a, b) => a.sitename.localeCompare(b.sitename));
+    .sort((a, b) => new Date(a.nextfuelingplan) - new Date(b.nextfuelingplan));
 
   const todaySites = sites
     .filter((s) => s.status === "today")
-    .sort((a, b) => a.sitename.localeCompare(b.sitename));
+    .sort((a, b) => new Date(a.nextfuelingplan) - new Date(b.nextfuelingplan));
 
   const comingSites = sites
     .filter((s) => s.status === "coming3")
-    .sort((a, b) => a.sitename.localeCompare(b.sitename));
+    .sort((a, b) => a.days - b.days);
 
   populateOverdueTable(dueSites);
   populateTodayTable(todaySites);
