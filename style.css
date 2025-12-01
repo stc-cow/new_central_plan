@@ -48,8 +48,8 @@
 }
 
 .login-card {
-  background: white;
-  border: 1px solid #e6ecf3;
+  background: rgba(21, 21, 63, 1);
+  border: 1px solid rgba(39, 69, 104, 1);
   border-radius: 22px;
   padding: 40px;
   position: relative;
@@ -238,10 +238,14 @@
 
 .login-footer {
   margin-top: 28px;
-  background: #f8faff;
-  border: 1px solid #e8ecff;
+  background: #15153f;
+  border: 1px solid #15153f;
   border-radius: 16px;
   padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .login-footer-title {
