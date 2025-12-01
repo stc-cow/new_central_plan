@@ -11,7 +11,89 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="dashboard" id="dashboardPage">
+    <div class="login-page" id="loginPage">
+      <div class="login-card">
+        <div class="login-badge">ACES Managed Services</div>
+        <h1 class="login-title">Central Fuel Plan Dashboard</h1>
+        <p class="login-subtitle">
+          Secure sign-in to view live COW fueling status, KPIs, and priority
+          events across the Central region.
+        </p>
+
+        <form class="login-form" id="loginForm">
+          <label class="login-label" for="emailInput">Work Email</label>
+          <input
+            class="login-input"
+            id="emailInput"
+            name="email"
+            type="email"
+            placeholder="you@aces.sa"
+            required
+          />
+
+          <label class="login-label" for="accessCodeInput">ACES Access Code</label>
+          <input
+            class="login-input"
+            id="accessCodeInput"
+            name="accessCode"
+            type="password"
+            placeholder="Enter your secure code"
+            required
+          />
+
+          <div class="login-actions">
+            <div class="login-hint">
+              Use the ACES code shared by Central Operations to enter the live
+              dashboard.
+            </div>
+            <button class="login-button" type="submit">Enter Dashboard</button>
+          </div>
+
+          <div id="loginError" class="login-error is-hidden">
+            Invalid credentials. Please confirm your ACES access code.
+          </div>
+        </form>
+
+        <div class="login-footer">
+          <div class="login-footer-title">Operational Snapshot</div>
+          <div class="login-footer-grid">
+            <div class="login-footer-item">
+              <span class="login-footer-label">Coverage</span>
+              <span class="login-footer-value">Central Region</span>
+            </div>
+            <div class="login-footer-item">
+              <span class="login-footer-label">Focus</span>
+              <span class="login-footer-value">Fuel Reliability</span>
+            </div>
+            <div class="login-footer-item">
+              <span class="login-footer-label">Theme</span>
+              <span class="login-footer-value">ACES Confidence</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-aside">
+        <div class="login-aside-top">
+          <div class="login-pill">Live ACES View</div>
+          <div class="login-metric-card">
+            <div class="login-metric-label">Fueling KPI Target</div>
+            <div class="login-metric-value">98%</div>
+            <div class="login-metric-sub">On-time fueling compliance</div>
+          </div>
+        </div>
+
+        <div class="login-aside-bottom">
+          <div class="login-quote">
+            "ACES dashboards keep our Central fleet fueled, protected, and ready
+            for every priority event."
+          </div>
+          <div class="login-quote-meta">— Central Operations Control</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard is-hidden" id="dashboardPage">
       <div class="dashboard-header">
         <div class="header-content">
           <div class="logo-text logo-left">Managed Services Dept.</div>
