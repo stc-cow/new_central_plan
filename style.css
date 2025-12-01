@@ -24,13 +24,14 @@
 .login-page {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  background: radial-gradient(circle at 10% 20%, rgba(32, 43, 109, 0.12), transparent 35%),
-    radial-gradient(circle at 90% 10%, rgba(255, 107, 107, 0.12), transparent 35%),
-    linear-gradient(120deg, #f8faff 0%, #f0f4ff 50%, #ffffff 100%);
+  grid-template-columns: 1fr;
+  background: radial-gradient(circle at 15% 30%, rgba(18, 55, 102, 0.04), transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(18, 55, 102, 0.03), transparent 40%),
+    linear-gradient(135deg, #f7f9fc 0%, #eef2f8 45%, #e6ecf6 100%);
   padding: 64px 72px;
   gap: 48px;
   align-items: center;
+  justify-content: center;
 }
 
 .login-card {
