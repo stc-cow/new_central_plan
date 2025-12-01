@@ -22,6 +22,67 @@ let pulsingCircles = [];
 let markersLayer;
 let currentPopupOverlay = null;
 
+// Authentication credentials (Option A - simple client-side)
+const VALID_CREDENTIALS = {
+  username: "admin",
+  password: "fuel123",
+};
+
+// Initialize page on load
+document.addEventListener("DOMContentLoaded", () => {
+  const isLoggedIn = localStorage.getItem("analyticsLoggedIn") === "true";
+  if (isLoggedIn) {
+    showDashboard();
+  } else {
+    showLoginPage();
+  }
+});
+
+window.showLoginPage = function showLoginPage() {
+  document.getElementById("loginPage").style.display = "block";
+  document.getElementById("analyticsPage").style.display = "none";
+  document.getElementById("dashboardPage").style.display = "none";
+};
+
+window.showDashboard = function showDashboard() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("analyticsPage").style.display = "none";
+  document.getElementById("dashboardPage").style.display = "flex";
+  loadDashboard();
+};
+
+window.showAnalytics = function showAnalytics() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("analyticsPage").style.display = "block";
+  document.getElementById("dashboardPage").style.display = "none";
+  loadAnalytics();
+};
+
+window.handleLogin = function handleLogin(event) {
+  event.preventDefault();
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const errorElement = document.getElementById("loginError");
+
+  if (
+    username === VALID_CREDENTIALS.username &&
+    password === VALID_CREDENTIALS.password
+  ) {
+    localStorage.setItem("analyticsLoggedIn", "true");
+    errorElement.textContent = "";
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    showDashboard();
+  } else {
+    errorElement.textContent = "Invalid username or password";
+  }
+};
+
+window.handleLogout = function handleLogout() {
+  localStorage.removeItem("analyticsLoggedIn");
+  showLoginPage();
+};
+
 async function fetchCSV() {
   try {
     console.log("Attempting to fetch CSV from:", CSV_URL);
