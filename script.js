@@ -23,6 +23,11 @@ let markersLayer;
 let currentPopupOverlay = null;
 
 
+// Initialize dashboard on page load
+document.addEventListener("DOMContentLoaded", () => {
+  loadDashboard();
+});
+
 async function fetchCSV() {
   try {
     console.log("Attempting to fetch CSV from:", CSV_URL);
