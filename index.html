@@ -11,7 +11,88 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="dashboard">
+    <!-- Login Page -->
+    <div id="loginPage" class="login-page" style="display: none;">
+      <div class="login-container">
+        <div class="login-box">
+          <h1>Analytics & Admin</h1>
+          <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" id="username" name="username" required />
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required />
+            </div>
+            <button type="submit" class="login-btn">Login</button>
+          </form>
+          <p id="loginError" class="login-error"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Page -->
+    <div id="analyticsPage" class="analytics-page" style="display: none;">
+      <div class="analytics-header">
+        <h1>Fuel Analytics & Impact Analysis</h1>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
+      </div>
+      <div class="analytics-container">
+        <div class="analytics-card due-sites-card">
+          <h2>Due Sites</h2>
+          <div class="analytics-stat">
+            <div class="stat-value" id="dueSitesCount">0</div>
+            <div class="stat-label">Total Due</div>
+          </div>
+          <div id="dueSitesBreakdown" class="breakdown"></div>
+        </div>
+
+        <div class="analytics-card fuel-impact-card">
+          <h2>Fuel Impact</h2>
+          <div class="analytics-stat">
+            <div class="stat-value" id="affectedSitesCount">0</div>
+            <div class="stat-label">Sites Affected</div>
+          </div>
+          <div id="impactBreakdown" class="breakdown"></div>
+        </div>
+
+        <div class="analytics-card violations-card">
+          <h2>Violations Due to Fuel</h2>
+          <div class="analytics-stat">
+            <div class="stat-value" id="violationsCount">0</div>
+            <div class="stat-label">Total Violations</div>
+          </div>
+          <div id="violationsBreakdown" class="breakdown"></div>
+        </div>
+
+        <div class="analytics-card sites-down-card">
+          <h2>Sites Down Due to Fuel</h2>
+          <div class="analytics-stat">
+            <div class="stat-value" id="sitesDownCount">0</div>
+            <div class="stat-label">Non-Operational</div>
+          </div>
+          <div id="sitesDownList" class="breakdown"></div>
+        </div>
+      </div>
+
+      <div class="analytics-details">
+        <h3>Detailed Due Sites List</h3>
+        <table class="analytics-table">
+          <thead>
+            <tr>
+              <th>Site Name</th>
+              <th>Fueling Date</th>
+              <th>Days Overdue</th>
+              <th>Impact Level</th>
+            </tr>
+          </thead>
+          <tbody id="dueDetailsList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="dashboard" id="dashboardPage">
       <div class="dashboard-header">
         <div class="header-content">
           <div class="logo-text logo-left">Managed Services Dept.</div>
