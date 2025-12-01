@@ -13,39 +13,40 @@
   <body>
     <div class="login-page" id="loginPage">
       <div class="login-card">
-        <div class="login-badge">ACES Managed Services</div>
-        <h1 class="login-title">Central Fuel Plan Dashboard</h1>
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F79bb5a2ce6d049dc9cdf932874fa9691?format=webp&width=800"
+          alt="ACES Logo"
+          class="aces-logo"
+        />
+        <h1 class="login-title">stc COWs Fueling Central Region</h1>
         <p class="login-subtitle">
-          Secure sign-in to view live COW fueling status, KPIs, and priority
-          events across the Central region.
+          <br />
         </p>
 
         <form class="login-form" id="loginForm">
-          <label class="login-label" for="emailInput">Work Email</label>
+          <label class="login-label" for="emailInput"><p>User Name</p></label>
           <input
             class="login-input"
             id="emailInput"
             name="email"
             type="email"
-            placeholder="you@aces.sa"
+            placeholder="Enter user-name"
             required
           />
 
-          <label class="login-label" for="accessCodeInput">ACES Access Code</label>
+          <label class="login-label" for="accessCodeInput"
+            ><p>Password</p></label
+          >
           <input
             class="login-input"
             id="accessCodeInput"
             name="accessCode"
             type="password"
-            placeholder="Enter your secure code"
+            placeholder="Enter your password"
             required
           />
 
           <div class="login-actions">
-            <div class="login-hint">
-              Use the ACES code shared by Central Operations to enter the live
-              dashboard.
-            </div>
             <button class="login-button" type="submit">Enter Dashboard</button>
           </div>
 
@@ -55,20 +56,10 @@
         </form>
 
         <div class="login-footer">
-          <div class="login-footer-title">Operational Snapshot</div>
           <div class="login-footer-grid">
-            <div class="login-footer-item">
-              <span class="login-footer-label">Coverage</span>
-              <span class="login-footer-value">Central Region</span>
-            </div>
-            <div class="login-footer-item">
-              <span class="login-footer-label">Focus</span>
-              <span class="login-footer-value">Fuel Reliability</span>
-            </div>
-            <div class="login-footer-item">
-              <span class="login-footer-label">Theme</span>
-              <span class="login-footer-value">ACES Confidence</span>
-            </div>
+            <div class="login-footer-item" />
+            <div class="login-footer-item" />
+            <div class="login-footer-item" />
           </div>
         </div>
       </div>
