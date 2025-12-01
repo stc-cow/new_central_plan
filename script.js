@@ -1117,7 +1117,7 @@ function isVVVIPSite(site) {
     return false;
   }
 
-  if (!site.sitelabel || !site.sitelabel.toUpperCase().includes("VVVIP")) {
+  if (!VVVIP_SITES_LIST.includes(site.sitename)) {
     return false;
   }
 
