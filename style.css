@@ -5,15 +5,16 @@
 }
 
 :root {
-  --aces-primary: #202b6d;
+  --aces-primary: #123766;
+  --aces-dark: #0B1F3C;
+  --aces-accent: #1E4F8A;
   --aces-red: #ff6b6b;
   --aces-yellow: #ffbe0b;
   --aces-green: #3ad17c;
-  --aces-dark: #0f1f4c;
   --aces-light: #f8faff;
   --text-primary: #1a202c;
   --text-secondary: #64748b;
-  --border-color: #e2e8f0;
+  --border-color: #e6ecf3;
 }
 
 .is-hidden {
