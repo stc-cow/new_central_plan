@@ -1234,7 +1234,13 @@ function selectRegion(region) {
 }
 
 function isInSelectedRegion(site) {
-  return site.regionname && site.regionname.includes(selectedRegion);
+  if (!site.regionname) {
+    return false;
+  }
+  if (selectedRegion === "CER") {
+    return site.regionname.includes("Central") || site.regionname.includes("East");
+  }
+  return site.regionname.includes(selectedRegion);
 }
 
 function startDashboard() {
