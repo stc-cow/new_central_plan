@@ -118,8 +118,13 @@
   margin: 16px 0 8px;
   font-size: 32px;
   font-weight: 900;
-  color: var(--aces-dark);
+  color: var(--aces-primary);
   letter-spacing: -0.5px;
+  text-shadow:
+    0 2px 4px rgba(11, 31, 60, 0.1),
+    0 4px 8px rgba(11, 31, 60, 0.08),
+    2px 2px 0px rgba(30, 79, 138, 0.15);
+  transform: translateZ(20px);
 }
 
 .login-subtitle {
