@@ -70,15 +70,40 @@ body {
 
 .login-left {
   flex: 1;
-  background: linear-gradient(
-    135deg,
-    var(--aces-dark) 0%,
-    var(--aces-primary) 100%
-  );
+  background:
+    radial-gradient(circle at 20% 50%, rgba(226, 43, 43, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(18, 55, 102, 0.25) 0%, transparent 50%),
+    linear-gradient(135deg, #0A1D3C 0%, #123766 50%, #1a2f5a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 60px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-left::before {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(226, 43, 43, 0.18) 0%, transparent 70%);
+  filter: blur(80px);
+  top: -100px;
+  left: -50px;
+  z-index: 1;
+}
+
+.login-left::after {
+  content: '';
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(20, 80, 200, 0.20) 0%, transparent 70%);
+  filter: blur(100px);
+  bottom: -50px;
+  right: -100px;
+  z-index: 1;
 }
 
 .login-branding {
