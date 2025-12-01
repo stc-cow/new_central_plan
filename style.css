@@ -187,163 +187,183 @@ body {
 }
 
 .particle1 {
-  width: 150px;
-  height: 150px;
+  width: 220px;
+  height: 220px;
   top: 5%;
   left: 10%;
   background: radial-gradient(
     circle,
-    rgba(255, 100, 200, 0.5) 0%,
+    rgba(255, 100, 200, 0.65) 0%,
+    rgba(255, 120, 210, 0.35) 40%,
     transparent 100%
   );
   animation-duration: 12s;
   animation-delay: 0s;
   --tx: 40px;
   --ty: 30px;
+  box-shadow: 0 0 80px 40px rgba(255, 100, 200, 0.3);
 }
 
 .particle2 {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   top: 20%;
   right: 15%;
   background: radial-gradient(
     circle,
-    rgba(100, 200, 255, 0.4) 0%,
+    rgba(100, 200, 255, 0.55) 0%,
+    rgba(120, 210, 255, 0.3) 40%,
     transparent 100%
   );
   animation-duration: 14s;
   animation-delay: 1s;
   --tx: -50px;
   --ty: 40px;
+  box-shadow: 0 0 70px 35px rgba(100, 200, 255, 0.28);
 }
 
 .particle3 {
-  width: 100px;
-  height: 100px;
+  width: 160px;
+  height: 160px;
   bottom: 30%;
   left: 5%;
   background: radial-gradient(
     circle,
-    rgba(200, 150, 255, 0.45) 0%,
+    rgba(200, 150, 255, 0.55) 0%,
+    rgba(210, 160, 255, 0.3) 40%,
     transparent 100%
   );
   animation-duration: 16s;
   animation-delay: 2s;
   --tx: 30px;
   --ty: -50px;
+  box-shadow: 0 0 70px 35px rgba(200, 150, 255, 0.28);
 }
 
 .particle4 {
-  width: 130px;
-  height: 130px;
+  width: 190px;
+  height: 190px;
   top: 50%;
   left: 40%;
   background: radial-gradient(
     circle,
-    rgba(100, 255, 200, 0.35) 0%,
+    rgba(100, 255, 200, 0.5) 0%,
+    rgba(120, 255, 210, 0.28) 40%,
     transparent 100%
   );
   animation-duration: 18s;
   animation-delay: 1.5s;
   --tx: -30px;
   --ty: -40px;
+  box-shadow: 0 0 70px 35px rgba(100, 255, 200, 0.22);
 }
 
 .particle5 {
-  width: 90px;
-  height: 90px;
+  width: 170px;
+  height: 170px;
   bottom: 10%;
   right: 20%;
   background: radial-gradient(
     circle,
-    rgba(255, 150, 100, 0.4) 0%,
+    rgba(255, 150, 100, 0.55) 0%,
+    rgba(255, 160, 110, 0.32) 40%,
     transparent 100%
   );
   animation-duration: 15s;
   animation-delay: 0.5s;
   --tx: 45px;
   --ty: -30px;
+  box-shadow: 0 0 70px 35px rgba(255, 150, 100, 0.26);
 }
 
 .particle6 {
-  width: 110px;
-  height: 110px;
+  width: 175px;
+  height: 175px;
   top: 30%;
   right: 5%;
   background: radial-gradient(
     circle,
-    rgba(150, 200, 255, 0.38) 0%,
+    rgba(150, 200, 255, 0.5) 0%,
+    rgba(165, 210, 255, 0.3) 40%,
     transparent 100%
   );
   animation-duration: 17s;
   animation-delay: 2.5s;
   --tx: -40px;
   --ty: 50px;
+  box-shadow: 0 0 70px 35px rgba(150, 200, 255, 0.24);
 }
 
 .particle7 {
-  width: 95px;
-  height: 95px;
+  width: 160px;
+  height: 160px;
   bottom: 40%;
   right: 30%;
   background: radial-gradient(
     circle,
-    rgba(255, 200, 100, 0.42) 0%,
+    rgba(255, 200, 100, 0.55) 0%,
+    rgba(255, 210, 110, 0.32) 40%,
     transparent 100%
   );
   animation-duration: 13s;
   animation-delay: 1.2s;
   --tx: 35px;
   --ty: 45px;
+  box-shadow: 0 0 65px 32px rgba(255, 200, 100, 0.26);
 }
 
 .particle8 {
-  width: 125px;
-  height: 125px;
+  width: 185px;
+  height: 185px;
   top: 60%;
   left: 20%;
   background: radial-gradient(
     circle,
-    rgba(200, 100, 255, 0.4) 0%,
+    rgba(200, 100, 255, 0.55) 0%,
+    rgba(210, 120, 255, 0.3) 40%,
     transparent 100%
   );
   animation-duration: 19s;
   animation-delay: 0.8s;
   --tx: -45px;
   --ty: -35px;
+  box-shadow: 0 0 75px 38px rgba(200, 100, 255, 0.28);
 }
 
 .particle9 {
-  width: 85px;
-  height: 85px;
+  width: 155px;
+  height: 155px;
   top: 15%;
   left: 60%;
   background: radial-gradient(
     circle,
-    rgba(100, 255, 150, 0.38) 0%,
+    rgba(100, 255, 150, 0.5) 0%,
+    rgba(120, 255, 165, 0.28) 40%,
     transparent 100%
   );
   animation-duration: 14s;
   animation-delay: 2.2s;
   --tx: 50px;
   --ty: 25px;
+  box-shadow: 0 0 65px 32px rgba(100, 255, 150, 0.22);
 }
 
 .particle10 {
-  width: 105px;
-  height: 105px;
+  width: 170px;
+  height: 170px;
   bottom: 20%;
   left: 50%;
   background: radial-gradient(
     circle,
-    rgba(255, 100, 100, 0.36) 0%,
+    rgba(255, 100, 100, 0.55) 0%,
+    rgba(255, 120, 120, 0.32) 40%,
     transparent 100%
   );
   animation-duration: 16s;
   animation-delay: 1.8s;
   --tx: -35px;
   --ty: 40px;
+  box-shadow: 0 0 70px 35px rgba(255, 100, 100, 0.26);
 }
 
 .login-container {
