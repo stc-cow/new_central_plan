@@ -22,7 +22,6 @@ let pulsingCircles = [];
 let markersLayer;
 let currentPopupOverlay = null;
 
-
 // Initialize dashboard on page load
 document.addEventListener("DOMContentLoaded", () => {
   loadDashboard();

@@ -48,7 +48,6 @@ body {
   padding: 0;
 }
 
-
 .dashboard {
   display: grid;
   grid-template-rows: auto auto 1fr;
