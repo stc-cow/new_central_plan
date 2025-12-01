@@ -3,6 +3,23 @@ const CSV_URL =
 
 const ACES_ACCESS_CODE = "ACES2025";
 
+const VVVIP_SITES_LIST = [
+  "COW779",
+  "COW820",
+  "COW020",
+  "COW059",
+  "COWE05",
+  "COW626",
+  "COW774",
+  "COW739",
+  "COW772",
+  "COW518",
+  "COW535",
+  "COW529",
+  "CWH972",
+  "COW552",
+];
+
 const SA_CENTER = [23.8859, 45.0792];
 const SA_BOUNDS = [
   [16.3, 32.0],
