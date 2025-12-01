@@ -70,13 +70,17 @@ body {
 }
 
 .login-container::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 50%;
   top: 5%;
   height: 90%;
   width: 1px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.08));
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.18),
+    rgba(0, 0, 0, 0.08)
+  );
   filter: blur(0.5px);
   box-shadow: 0 0 30px 10px rgba(255, 255, 255, 0.15);
   z-index: 10;
@@ -157,13 +161,18 @@ body {
 }
 
 .login-logo::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 60%;
   height: 100%;
-  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
   border-radius: 50%;
   animation: shine 2.5s infinite;
   pointer-events: none;
@@ -238,8 +247,10 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
   padding: 40px;
-  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.20);
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
 .login-right:hover .login-form-container {
@@ -326,13 +337,18 @@ body {
 }
 
 .login-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(20, 59, 122, 0.5) 0%, rgba(10, 29, 60, 0.5) 50%, rgba(226, 43, 43, 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(20, 59, 122, 0.5) 0%,
+    rgba(10, 29, 60, 0.5) 50%,
+    rgba(226, 43, 43, 0.3) 100%
+  );
   border-radius: 12px;
   z-index: 0;
   opacity: 0;
@@ -342,7 +358,9 @@ body {
 
 .login-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(18, 55, 102, 0.4), 0 0 25px rgba(226, 43, 43, 0.35);
+  box-shadow:
+    0 10px 28px rgba(18, 55, 102, 0.4),
+    0 0 25px rgba(226, 43, 43, 0.35);
   filter: brightness(1.15);
 }
 
@@ -1582,7 +1600,8 @@ body {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) scale(1);
   }
   50% {
@@ -1600,7 +1619,8 @@ body {
 }
 
 @keyframes glow-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
