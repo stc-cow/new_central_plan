@@ -76,7 +76,11 @@ window.handleLogin = function handleLogin(event) {
     errorElement.textContent = "";
     document.getElementById("username").value = "";
     document.getElementById("password").value = "";
-    showDashboard();
+    // Show analytics page after successful login
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("analyticsPage").style.display = "block";
+    document.getElementById("dashboardPage").style.display = "none";
+    loadAnalytics();
   } else {
     errorElement.textContent = "Invalid username or password";
   }
