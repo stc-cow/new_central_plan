@@ -45,7 +45,6 @@
 .login-card {
   background: white;
   border: 1px solid #e6ecf3;
-  box-shadow: 0 20px 40px rgba(11, 31, 60, 0.08);
   border-radius: 22px;
   padding: 40px;
   position: relative;
@@ -53,6 +52,24 @@
   max-width: 500px;
   width: 100%;
   backdrop-filter: blur(2px);
+  box-shadow:
+    0 2px 8px rgba(11, 31, 60, 0.1),
+    0 8px 24px rgba(11, 31, 60, 0.15),
+    0 20px 50px rgba(11, 31, 60, 0.2),
+    0 40px 80px rgba(11, 31, 60, 0.25);
+  transform: translateZ(0) rotateX(0deg) rotateY(0deg);
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+  z-index: 10;
+}
+
+.login-card:hover {
+  transform: translateZ(20px) rotateX(2deg) rotateY(-2deg);
+  box-shadow:
+    0 4px 12px rgba(11, 31, 60, 0.15),
+    0 12px 32px rgba(11, 31, 60, 0.2),
+    0 28px 60px rgba(11, 31, 60, 0.25),
+    0 50px 100px rgba(11, 31, 60, 0.3);
 }
 
 .login-card::after {
