@@ -28,14 +28,9 @@ const VALID_CREDENTIALS = {
   password: "fuel123",
 };
 
-// Initialize page on load
+// Initialize page on load - Dashboard is default page
 document.addEventListener("DOMContentLoaded", () => {
-  const isLoggedIn = localStorage.getItem("analyticsLoggedIn") === "true";
-  if (isLoggedIn) {
-    showDashboard();
-  } else {
-    showLoginPage();
-  }
+  showDashboard();
 });
 
 window.showLoginPage = function showLoginPage() {
