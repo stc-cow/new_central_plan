@@ -89,9 +89,9 @@ function setupLogoParallax() {
 
     logo.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.05)`;
 
-    // Calculate color shift based on cursor position (0-1 range)
-    const hueShift = (mouseX / window.innerWidth) * 360;
-    const saturation = (mouseY / window.innerHeight) * 50 + 50;
+    // Calculate color shift based on cursor position with smoother progression
+    const hueShift = (mouseX / window.innerWidth) * 180;
+    const saturation = Math.min(120, (mouseY / window.innerHeight) * 70 + 60);
 
     // Update main blobs with physics and color shifts
     const blobs = document.querySelectorAll(".blob");
