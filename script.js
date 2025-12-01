@@ -945,7 +945,7 @@ function updateHeaderDate() {
 }
 
 function isVVVIPSite(site) {
-  if (!site.regionname || !site.regionname.includes("Central")) {
+  if (!isInSelectedRegion(site)) {
     return false;
   }
 
