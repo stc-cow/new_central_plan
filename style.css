@@ -1519,4 +1519,60 @@ body {
     width: 16px;
     height: 16px;
   }
+
+  .login-page {
+    padding: 40px 20px;
+  }
+
+  .login-card {
+    width: 92%;
+    padding: 30px 20px;
+  }
+
+  .aces-logo {
+    max-width: 100px;
+    margin-bottom: 20px;
+  }
+
+  .login-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .login-subtitle {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .login-label {
+    font-size: 11px;
+  }
+
+  .login-input {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .login-button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .login-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .login-hint {
+    font-size: 12px;
+    max-width: 100%;
+  }
+
+  .login-footer {
+    margin-top: 20px;
+  }
+
+  .login-footer-grid {
+    gap: 8px;
+  }
 }
