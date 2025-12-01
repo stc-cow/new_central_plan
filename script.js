@@ -1234,9 +1234,6 @@ function selectRegion(region) {
 }
 
 function isInSelectedRegion(site) {
-  if (selectedRegion === "All") {
-    return true;
-  }
   return site.regionname && site.regionname.includes(selectedRegion);
 }
 
