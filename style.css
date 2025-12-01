@@ -154,22 +154,24 @@
 }
 
 .login-button {
-  background: linear-gradient(135deg, var(--aces-primary) 0%, #1a1f4f 100%);
+  background: var(--aces-primary);
   color: white;
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   padding: 14px 24px;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.3px;
   cursor: pointer;
-  box-shadow: 0 12px 30px rgba(32, 43, 109, 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 20px rgba(18, 55, 102, 0.2);
+  transition: all 0.2s ease;
+  font-family: Verdana, sans-serif;
 }
 
 .login-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 32px rgba(32, 43, 109, 0.3);
+  background: #1a4c88;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(18, 55, 102, 0.25);
 }
 
 .login-button:active {
