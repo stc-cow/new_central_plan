@@ -81,10 +81,25 @@ function setupLogoParallax() {
     const offsetY = (mouseY - centerY) * 0.08;
 
     logo.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.04)`;
+
+    // Also move blobs reactively
+    const blobs = document.querySelectorAll(".blob");
+    blobs.forEach((blob, i) => {
+      const speed = (i + 1) * 0.01;
+      const blobX = (window.innerWidth - mouseX * speed);
+      const blobY = (window.innerHeight - mouseY * speed);
+      blob.style.transform = `translate(${blobX}px, ${blobY}px) scale(1.1)`;
+    });
   });
 
   document.addEventListener("mouseleave", () => {
     logo.style.transform = "translate(0, 0) scale(1)";
+
+    // Reset blobs
+    const blobs = document.querySelectorAll(".blob");
+    blobs.forEach((blob) => {
+      blob.style.transform = "translate(0, 0) scale(1)";
+    });
   });
 }
 
