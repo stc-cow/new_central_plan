@@ -110,6 +110,8 @@ body {
   text-align: center;
   color: white;
   max-width: 400px;
+  position: relative;
+  z-index: 2;
 }
 
 .login-logo {
