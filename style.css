@@ -51,8 +51,28 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(32, 43, 109, 0.06), transparent);
+  background: linear-gradient(135deg, rgba(18, 55, 102, 0.03), transparent);
   pointer-events: none;
+}
+
+.aces-logo {
+  max-width: 120px;
+  height: auto;
+  margin: 0 auto 24px;
+  display: block;
+  animation: fadeInLogo 0.6s ease-out;
+  filter: drop-shadow(0 4px 12px rgba(18, 55, 102, 0.12));
+}
+
+@keyframes fadeInLogo {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .login-badge {
