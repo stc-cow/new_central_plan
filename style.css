@@ -206,11 +206,27 @@ body {
 
 .login-right {
   flex: 1;
-  background: white;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 30px,
+      rgba(18, 55, 102, 0.02) 30px,
+      rgba(18, 55, 102, 0.02) 31px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 30px,
+      rgba(18, 55, 102, 0.02) 30px,
+      rgba(18, 55, 102, 0.02) 31px
+    ),
+    white;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 60px 40px;
+  position: relative;
 }
 
 .login-form-container {
