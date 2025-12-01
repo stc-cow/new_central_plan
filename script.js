@@ -1232,6 +1232,13 @@ function selectRegion(region) {
   loadDashboard();
 }
 
+function isInSelectedRegion(site) {
+  if (selectedRegion === "All") {
+    return true;
+  }
+  return site.regionname && site.regionname.includes(selectedRegion);
+}
+
 function startDashboard() {
   if (dashboardInitialized) return;
   dashboardInitialized = true;
