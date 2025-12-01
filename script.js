@@ -30,8 +30,62 @@ let selectedRegion = "CER";
 
 // Load dashboard on page load
 document.addEventListener("DOMContentLoaded", () => {
-  startDashboard();
+  initializeApp();
 });
+
+function initializeApp() {
+  // Check if user is already logged in
+  const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
+
+  if (isLoggedIn) {
+    showDashboard();
+  } else {
+    showLoginPage();
+    setupLoginForm();
+  }
+}
+
+function showLoginPage() {
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("dashboardPage").style.display = "none";
+}
+
+function showDashboard() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("dashboardPage").style.display = "grid";
+  startDashboard();
+}
+
+function setupLoginForm() {
+  const loginForm = document.getElementById("loginForm");
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    handleLogin();
+  });
+}
+
+function handleLogin() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
+  const loginError = document.getElementById("loginError");
+
+  // Validate credentials
+  if (username === "Aces@MSD" && password === "ACES@2025") {
+    // Store login status
+    sessionStorage.setItem("isLoggedIn", "true");
+    loginError.style.display = "none";
+
+    // Show dashboard
+    showDashboard();
+  } else {
+    // Show error
+    loginError.textContent = "Invalid username or password";
+    loginError.style.display = "block";
+
+    // Clear password field
+    document.getElementById("password").value = "";
+  }
+}
 
 async function fetchCSV() {
   try {
