@@ -59,6 +59,73 @@ body {
     var(--aces-dark) 0%,
     var(--aces-primary) 100%
   );
+  position: relative;
+  overflow: hidden;
+}
+
+.bubble-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: transparent;
+  z-index: 0;
+}
+
+.blob {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  filter: blur(80px);
+  border-radius: 50%;
+  animation: float-blob 18s infinite ease-in-out;
+  mix-blend-mode: screen;
+}
+
+.blob1 {
+  top: 10%;
+  left: 20%;
+  background: radial-gradient(
+    circle at center,
+    rgba(110, 80, 255, 0.6) 0%,
+    rgba(40, 20, 100, 0) 100%
+  );
+  animation-duration: 22s;
+}
+
+.blob2 {
+  bottom: 15%;
+  right: 10%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 70, 180, 0.55) 0%,
+    transparent 100%
+  );
+  animation-duration: 26s;
+  animation-delay: 2s;
+}
+
+.blob3 {
+  top: 40%;
+  right: 35%;
+  background: radial-gradient(
+    circle at center,
+    rgba(90, 220, 255, 0.45) 0%,
+    transparent 100%
+  );
+  animation-duration: 30s;
+  animation-delay: 4s;
+}
+
+@keyframes float-blob {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-60px, -40px) scale(1.15);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 }
 
 .login-container {
@@ -67,6 +134,7 @@ body {
   height: 100vh;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   position: relative;
+  z-index: 10;
 }
 
 .login-container::after {
