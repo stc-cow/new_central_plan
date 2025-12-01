@@ -118,6 +118,12 @@ body {
   width: 200px;
   height: 200px;
   margin-bottom: 40px;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease;
+}
+
+.login-logo:hover {
+  transform: scale(1.04);
 }
 
 .login-title {
