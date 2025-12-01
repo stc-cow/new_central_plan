@@ -1219,6 +1219,19 @@ window.addEventListener("click", (event) => {
   }
 });
 
+function selectRegion(region) {
+  selectedRegion = region;
+
+  // Update active tab styling
+  document.querySelectorAll(".region-tab").forEach((tab) => {
+    tab.classList.remove("active");
+  });
+  event.target.classList.add("active");
+
+  // Reload dashboard with new region filter
+  loadDashboard();
+}
+
 function startDashboard() {
   if (dashboardInitialized) return;
   dashboardInitialized = true;
