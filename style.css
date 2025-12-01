@@ -23,15 +23,23 @@
 
 .login-page {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 1fr;
-  background: radial-gradient(circle at 15% 30%, rgba(18, 55, 102, 0.04), transparent 40%),
-    radial-gradient(circle at 85% 70%, rgba(18, 55, 102, 0.03), transparent 40%),
-    linear-gradient(135deg, #f7f9fc 0%, #eef2f8 45%, #e6ecf6 100%);
-  padding: 64px 72px;
-  gap: 48px;
+  display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, #0B1F3C 0%, #123766 50%, #0B1F3C 100%);
+  padding: 20px;
+  perspective: 1200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(30, 79, 138, 0.2), transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(30, 79, 138, 0.15), transparent 50%);
+  pointer-events: none;
 }
 
 .login-card {
