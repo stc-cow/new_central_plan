@@ -1237,12 +1237,13 @@ function isInSelectedRegion(site) {
   if (!site.regionname) {
     return false;
   }
+  const regionLower = site.regionname.toLowerCase().trim();
   if (selectedRegion === "CER") {
     return (
-      site.regionname.includes("Central") || site.regionname.includes("East")
+      regionLower.includes("central") || regionLower.includes("east")
     );
   }
-  return site.regionname.includes(selectedRegion);
+  return regionLower.includes(selectedRegion.toLowerCase());
 }
 
 function startDashboard() {
