@@ -26,6 +26,7 @@ let currentPopupOverlay = null;
 let dashboardInitialized = false;
 let headerIntervalId = null;
 let refreshIntervalId = null;
+let selectedRegion = "All";
 
 // Load dashboard on page load
 document.addEventListener("DOMContentLoaded", () => {
