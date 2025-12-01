@@ -1229,6 +1229,14 @@ function selectRegion(region) {
   });
   event.target.classList.add("active");
 
+  // Update event cards visibility based on region
+  const eventCardsContainer = document.getElementById("eventCardsContainer");
+  if (region === "East") {
+    eventCardsContainer.style.display = "none";
+  } else {
+    eventCardsContainer.style.display = "flex";
+  }
+
   // Reload dashboard with new region filter
   loadDashboard();
 }
