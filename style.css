@@ -134,6 +134,17 @@
   transform: translateZ(20px);
 }
 
+.login-title-dark h5 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-shadow:
+    0 2px 4px rgba(11, 31, 60, 0.1),
+    0 4px 8px rgba(11, 31, 60, 0.08),
+    2px 2px 0px rgba(30, 79, 138, 0.15);
+}
+
 .login-subtitle {
   margin: 0 0 28px;
   color: var(--text-secondary);
@@ -155,6 +166,18 @@
   font-weight: 800;
   letter-spacing: 0.4px;
   color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.login-label-dark {
+  color: rgb(255, 255, 255);
+}
+
+.login-label-dark p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
 }
 
