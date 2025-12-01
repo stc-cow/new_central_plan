@@ -161,12 +161,17 @@
   color: var(--text-primary);
   transition: all 0.2s ease;
   font-family: Verdana, sans-serif;
+  box-shadow: 0 4px 12px rgba(11, 31, 60, 0.08);
+  transform: translateZ(10px);
 }
 
 .login-input:focus {
   outline: none;
   border-color: var(--aces-primary);
-  box-shadow: 0 0 0 3px rgba(18, 55, 102, 0.1);
+  box-shadow:
+    0 0 0 3px rgba(18, 55, 102, 0.1),
+    0 8px 20px rgba(11, 31, 60, 0.15);
+  transform: translateZ(15px) translateY(-2px);
 }
 
 .login-actions {
