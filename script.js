@@ -87,7 +87,7 @@ function handleLogin() {
   }
 }
 
-function handleLogout() {
+window.handleLogout = function handleLogout() {
   // Clear login status
   sessionStorage.removeItem("isLoggedIn");
 
@@ -98,7 +98,7 @@ function handleLogout() {
   document.getElementById("username").value = "";
   document.getElementById("password").value = "";
   document.getElementById("loginError").style.display = "none";
-}
+};
 
 async function fetchCSV() {
   try {
