@@ -69,38 +69,76 @@ function setupLogoParallax() {
   const logo = document.querySelector(".login-logo");
   if (!logo) return;
 
-  document.addEventListener("mousemove", (e) => {
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let targetMouseX = mouseX;
+  let targetMouseY = mouseY;
+
+  // Smooth easing animation loop
+  function animateParticles() {
+    mouseX += (targetMouseX - mouseX) * 0.1;
+    mouseY += (targetMouseY - mouseY) * 0.1;
+
+    // Update logo
     const rect = logo.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-
     const offsetX = (mouseX - centerX) * 0.08;
     const offsetY = (mouseY - centerY) * 0.08;
 
-    logo.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.04)`;
+    logo.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(1.05)`;
 
-    // Also move blobs reactively
+    // Calculate color shift based on cursor position (0-1 range)
+    const hueShift = (mouseX / window.innerWidth) * 360;
+    const saturation = (mouseY / window.innerHeight) * 50 + 50;
+
+    // Update main blobs with physics and color shifts
     const blobs = document.querySelectorAll(".blob");
     blobs.forEach((blob, i) => {
-      const speed = (i + 1) * 0.01;
-      const blobX = (window.innerWidth - mouseX * speed);
-      const blobY = (window.innerHeight - mouseY * speed);
-      blob.style.transform = `translate(${blobX}px, ${blobY}px) scale(1.1)`;
+      const speed = 0.02 + (i * 0.005);
+      const blobX = (window.innerWidth - mouseX * speed) / (i + 1);
+      const blobY = (window.innerHeight - mouseY * speed) / (i + 1);
+
+      // Smooth easing for blob movement
+      const currentTransform = blob.style.transform;
+      blob.style.transform = `translate(${blobX}px, ${blobY}px) scale(${1 + (mouseY / window.innerHeight) * 0.15})`;
+
+      // Apply color shifts
+      const hue = (hueShift + (i * 120)) % 360;
+      blob.style.filter = `blur(80px) hue-rotate(${hue}deg) saturate(${saturation}%)`;
     });
+
+    // Update particles with physics
+    const particles = document.querySelectorAll(".particle");
+    particles.forEach((particle, i) => {
+      const particleSpeed = 0.01 + (i * 0.002);
+      const pX = (mouseX * particleSpeed) - (window.innerWidth / 2) * 0.3;
+      const pY = (mouseY * particleSpeed) - (window.innerHeight / 2) * 0.3;
+
+      const scale = 1 + ((mouseX + mouseY) / (window.innerWidth + window.innerHeight)) * 0.2;
+
+      particle.style.transform = `translate(${pX}px, ${pY}px) scale(${scale})`;
+
+      // Color shift for particles
+      const pHue = (hueShift + (i * 36)) % 360;
+      particle.style.filter = `blur(50px) hue-rotate(${pHue}deg) saturate(${saturation}%)`;
+    });
+
+    requestAnimationFrame(animateParticles);
+  }
+
+  document.addEventListener("mousemove", (e) => {
+    targetMouseX = e.clientX;
+    targetMouseY = e.clientY;
   });
 
   document.addEventListener("mouseleave", () => {
-    logo.style.transform = "translate(0, 0) scale(1)";
-
-    // Reset blobs
-    const blobs = document.querySelectorAll(".blob");
-    blobs.forEach((blob) => {
-      blob.style.transform = "translate(0, 0) scale(1)";
-    });
+    targetMouseX = window.innerWidth / 2;
+    targetMouseY = window.innerHeight / 2;
   });
+
+  animateParticles();
 }
 
 function handleLogin() {
