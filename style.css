@@ -93,17 +93,18 @@ body {
 .login-left::before {
   content: "";
   position: absolute;
-  width: 420px;
-  height: 420px;
+  width: 400px;
+  height: 400px;
   background: radial-gradient(
     circle,
-    rgba(226, 43, 43, 0.18) 0%,
+    rgba(255, 40, 40, 0.23) 0%,
     transparent 70%
   );
-  filter: blur(80px);
-  top: -100px;
-  left: -50px;
+  filter: blur(120px);
+  top: -150px;
+  left: -100px;
   z-index: 1;
+  animation: float 8s ease-in-out infinite;
 }
 
 .login-left::after {
@@ -113,13 +114,14 @@ body {
   height: 350px;
   background: radial-gradient(
     circle,
-    rgba(20, 80, 200, 0.2) 0%,
+    rgba(0, 100, 255, 0.26) 0%,
     transparent 70%
   );
-  filter: blur(100px);
-  bottom: -50px;
-  right: -100px;
+  filter: blur(120px);
+  bottom: -100px;
+  right: -50px;
   z-index: 1;
+  animation: float 10s ease-in-out infinite reverse;
 }
 
 .login-branding {
