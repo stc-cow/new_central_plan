@@ -117,9 +117,7 @@ function setupLogoParallax() {
       const pX = (mouseX - window.innerWidth / 2) * particleSpeed;
       const pY = (mouseY - window.innerHeight / 2) * particleSpeed;
 
-      const scale =
-        1 +
-        Math.abs(Math.sin((mouseX - mouseY) / 800 + i)) * 0.15;
+      const scale = 1 + Math.abs(Math.sin((mouseX - mouseY) / 800 + i)) * 0.15;
 
       particle.style.transform = `translate(${pX}px, ${pY}px) scale(${scale})`;
 
