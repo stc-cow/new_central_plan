@@ -1,6 +1,8 @@
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
+const ACES_ACCESS_CODE = "ACES2025";
+
 const SA_CENTER = [23.8859, 45.0792];
 const SA_BOUNDS = [
   [16.3, 32.0],
@@ -21,6 +23,9 @@ let siteMap = {};
 let pulsingCircles = [];
 let markersLayer;
 let currentPopupOverlay = null;
+let dashboardInitialized = false;
+let headerIntervalId = null;
+let refreshIntervalId = null;
 
 // Load dashboard on page load
 document.addEventListener("DOMContentLoaded", () => {
@@ -1213,24 +1218,29 @@ window.addEventListener("click", (event) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+function startDashboard() {
+  if (dashboardInitialized) return;
+  dashboardInitialized = true;
+
   initMap();
   loadDashboard();
 
   updateHeaderDate();
-  setInterval(updateHeaderDate, 1000);
+  headerIntervalId = setInterval(updateHeaderDate, 1000);
 
-  setInterval(() => {
+  refreshIntervalId = setInterval(() => {
     console.log("Auto-refreshing dashboard...");
     loadDashboard();
   }, 120000);
 
   const searchInput = document.getElementById("searchInput");
-  searchInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      searchSite(searchInput.value);
-    }
-  });
+  if (searchInput) {
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        searchSite(searchInput.value);
+      }
+    });
+  }
 
   const modal = document.getElementById("searchModal");
   window.addEventListener("click", (e) => {
@@ -1238,75 +1248,4 @@ document.addEventListener("DOMContentLoaded", () => {
       closeSearchModal();
     }
   });
-});
-
-async function loadAnalytics() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const dueSites = sitesData.filter((s) => {
-    const fuelDate = new Date(s.nextfuelingplan);
-    fuelDate.setHours(0, 0, 0, 0);
-    return fuelDate < today && (s.status === "due" || s.status === "today");
-  });
-
-  const daysOverdueMap = {};
-  dueSites.forEach((site) => {
-    const fuelDate = new Date(site.nextfuelingplan);
-    const daysOver = Math.floor((today - fuelDate) / (1000 * 60 * 60 * 24));
-    daysOverdueMap[site.sitename] = daysOver;
-  });
-
-  document.getElementById("dueSitesCount").textContent = dueSites.length;
-  document.getElementById("affectedSitesCount").textContent = dueSites.length;
-  document.getElementById("violationsCount").textContent = Math.ceil(
-    dueSites.length * 0.15,
-  );
-  document.getElementById("sitesDownCount").textContent = Math.ceil(
-    dueSites.length * 0.3,
-  );
-
-  const dueSitesBreakdown = document.getElementById("dueSitesBreakdown");
-  const violationsBreakdown = document.getElementById("violationsBreakdown");
-  const sitesDownList = document.getElementById("sitesDownList");
-  const dueDetailsList = document.getElementById("dueDetailsList");
-
-  dueSitesBreakdown.innerHTML = `
-    <p>Critical: ${Math.ceil(dueSites.length * 0.3)} sites</p>
-    <p>High Priority: ${Math.ceil(dueSites.length * 0.4)} sites</p>
-    <p>Medium: ${Math.ceil(dueSites.length * 0.3)} sites</p>
-  `;
-
-  violationsBreakdown.innerHTML = `
-    <p>Environmental: ${Math.ceil(dueSites.length * 0.08)} violations</p>
-    <p>Safety: ${Math.ceil(dueSites.length * 0.04)} violations</p>
-    <p>Operational: ${Math.ceil(dueSites.length * 0.03)} violations</p>
-  `;
-
-  const sitesDown = dueSites.slice(0, Math.ceil(dueSites.length * 0.3));
-  sitesDownList.innerHTML = sitesDown
-    .map((s) => `<p>• ${s.sitename}</p>`)
-    .join("");
-
-  dueDetailsList.innerHTML = dueSites
-    .map((site) => {
-      const daysOver = daysOverdueMap[site.sitename];
-      let impactLevel = "Low";
-      if (daysOver > 14) {
-        impactLevel = "Critical";
-      } else if (daysOver > 7) {
-        impactLevel = "High";
-      } else if (daysOver > 3) {
-        impactLevel = "Medium";
-      }
-      return `
-        <tr>
-          <td>${site.sitename}</td>
-          <td>${site.nextfuelingplan}</td>
-          <td>${daysOver} days</td>
-          <td><span class="impact-${impactLevel.toLowerCase()}">${impactLevel}</span></td>
-        </tr>
-      `;
-    })
-    .join("");
 }
