@@ -230,16 +230,7 @@
 }
 
 .login-aside {
-  background: linear-gradient(155deg, #101a46 0%, #202b6d 70%, #2f3b93 100%);
-  color: white;
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 30px 60px rgba(16, 26, 70, 0.35);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
+  display: none !important;
 }
 
 .login-aside::before,
