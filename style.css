@@ -54,7 +54,11 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--aces-dark) 0%, var(--aces-primary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--aces-dark) 0%,
+    var(--aces-primary) 100%
+  );
 }
 
 .login-container {
@@ -66,7 +70,11 @@ body {
 
 .login-left {
   flex: 1;
-  background: linear-gradient(135deg, var(--aces-dark) 0%, var(--aces-primary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--aces-dark) 0%,
+    var(--aces-primary) 100%
+  );
   display: flex;
   align-items: center;
   justify-content: center;
