@@ -97,6 +97,7 @@ function setupLoginForm() {
 function handleLogin() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
+  const rememberMe = document.getElementById("rememberMe").checked;
   const loginError = document.getElementById("loginError");
 
   // Validate credentials
@@ -104,6 +105,13 @@ function handleLogin() {
     // Store login status
     sessionStorage.setItem("isLoggedIn", "true");
     loginError.style.display = "none";
+
+    // Store Remember Me preference
+    if (rememberMe) {
+      localStorage.setItem("rememberMe", "true");
+    } else {
+      localStorage.removeItem("rememberMe");
+    }
 
     // Show dashboard immediately (without waiting for data load)
     showDashboard();
