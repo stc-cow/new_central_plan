@@ -286,17 +286,107 @@ async function updateActiveUsersCount() {
     const { data, error } = await supabaseClient.rpc("count_active_users");
 
     if (error) {
-      console.warn("Could not fetch active users count:", error.message);
+      console.warn("❌ RPC error:", error.code, error.message);
+      // Fallback: directly count from table
+      await fallbackCountActiveUsers();
       return;
     }
 
     const countElement = document.getElementById("activeUsersCount");
     if (countElement && data !== null) {
       countElement.textContent = data || 0;
+      console.log("✓ Active users count updated:", data);
     }
   } catch (error) {
-    console.warn("Warning: Could not fetch active users count:", error.message);
+    console.warn("❌ Warning: Could not fetch active users count:", error.message);
+    await fallbackCountActiveUsers();
   }
+}
+
+async function fallbackCountActiveUsers() {
+  if (!supabaseClient) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("active_users")
+      .select("*", { count: "exact", head: true })
+      .gt("last_activity", new Date(Date.now() - 2 * 60 * 1000).toISOString());
+
+    if (error) {
+      console.error("❌ Fallback count error:", error.message);
+      return;
+    }
+
+    const countElement = document.getElementById("activeUsersCount");
+    if (countElement) {
+      countElement.textContent = data?.length || 0;
+      console.log("✓ Fallback: Active users count updated:", data?.length || 0);
+    }
+  } catch (error) {
+    console.error("❌ Fallback count exception:", error.message);
+  }
+}
+
+async function diagnoseSuppbaseSetup() {
+  console.group("🔍 Supabase Diagnostic Report");
+
+  // Check 1: Supabase client
+  console.log("1. Supabase Client Status:");
+  if (supabaseClient) {
+    console.log("✓ Supabase client initialized");
+  } else {
+    console.error("❌ Supabase client NOT initialized");
+    return;
+  }
+
+  // Check 2: Table exists
+  console.log("\n2. Checking active_users table...");
+  try {
+    const { count, error } = await supabaseClient
+      .from("active_users")
+      .select("*", { count: "exact", head: true });
+
+    if (error) {
+      console.error("❌ Table error:", error.message);
+    } else {
+      console.log("✓ active_users table exists, current records:", count);
+    }
+  } catch (e) {
+    console.error("❌ Exception checking table:", e.message);
+  }
+
+  // Check 3: RPC function exists
+  console.log("\n3. Checking count_active_users RPC function...");
+  try {
+    const { data, error } = await supabaseClient.rpc("count_active_users");
+    if (error) {
+      console.error("❌ RPC function error:", error.code, error.message);
+    } else {
+      console.log("✓ RPC function works, returned:", data);
+    }
+  } catch (e) {
+    console.error("❌ Exception calling RPC:", e.message);
+  }
+
+  // Check 4: Last activity data
+  console.log("\n4. Recent active users (last 10 records)...");
+  try {
+    const { data, error } = await supabaseClient
+      .from("active_users")
+      .select("*")
+      .order("last_activity", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("❌ Query error:", error.message);
+    } else {
+      console.table(data);
+    }
+  } catch (e) {
+    console.error("❌ Exception querying users:", e.message);
+  }
+
+  console.groupEnd();
 }
 
 async function removeActiveUser() {
