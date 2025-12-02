@@ -1261,11 +1261,23 @@ window.showVVVIPModal = function showVVVIPModal() {
 
       tr.style.backgroundColor = rowColor;
 
-      tr.innerHTML = `
-        <td>${site.sitename}</td>
-        <td>${site.nextfuelingplan || "N/A"}</td>
-        <td>${site.sitelabel || "N/A"}</td>
-      `;
+      const gradientStyle = getGradientStyleForFuelDate(site.days);
+      const siteName = document.createElement("td");
+      siteName.textContent = site.sitename;
+
+      const fuelDateCell = document.createElement("td");
+      fuelDateCell.textContent = site.nextfuelingplan || "N/A";
+      fuelDateCell.style.backgroundColor = gradientStyle.backgroundColor;
+      fuelDateCell.style.color = gradientStyle.color;
+      fuelDateCell.style.padding = "8px";
+      fuelDateCell.style.fontWeight = "500";
+
+      const siteLabel = document.createElement("td");
+      siteLabel.textContent = site.sitelabel || "N/A";
+
+      tr.appendChild(siteName);
+      tr.appendChild(fuelDateCell);
+      tr.appendChild(siteLabel);
       tbody.appendChild(tr);
     });
   }
