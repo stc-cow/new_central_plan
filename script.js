@@ -65,39 +65,51 @@ async function createRememberMeToken(username) {
   const deviceId = getOrCreateDeviceId();
   const token =
     "token_" + Math.random().toString(36).substr(2, 20) + "_" + Date.now();
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-  try {
-    // Store only the token (not password) in Supabase
-    const { data, error } = await supabaseClient
-      .from("remember_me_tokens")
-      .upsert(
-        {
-          device_id: deviceId,
-          username: username,
-          token: token,
-          is_active: true,
-        },
-        { onConflict: "device_id" },
-      );
+  // Save comprehensive session data to localStorage (primary)
+  const sessionData = {
+    username: username,
+    device_id: deviceId,
+    token: token,
+    created_at: now.toISOString(),
+    expires_at: expiresAt.toISOString(),
+    is_active: true,
+    last_region: localStorage.getItem("last_selected_region") || "CER",
+    last_login: now.toISOString(),
+  };
 
-    if (error) {
-      console.warn("⚠ Remember-me not available:", error.message);
-      // Still save to localStorage as fallback
-      localStorage.setItem("remember_me_username", username);
-      return token;
+  localStorage.setItem("remember_me_session", JSON.stringify(sessionData));
+  console.log("✓ Remember-me session saved with all details");
+
+  // Also try to save to Supabase (optional backup)
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from("remember_me_tokens")
+        .upsert(
+          {
+            device_id: deviceId,
+            username: username,
+            token: token,
+            is_active: true,
+            expires_at: expiresAt.toISOString(),
+          },
+          { onConflict: "device_id" },
+        );
+
+      if (error) {
+        console.warn("⚠ Supabase backup failed:", error.message);
+      } else {
+        console.log("✓ Synced to Supabase");
+      }
+    } catch (error) {
+      console.warn("⚠ Could not sync to Supabase:", error.message);
     }
-
-    // Also store in localStorage for quick access
-    localStorage.setItem("remember_me_token", token);
-    localStorage.setItem("remember_me_username", username);
-    console.log("✓ Remember-me token saved");
-    return token;
-  } catch (error) {
-    console.warn("⚠ Remember-me not available:", error.message);
-    // Fallback to localStorage
-    localStorage.setItem("remember_me_username", username);
-    return token;
   }
+
+  return token;
 }
 
 // Check and restore remember-me session
