@@ -118,37 +118,66 @@ async function checkRememberMeToken() {
     await initSupabaseClient();
   }
 
-  const deviceId = getOrCreateDeviceId();
+  // Check localStorage first (primary source)
+  const savedSession = localStorage.getItem("remember_me_session");
+  if (savedSession) {
+    try {
+      const sessionData = JSON.parse(savedSession);
+      const expiresAt = new Date(sessionData.expires_at);
+      const now = new Date();
 
-  try {
-    // Query the token from Supabase
-    const { data, error } = await supabaseClient
-      .from("remember_me_tokens")
-      .select("*")
-      .eq("device_id", deviceId)
-      .eq("is_active", true)
-      .gt("expires_at", new Date().toISOString())
-      .single();
-
-    if (error || !data) {
-      // Fallback: check localStorage
-      const savedUsername = localStorage.getItem("remember_me_username");
-      if (savedUsername) {
-        return { username: savedUsername, device_id: deviceId };
+      // Check if token is still valid
+      if (expiresAt > now && sessionData.is_active) {
+        console.log("✓ Remember-me session found for:", sessionData.username);
+        // Update last login timestamp
+        sessionData.last_login = now.toISOString();
+        localStorage.setItem("remember_me_session", JSON.stringify(sessionData));
+        return sessionData;
+      } else {
+        console.log("⚠ Remember-me session expired");
+        localStorage.removeItem("remember_me_session");
+        return null;
       }
-      return null;
+    } catch (error) {
+      console.warn("⚠ Could not parse session:", error.message);
+      localStorage.removeItem("remember_me_session");
     }
-
-    console.log("✓ Remember-me token found for:", data.username);
-    return data;
-  } catch (error) {
-    // Fallback: check localStorage
-    const savedUsername = localStorage.getItem("remember_me_username");
-    if (savedUsername) {
-      return { username: savedUsername, device_id: deviceId };
-    }
-    return null;
   }
+
+  // Fallback: Try Supabase if available
+  if (supabaseClient) {
+    const deviceId = getOrCreateDeviceId();
+    try {
+      const { data, error } = await supabaseClient
+        .from("remember_me_tokens")
+        .select("*")
+        .eq("device_id", deviceId)
+        .eq("is_active", true)
+        .gt("expires_at", new Date().toISOString())
+        .single();
+
+      if (!error && data) {
+        console.log("✓ Remember-me token found in Supabase for:", data.username);
+        // Restore to localStorage
+        const sessionData = {
+          username: data.username,
+          device_id: data.device_id,
+          token: data.token,
+          created_at: data.created_at,
+          expires_at: data.expires_at,
+          is_active: data.is_active,
+          last_region: "CER",
+          last_login: new Date().toISOString(),
+        };
+        localStorage.setItem("remember_me_session", JSON.stringify(sessionData));
+        return sessionData;
+      }
+    } catch (error) {
+      console.warn("⚠ Could not check Supabase:", error.message);
+    }
+  }
+
+  return null;
 }
 
 // Clear remember-me token on logout
