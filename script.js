@@ -51,15 +51,26 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initializeApp() {
-  // Check if user is already logged in
+  // Check if user is already logged in (session)
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
 
   if (isLoggedIn) {
     showDashboard();
     startDashboardAsync();
   } else {
-    showLoginPage();
-    setupLoginForm();
+    // Check if user has "Remember Me" enabled
+    const rememberMeData = localStorage.getItem("rememberMe");
+
+    if (rememberMeData) {
+      // Auto-login with remembered credentials
+      sessionStorage.setItem("isLoggedIn", "true");
+      showDashboard();
+      startDashboardAsync();
+    } else {
+      // Show login page
+      showLoginPage();
+      setupLoginForm();
+    }
   }
 }
 
