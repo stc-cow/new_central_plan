@@ -1172,11 +1172,11 @@ body {
   flex-direction: column;
 }
 
-.kpi-card h3 {
+.kpi-title {
   font-size: 13px;
   font-weight: 800;
   color: var(--aces-primary);
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
