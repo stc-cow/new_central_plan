@@ -724,9 +724,7 @@ async function startDashboardAsync() {
 window.handleLogout = function handleLogout() {
   // Clear login status
   sessionStorage.removeItem("isLoggedIn");
-
-  // Clear remember-me token from Supabase
-  clearRememberMeToken();
+  sessionStorage.removeItem("username");
 
   // Remove user from active users and clear intervals
   removeActiveUser();
@@ -739,7 +737,6 @@ window.handleLogout = function handleLogout() {
   // Clear form fields
   document.getElementById("username").value = "";
   document.getElementById("password").value = "";
-  document.getElementById("rememberMe").checked = false;
   document.getElementById("loginError").style.display = "none";
 };
 
