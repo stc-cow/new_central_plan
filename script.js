@@ -135,21 +135,25 @@ async function updateActiveUsersCount() {
     await supabaseClient
       .from("active_users")
       .delete()
-      .lt("last_activity", fiveMinutesAgo);
+      .lt("last_activity", fiveMinutesAgo)
+      .catch(err => console.log("Cleanup error (may be expected if table empty):", err));
 
     // Get current active users count
     const { count, error } = await supabaseClient
       .from("active_users")
       .select("*", { count: "exact", head: true });
 
-    if (error) throw error;
+    if (error) {
+      console.warn("Active users query error:", error.message);
+      return;
+    }
 
     const countElement = document.getElementById("activeUsersCount");
     if (countElement) {
       countElement.textContent = count || 0;
     }
   } catch (error) {
-    console.error("Error fetching active users count:", error);
+    console.warn("Warning: Could not fetch active users count:", error.message);
   }
 }
 
