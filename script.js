@@ -244,9 +244,7 @@ function initSupabaseClient() {
 
 async function registerActiveUser(username) {
   if (!supabaseClient) {
-    initSupabaseClient();
-    // Wait a moment for client to load
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await initSupabaseClient();
   }
 
   // Get or create session ID
