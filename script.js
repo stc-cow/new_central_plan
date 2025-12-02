@@ -620,62 +620,21 @@ async function testSupabaseRESTEndpoints() {
 }
 
 async function initializeApp() {
-  // Initialize Supabase client and wait for it
+  // Initialize Supabase client
   await initSupabaseClient();
 
   // Check if user is already logged in (session)
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
 
   if (isLoggedIn) {
+    const username = sessionStorage.getItem("username") || "Aces@MSD";
     showDashboard();
-    registerActiveUser("Aces@MSD");
+    registerActiveUser(username);
     startDashboardAsync();
   } else {
-    // Check for remember-me token in Supabase
-    const rememberMeToken = await checkRememberMeToken();
-
-    if (rememberMeToken) {
-      // Auto-login with remember-me token
-      console.log(
-        "Remember Me token found - auto-logging in as:",
-        rememberMeToken.username,
-      );
-      sessionStorage.setItem("isLoggedIn", "true");
-
-      // Prefill the login form for visual feedback
-      document.getElementById("username").value = rememberMeToken.username;
-      document.getElementById("rememberMe").checked = true;
-
-      // Restore last selected region
-      if (rememberMeToken.last_region) {
-        localStorage.setItem(
-          "last_selected_region",
-          rememberMeToken.last_region,
-        );
-        console.log("✓ Restored last region:", rememberMeToken.last_region);
-      }
-
-      showDashboard();
-      registerActiveUser(rememberMeToken.username);
-      startDashboardAsync();
-
-      // Auto-select the last used region
-      if (rememberMeToken.last_region) {
-        selectRegion(rememberMeToken.last_region);
-      }
-    } else {
-      // Check localStorage for remembered username (for form prefill)
-      const savedUsername = localStorage.getItem("remember_me_username");
-      if (savedUsername) {
-        document.getElementById("username").value = savedUsername;
-        document.getElementById("rememberMe").checked = true;
-      }
-
-      // Show login page
-      console.log("No valid remember-me token - showing login page");
-      showLoginPage();
-      setupLoginForm();
-    }
+    // Show login page
+    showLoginPage();
+    setupLoginForm();
   }
 }
 
