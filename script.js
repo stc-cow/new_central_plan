@@ -59,7 +59,112 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeApp();
 });
 
+function initSupabaseClient() {
+  if (!window.supabase) {
+    // Load Supabase library if not already loaded
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js";
+    script.onload = function() {
+      supabaseClient = window.supabase.createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
+    };
+    document.head.appendChild(script);
+  } else {
+    supabaseClient = window.supabase.createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
+  }
+}
+
+async function registerActiveUser(username) {
+  if (!supabaseClient) {
+    initSupabaseClient();
+    // Wait a moment for client to load
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  currentSessionId = "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+
+  try {
+    await supabaseClient
+      .from("active_users")
+      .insert({
+        username: username,
+        session_id: currentSessionId,
+        last_activity: new Date().toISOString(),
+      });
+
+    console.log("User registered as active");
+    updateActiveUsersCount();
+
+    // Update activity every 30 seconds
+    if (updateActivityIntervalId) clearInterval(updateActivityIntervalId);
+    updateActivityIntervalId = setInterval(updateUserActivity, 30000);
+
+    // Fetch active users count every 5 seconds
+    if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
+    activeUsersIntervalId = setInterval(updateActiveUsersCount, 5000);
+  } catch (error) {
+    console.error("Error registering active user:", error);
+  }
+}
+
+async function updateUserActivity() {
+  if (!supabaseClient || !currentSessionId) return;
+
+  try {
+    await supabaseClient
+      .from("active_users")
+      .update({ last_activity: new Date().toISOString() })
+      .eq("session_id", currentSessionId);
+  } catch (error) {
+    console.error("Error updating user activity:", error);
+  }
+}
+
+async function updateActiveUsersCount() {
+  if (!supabaseClient) return;
+
+  try {
+    // Remove users with last activity older than 5 minutes
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    await supabaseClient
+      .from("active_users")
+      .delete()
+      .lt("last_activity", fiveMinutesAgo);
+
+    // Get current active users count
+    const { count, error } = await supabaseClient
+      .from("active_users")
+      .select("*", { count: "exact", head: true });
+
+    if (error) throw error;
+
+    const countElement = document.getElementById("activeUsersCount");
+    if (countElement) {
+      countElement.textContent = count || 0;
+    }
+  } catch (error) {
+    console.error("Error fetching active users count:", error);
+  }
+}
+
+async function removeActiveUser() {
+  if (!supabaseClient || !currentSessionId) return;
+
+  try {
+    await supabaseClient
+      .from("active_users")
+      .delete()
+      .eq("session_id", currentSessionId);
+
+    currentSessionId = null;
+  } catch (error) {
+    console.error("Error removing active user:", error);
+  }
+}
+
 function initializeApp() {
+  // Initialize Supabase client
+  initSupabaseClient();
+
   // Check if user is already logged in (session)
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
 
