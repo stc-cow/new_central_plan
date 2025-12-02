@@ -695,7 +695,7 @@ function setupLoginForm() {
 
   // Check for login error from query params (when backend redirects back due to invalid credentials)
   const params = new URLSearchParams(window.location.search);
-  if (params.has('login_error')) {
+  if (params.has("login_error")) {
     const loginError = document.getElementById("loginError");
     loginError.textContent = "Invalid username or password";
     loginError.style.display = "block";

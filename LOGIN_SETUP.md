@@ -20,6 +20,7 @@ pnpm install
 ```
 
 This installs:
+
 - `express` - Backend server framework
 - `cookie-parser` - For handling session cookies
 
@@ -54,10 +55,11 @@ Server starts on `http://localhost:3000`
 ## What Changed
 
 ### HTML Form (`index.html`)
+
 ```html
-<form 
-  class="login-form" 
-  id="loginForm" 
+<form
+  class="login-form"
+  id="loginForm"
   method="POST"          <!-- ✅ Normal form submission -->
   action="/login-api"    <!-- ✅ Posts to backend API -->
   autocomplete="on"      <!-- ✅ Enables auto-fill -->
@@ -69,11 +71,13 @@ Server starts on `http://localhost:3000`
 ```
 
 ### JavaScript (`script.js`)
+
 - ✅ Removed `e.preventDefault()` - allows normal form submission
 - ✅ Removed client-side validation
 - ✅ Backend handles all validation and security
 
 ### Backend Server (`server.js`)
+
 - ✅ POST `/login-api` endpoint
 - ✅ Validates credentials
 - ✅ Returns HTTP 302 redirect
@@ -96,7 +100,9 @@ All these conditions are now met!
 ## API Endpoints
 
 ### POST `/login-api`
+
 Login with credentials
+
 ```
 POST /login-api HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
@@ -108,9 +114,11 @@ username=Aces@MSD&password=ACES@2025
 **Failure:** `HTTP 302` redirect to `/?login_error=1`
 
 ### GET `/new_central_plan/`
+
 Dashboard (requires valid session cookie)
 
 ### GET `/logout`
+
 Logout and clear session
 
 ## Production Deployment
@@ -123,11 +131,13 @@ When deploying to production:
 4. Server serves static files from `dist/` folder
 
 Example with Fly.io:
+
 ```bash
 fly deploy
 ```
 
 Example with Heroku:
+
 ```bash
 git push heroku main
 ```
@@ -135,11 +145,13 @@ git push heroku main
 ## Troubleshooting
 
 ### "405 Not Allowed" Error
+
 - Form is trying to POST to wrong endpoint
 - Check `<form action="/login-api">`
 - Ensure `method="POST"` is set
 
 ### Browser not showing "Save Password?"
+
 - Check form uses `<input name="username">` (not `id="username"`)
 - Check form uses `<input name="password">` (not `id="password"`)
 - Check form has `<form ... method="POST" action="/login-api">`
@@ -147,6 +159,7 @@ git push heroku main
 - Refresh browser page if form was cached
 
 ### "Cookie not set" or "Session lost"
+
 - Check cookies are not disabled
 - Check `/new_central_plan/` validates `session_id` cookie
 - Check cookies have `httpOnly: true` (secure)
