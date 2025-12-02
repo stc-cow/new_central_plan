@@ -170,8 +170,11 @@ function handleLogin() {
     sessionStorage.setItem("isLoggedIn", "true");
     loginError.style.display = "none";
 
-    // Show dashboard
+    // Show dashboard immediately (without waiting for data load)
     showDashboard();
+
+    // Load data in background
+    startDashboardAsync();
   } else {
     // Show error
     loginError.textContent = "Invalid username or password";
@@ -179,6 +182,42 @@ function handleLogin() {
 
     // Clear password field
     document.getElementById("password").value = "";
+  }
+}
+
+async function startDashboardAsync() {
+  if (dashboardInitialized) return;
+  dashboardInitialized = true;
+
+  try {
+    initMap();
+    await loadDashboard();
+
+    updateHeaderDate();
+    headerIntervalId = setInterval(updateHeaderDate, 1000);
+
+    refreshIntervalId = setInterval(() => {
+      console.log("Auto-refreshing dashboard...");
+      loadDashboard();
+    }, 120000);
+
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          searchSite(searchInput.value);
+        }
+      });
+    }
+
+    const modal = document.getElementById("searchModal");
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        closeSearchModal();
+      }
+    });
+  } catch (error) {
+    console.error("Error loading dashboard:", error);
   }
 }
 
