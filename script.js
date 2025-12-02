@@ -174,29 +174,17 @@ async function updateActiveUsersCount() {
   if (!supabaseClient) return;
 
   try {
-    // Remove users with last activity older than 5 minutes
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    await supabaseClient
-      .from("active_users")
-      .delete()
-      .lt("last_activity", fiveMinutesAgo)
-      .catch((err) =>
-        console.log("Cleanup error (may be expected if table empty):", err),
-      );
-
-    // Get current active users count
-    const { count, error } = await supabaseClient
-      .from("active_users")
-      .select("*", { count: "exact", head: true });
+    // Call Supabase RPC function to get active users count (within last 2 minutes)
+    const { data, error } = await supabaseClient.rpc("count_active_users");
 
     if (error) {
-      console.warn("Active users query error:", error.message);
+      console.warn("Could not fetch active users count:", error.message);
       return;
     }
 
     const countElement = document.getElementById("activeUsersCount");
-    if (countElement) {
-      countElement.textContent = count || 0;
+    if (countElement && data !== null) {
+      countElement.textContent = data || 0;
     }
   } catch (error) {
     console.warn("Warning: Could not fetch active users count:", error.message);
