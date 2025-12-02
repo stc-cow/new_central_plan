@@ -708,89 +708,9 @@ function setupLoginForm() {
   // The browser will then show the "Save Password?" dialog
 }
 
-async function handleLogin() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
-  const rememberMe = document.getElementById("rememberMe").checked;
-  const loginError = document.getElementById("loginError");
-
-  // Validate credentials
-  if (username === "Aces@MSD" && password === "ACES@2025") {
-    // Store login status
-    sessionStorage.setItem("isLoggedIn", "true");
-    loginError.style.display = "none";
-
-    // Handle Remember Me
-    if (rememberMe) {
-      await saveBrowserCredentials(username, password);
-      await createRememberMeToken(username);
-      console.log("✓ Remember Me enabled - token stored in Supabase");
-    } else {
-      localStorage.removeItem("remember_me_username");
-      await clearRememberMeToken();
-      console.log("✓ Remember Me disabled");
-    }
-
-    // Register user as active in Supabase with proper error handling
-    console.log("Registering user as active...");
-    await registerActiveUser(username);
-    console.log("✓ User registered as active");
-
-    // Run diagnostics to verify setup
-    setTimeout(() => diagnoseSupabaseSetup(), 1000);
-
-    // Show dashboard immediately
-    showDashboard();
-
-    // Load data in background
-    await startDashboardAsync();
-
-    // Trigger browser password save dialog with form submission
-    // This is the most reliable way to get browsers to show the save password prompt
-    setTimeout(() => {
-      try {
-        const hiddenForm = document.createElement("form");
-        hiddenForm.method = "POST";
-        hiddenForm.style.display = "none";
-
-        const usernameInput = document.createElement("input");
-        usernameInput.type = "text";
-        usernameInput.name = "username";
-        usernameInput.value = username;
-
-        const passwordInput = document.createElement("input");
-        passwordInput.type = "password";
-        passwordInput.name = "password";
-        passwordInput.value = password;
-
-        hiddenForm.appendChild(usernameInput);
-        hiddenForm.appendChild(passwordInput);
-        document.body.appendChild(hiddenForm);
-
-        // Submit the form - this triggers the browser's password manager
-        hiddenForm.submit();
-
-        // Clean up
-        setTimeout(() => {
-          if (document.body.contains(hiddenForm)) {
-            document.body.removeChild(hiddenForm);
-          }
-        }, 100);
-
-        console.log("✓ Browser password save dialog triggered");
-      } catch (error) {
-        console.log("Could not trigger password save:", error.message);
-      }
-    }, 300);
-  } else {
-    // Show error
-    loginError.textContent = "Invalid username or password";
-    loginError.style.display = "block";
-
-    // Clear password field
-    document.getElementById("password").value = "";
-  }
-}
+// handleLogin is replaced by backend form submission to /login-api
+// Backend validates credentials and returns HTTP 302 redirect to /new_central_plan/
+// Browser automatically saves password after successful login redirect
 
 async function startDashboardAsync() {
   if (dashboardInitialized) return;
