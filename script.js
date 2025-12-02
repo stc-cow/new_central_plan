@@ -121,14 +121,22 @@ async function checkRememberMeToken() {
       .single();
 
     if (error || !data) {
-      console.log("No valid remember-me token found");
+      // Fallback: check localStorage
+      const savedUsername = localStorage.getItem("remember_me_username");
+      if (savedUsername) {
+        return { username: savedUsername, device_id: deviceId };
+      }
       return null;
     }
 
-    console.log("Remember Me token found for:", data.username);
+    console.log("✓ Remember-me token found for:", data.username);
     return data;
   } catch (error) {
-    console.log("Could not check remember-me token:", error.message);
+    // Fallback: check localStorage
+    const savedUsername = localStorage.getItem("remember_me_username");
+    if (savedUsername) {
+      return { username: savedUsername, device_id: deviceId };
+    }
     return null;
   }
 }
