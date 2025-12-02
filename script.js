@@ -30,6 +30,20 @@ let currentSessionId = null;
 let activeUsersIntervalId = null;
 let updateActivityIntervalId = null;
 
+// Extract username from URL params
+const urlParams = new URLSearchParams(window.location.search);
+let urlUsername = urlParams.get("username") || "Guest";
+
+// Initialize or retrieve session ID
+function getOrCreateSessionId() {
+  let sessionId = localStorage.getItem("session_id");
+  if (!sessionId) {
+    sessionId = "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+    localStorage.setItem("session_id", sessionId);
+  }
+  return sessionId;
+}
+
 const SA_CENTER = [23.8859, 45.0792];
 const SA_BOUNDS = [
   [16.3, 32.0],
