@@ -680,7 +680,7 @@ body {
 
 .active-users-count {
   font-weight: 700;
-  color: var(--aces-primary);
+  color: rgb(255, 255, 255);
   font-size: 14px;
 }
 
