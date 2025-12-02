@@ -84,19 +84,26 @@ async function registerActiveUser(username) {
   if (!supabaseClient) {
     initSupabaseClient();
     // Wait a moment for client to load
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
   }
 
   currentSessionId = "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
 
   try {
-    await supabaseClient
+    // Try to insert, but don't fail if table doesn't exist
+    const { error } = await supabaseClient
       .from("active_users")
       .insert({
         username: username,
         session_id: currentSessionId,
         last_activity: new Date().toISOString(),
       });
+
+    if (error && error.code !== "PGRST116") {
+      // Only log if it's not a "table does not exist" error
+      console.warn("Note: Active users tracking not available - create table in Supabase");
+      return;
+    }
 
     console.log("User registered as active");
     updateActiveUsersCount();
@@ -109,7 +116,7 @@ async function registerActiveUser(username) {
     if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
     activeUsersIntervalId = setInterval(updateActiveUsersCount, 5000);
   } catch (error) {
-    console.error("Error registering active user:", error);
+    console.warn("Could not register active user:", error.message);
   }
 }
 
