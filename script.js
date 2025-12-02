@@ -710,14 +710,18 @@ async function handleLogin() {
           id: username,
           password: password,
           name: username,
-          iconURL: "https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Ff2e39f8a2b5f4c6f9a8b0c1d2e3f4a5b"
+          iconURL:
+            "https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Ff2e39f8a2b5f4c6f9a8b0c1d2e3f4a5b",
         });
 
-        navigator.credentials.store(cred).then(() => {
-          console.log("✓ Browser password manager save dialog triggered");
-        }).catch((error) => {
-          console.log("Password manager not available:", error.message);
-        });
+        navigator.credentials
+          .store(cred)
+          .then(() => {
+            console.log("✓ Browser password manager save dialog triggered");
+          })
+          .catch((error) => {
+            console.log("Password manager not available:", error.message);
+          });
       } catch (error) {
         console.log("Could not trigger password save:", error.message);
       }
