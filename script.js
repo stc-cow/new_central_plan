@@ -429,6 +429,127 @@ async function removeActiveUser() {
   }
 }
 
+// Test Supabase REST endpoints
+async function testSupabaseRESTEndpoints() {
+  console.group("🧪 Testing Supabase REST Endpoints");
+
+  if (!supabaseClient) {
+    await initSupabaseClient();
+  }
+
+  if (!supabaseClient) {
+    console.error("❌ Supabase client not initialized");
+    console.groupEnd();
+    return;
+  }
+
+  const apiKey = VITE_SUPABASE_KEY;
+  const baseUrl = VITE_SUPABASE_URL;
+
+  // Test 1: Query active_users table via REST
+  console.log("\n📋 Test 1: Query active_users table");
+  try {
+    const response = await fetch(
+      `${baseUrl}/rest/v1/active_users?select=*&limit=5`,
+      {
+        headers: {
+          "apikey": apiKey,
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    if (response.ok) {
+      console.log("✅ REST endpoint working. Records:", data.length);
+      console.table(data);
+    } else {
+      console.error(`❌ REST error (${response.status}):`, data);
+    }
+  } catch (err) {
+    console.error("❌ Fetch error:", err.message);
+  }
+
+  // Test 2: Query remember_me_tokens table via REST
+  console.log("\n📋 Test 2: Query remember_me_tokens table");
+  try {
+    const response = await fetch(
+      `${baseUrl}/rest/v1/remember_me_tokens?select=*&limit=5`,
+      {
+        headers: {
+          "apikey": apiKey,
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    if (response.ok) {
+      console.log("✅ REST endpoint working. Records:", data.length);
+      console.table(data);
+    } else {
+      console.error(`❌ REST error (${response.status}):`, data);
+    }
+  } catch (err) {
+    console.error("❌ Fetch error:", err.message);
+  }
+
+  // Test 3: Call count_active_users RPC function
+  console.log("\n📋 Test 3: Call count_active_users RPC");
+  try {
+    const response = await fetch(
+      `${baseUrl}/rest/v1/rpc/count_active_users`,
+      {
+        method: "POST",
+        headers: {
+          "apikey": apiKey,
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    if (response.ok) {
+      console.log("✅ RPC function working. Active users:", data);
+    } else {
+      console.error(`❌ RPC error (${response.status}):`, data);
+    }
+  } catch (err) {
+    console.error("❌ Fetch error:", err.message);
+  }
+
+  // Test 4: Insert test record into active_users
+  console.log("\n📋 Test 4: Insert test record (via SDK)");
+  try {
+    const testSession = "test_" + Date.now();
+    const { data, error } = await supabaseClient
+      .from("active_users")
+      .insert({
+        session_id: testSession,
+        username: "test_user",
+        last_activity: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error("❌ Insert error:", error.message);
+    } else {
+      console.log("✅ Insert successful. Data:", data);
+
+      // Clean up test record
+      await supabaseClient
+        .from("active_users")
+        .delete()
+        .eq("session_id", testSession)
+        .catch((e) => console.error("Cleanup error:", e));
+    }
+  } catch (err) {
+    console.error("❌ Exception:", err.message);
+  }
+
+  console.log("\n✅ Testing complete");
+  console.groupEnd();
+}
+
 async function initializeApp() {
   // Initialize Supabase client and wait for it
   await initSupabaseClient();
