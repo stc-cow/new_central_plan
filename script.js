@@ -167,6 +167,7 @@ async function startDashboardAsync() {
 window.handleLogout = function handleLogout() {
   // Clear login status
   sessionStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("rememberMe");
 
   // Show login page
   showLoginPage();
@@ -174,6 +175,7 @@ window.handleLogout = function handleLogout() {
   // Clear form fields
   document.getElementById("username").value = "";
   document.getElementById("password").value = "";
+  document.getElementById("rememberMe").checked = false;
   document.getElementById("loginError").style.display = "none";
 };
 
