@@ -59,6 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeApp();
 });
 
+// Clean up active user when page is closed or navigated away
+window.addEventListener("beforeunload", () => {
+  removeActiveUser();
+  if (updateActivityIntervalId) clearInterval(updateActivityIntervalId);
+  if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
+});
+
 function initSupabaseClient() {
   if (!window.supabase) {
     // Load Supabase library if not already loaded
