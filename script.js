@@ -671,9 +671,11 @@ function showDashboard() {
 
 function setupLoginForm() {
   const loginForm = document.getElementById("loginForm");
-  loginForm.addEventListener("submit", (e) => {
+  loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    handleLogin();
+    await handleLogin();
+    // After successful login, submit the form normally so browser can save password
+    // This triggers the browser's password manager save dialog
   });
 }
 
