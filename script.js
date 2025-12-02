@@ -122,35 +122,35 @@ async function registerActiveUser(username) {
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
-  currentSessionId =
-    "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+  // Get or create session ID
+  currentSessionId = getOrCreateSessionId();
+
+  // Use URL username if available, otherwise use parameter
+  const finalUsername = urlUsername !== "Guest" ? urlUsername : username;
 
   try {
-    // Try to insert, but don't fail if table doesn't exist
-    const { error } = await supabaseClient.from("active_users").insert({
-      username: username,
+    // Use upsert to insert or update existing session
+    const { error } = await supabaseClient.from("active_users").upsert({
+      username: finalUsername,
       session_id: currentSessionId,
       last_activity: new Date().toISOString(),
-    });
+    }, { onConflict: "session_id" });
 
-    if (error && error.code !== "PGRST116") {
-      // Only log if it's not a "table does not exist" error
-      console.warn(
-        "Note: Active users tracking not available - create table in Supabase",
-      );
+    if (error) {
+      console.warn("Could not register active user:", error.message);
       return;
     }
 
-    console.log("User registered as active");
+    console.log("User registered as active with session:", currentSessionId);
     updateActiveUsersCount();
 
-    // Update activity every 30 seconds
+    // Update activity every 20 seconds
     if (updateActivityIntervalId) clearInterval(updateActivityIntervalId);
-    updateActivityIntervalId = setInterval(updateUserActivity, 30000);
+    updateActivityIntervalId = setInterval(updateUserActivity, 20000);
 
-    // Fetch active users count every 5 seconds
+    // Fetch active users count every 10 seconds
     if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
-    activeUsersIntervalId = setInterval(updateActiveUsersCount, 5000);
+    activeUsersIntervalId = setInterval(updateActiveUsersCount, 10000);
   } catch (error) {
     console.warn("Could not register active user:", error.message);
   }
