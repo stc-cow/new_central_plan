@@ -182,21 +182,26 @@ async function checkRememberMeToken() {
 
 // Clear remember-me token on logout
 async function clearRememberMeToken() {
-  if (!supabaseClient) return;
+  // Clear from localStorage first
+  localStorage.removeItem("remember_me_session");
+  localStorage.removeItem("remember_me_token");
+  localStorage.removeItem("remember_me_username");
 
-  const deviceId = localStorage.getItem("device_id");
-
-  try {
-    await supabaseClient
-      .from("remember_me_tokens")
-      .update({ is_active: false })
-      .eq("device_id", deviceId)
-      .catch((err) => null);
-
-    localStorage.removeItem("remember_me_token");
-    localStorage.removeItem("remember_me_username");
-  } catch (error) {
-    console.log("Error clearing remember-me token");
+  // Try to clear from Supabase if available
+  if (supabaseClient) {
+    const deviceId = localStorage.getItem("device_id");
+    if (deviceId) {
+      try {
+        await supabaseClient
+          .from("remember_me_tokens")
+          .update({ is_active: false })
+          .eq("device_id", deviceId)
+          .catch((err) => null);
+        console.log("✓ Remember-me cleared");
+      } catch (error) {
+        console.warn("⚠ Could not clear from Supabase:", error.message);
+      }
+    }
   }
 }
 
