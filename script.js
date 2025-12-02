@@ -618,9 +618,20 @@ async function initializeApp() {
       document.getElementById("username").value = rememberMeToken.username;
       document.getElementById("rememberMe").checked = true;
 
+      // Restore last selected region
+      if (rememberMeToken.last_region) {
+        localStorage.setItem("last_selected_region", rememberMeToken.last_region);
+        console.log("✓ Restored last region:", rememberMeToken.last_region);
+      }
+
       showDashboard();
       registerActiveUser(rememberMeToken.username);
       startDashboardAsync();
+
+      // Auto-select the last used region
+      if (rememberMeToken.last_region) {
+        selectRegion(rememberMeToken.last_region);
+      }
     } else {
       // Check localStorage for remembered username (for form prefill)
       const savedUsername = localStorage.getItem("remember_me_username");
