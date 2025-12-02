@@ -75,8 +75,10 @@ function initializeApp() {
 }
 
 function showLoginPage() {
-  document.getElementById("loginPage").style.display = "flex";
+  const loginPage = document.getElementById("loginPage");
+  loginPage.classList.add("show");
   document.getElementById("dashboardPage").style.display = "none";
+  setupLogoParallax();
 }
 
 function showDashboard() {
