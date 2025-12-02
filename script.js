@@ -199,37 +199,49 @@ window.addEventListener("beforeunload", () => {
 });
 
 function initSupabaseClient() {
-  if (!window.supabase) {
-    // Load Supabase library if not already loaded
-    const script = document.createElement("script");
-    script.src =
-      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js";
-    script.onload = function () {
+  // Return immediately if client is already initialized
+  if (supabaseClient) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    if (!window.supabase) {
+      // Load Supabase library if not already loaded
+      const script = document.createElement("script");
+      script.src =
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js";
+      script.onload = function () {
+        try {
+          supabaseClient = window.supabase.createClient(
+            VITE_SUPABASE_URL,
+            VITE_SUPABASE_KEY,
+          );
+          console.log("✓ Supabase client initialized");
+          resolve();
+        } catch (err) {
+          console.warn("Could not initialize Supabase client:", err.message);
+          resolve();
+        }
+      };
+      script.onerror = function () {
+        console.warn("Could not load Supabase library");
+        resolve();
+      };
+      document.head.appendChild(script);
+    } else {
       try {
         supabaseClient = window.supabase.createClient(
           VITE_SUPABASE_URL,
           VITE_SUPABASE_KEY,
         );
-        console.log("Supabase client initialized");
+        console.log("✓ Supabase client initialized");
+        resolve();
       } catch (err) {
         console.warn("Could not initialize Supabase client:", err.message);
+        resolve();
       }
-    };
-    script.onerror = function () {
-      console.warn("Could not load Supabase library");
-    };
-    document.head.appendChild(script);
-  } else {
-    try {
-      supabaseClient = window.supabase.createClient(
-        VITE_SUPABASE_URL,
-        VITE_SUPABASE_KEY,
-      );
-      console.log("Supabase client initialized");
-    } catch (err) {
-      console.warn("Could not initialize Supabase client:", err.message);
     }
-  }
+  });
 }
 
 async function registerActiveUser(username) {
