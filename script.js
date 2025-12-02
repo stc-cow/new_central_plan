@@ -285,6 +285,11 @@ window.handleLogout = function handleLogout() {
   sessionStorage.removeItem("isLoggedIn");
   localStorage.removeItem("rememberMe");
 
+  // Remove user from active users and clear intervals
+  removeActiveUser();
+  if (updateActivityIntervalId) clearInterval(updateActivityIntervalId);
+  if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
+
   // Show login page
   showLoginPage();
 
