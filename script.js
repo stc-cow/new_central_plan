@@ -1701,11 +1701,14 @@ function updateEventCards(sites) {
 
   const mdlBeastSites = [
     "COW017",
-    "COW018",
-    "COW019",
-    "COW036",
-    "COW762",
+    "COW08",
+    "COW056",
+    "COW801",
     "COW805",
+    "COW726",
+    "COW775",
+    "COW741",
+    "COW823",
   ];
   const mdlSites = sites.filter((s) => mdlBeastSites.includes(s.sitename));
 
