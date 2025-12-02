@@ -368,12 +368,14 @@ function handleLogin() {
     sessionStorage.setItem("isLoggedIn", "true");
     loginError.style.display = "none";
 
-    // Store Remember Me preference
+    // Handle Remember Me
     if (rememberMe) {
-      localStorage.setItem("rememberMe", "true");
-      console.log("Remember Me enabled - stored in localStorage");
+      createRememberMeToken(username);
+      console.log("Remember Me enabled - token stored in Supabase");
     } else {
       localStorage.removeItem("rememberMe");
+      localStorage.removeItem("remember_me_token");
+      localStorage.removeItem("remember_me_username");
       console.log("Remember Me disabled");
     }
 
