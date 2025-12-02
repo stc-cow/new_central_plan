@@ -38,7 +38,8 @@ let urlUsername = urlParams.get("username") || "Guest";
 function getOrCreateSessionId() {
   let sessionId = localStorage.getItem("session_id");
   if (!sessionId) {
-    sessionId = "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+    sessionId =
+      "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
     localStorage.setItem("session_id", sessionId);
   }
   return sessionId;
@@ -48,7 +49,8 @@ function getOrCreateSessionId() {
 function getOrCreateDeviceId() {
   let deviceId = localStorage.getItem("device_id");
   if (!deviceId) {
-    deviceId = "device_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+    deviceId =
+      "device_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
     localStorage.setItem("device_id", deviceId);
   }
   return deviceId;
@@ -58,22 +60,26 @@ function getOrCreateDeviceId() {
 async function createRememberMeToken(username) {
   if (!supabaseClient) {
     initSupabaseClient();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
   const deviceId = getOrCreateDeviceId();
-  const token = "token_" + Math.random().toString(36).substr(2, 20) + "_" + Date.now();
+  const token =
+    "token_" + Math.random().toString(36).substr(2, 20) + "_" + Date.now();
 
   try {
     // Store only the token (not password) in Supabase
     const { data, error } = await supabaseClient
       .from("remember_me_tokens")
-      .upsert({
-        device_id: deviceId,
-        username: username,
-        token: token,
-        is_active: true
-      }, { onConflict: "device_id" });
+      .upsert(
+        {
+          device_id: deviceId,
+          username: username,
+          token: token,
+          is_active: true,
+        },
+        { onConflict: "device_id" },
+      );
 
     if (error) {
       console.warn("Could not create remember-me token:", error.message);
@@ -95,7 +101,7 @@ async function createRememberMeToken(username) {
 async function checkRememberMeToken() {
   if (!supabaseClient) {
     initSupabaseClient();
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
   const deviceId = getOrCreateDeviceId();
@@ -134,7 +140,7 @@ async function clearRememberMeToken() {
       .from("remember_me_tokens")
       .update({ is_active: false })
       .eq("device_id", deviceId)
-      .catch(err => null);
+      .catch((err) => null);
 
     localStorage.removeItem("remember_me_token");
     localStorage.removeItem("remember_me_username");
@@ -229,11 +235,14 @@ async function registerActiveUser(username) {
 
   try {
     // Use upsert to insert or update existing session
-    const { error } = await supabaseClient.from("active_users").upsert({
-      username: finalUsername,
-      session_id: currentSessionId,
-      last_activity: new Date().toISOString(),
-    }, { onConflict: "session_id" });
+    const { error } = await supabaseClient.from("active_users").upsert(
+      {
+        username: finalUsername,
+        session_id: currentSessionId,
+        last_activity: new Date().toISOString(),
+      },
+      { onConflict: "session_id" },
+    );
 
     if (error) {
       console.warn("Could not register active user:", error.message);
@@ -323,7 +332,10 @@ async function initializeApp() {
 
     if (rememberMeToken) {
       // Auto-login with remember-me token
-      console.log("Remember Me token found - auto-logging in as:", rememberMeToken.username);
+      console.log(
+        "Remember Me token found - auto-logging in as:",
+        rememberMeToken.username,
+      );
       sessionStorage.setItem("isLoggedIn", "true");
 
       // Prefill the login form for visual feedback
