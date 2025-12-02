@@ -1519,33 +1519,5 @@ function isInSelectedRegion(site) {
 }
 
 function startDashboard() {
-  if (dashboardInitialized) return;
-  dashboardInitialized = true;
-
-  initMap();
-  loadDashboard();
-
-  updateHeaderDate();
-  headerIntervalId = setInterval(updateHeaderDate, 1000);
-
-  refreshIntervalId = setInterval(() => {
-    console.log("Auto-refreshing dashboard...");
-    loadDashboard();
-  }, 120000);
-
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    searchInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        searchSite(searchInput.value);
-      }
-    });
-  }
-
-  const modal = document.getElementById("searchModal");
-  window.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      closeSearchModal();
-    }
-  });
+  startDashboardAsync();
 }
