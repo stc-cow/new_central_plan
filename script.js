@@ -705,30 +705,6 @@ async function handleLogin() {
     await registerActiveUser(username);
     console.log("✓ User registered as active");
 
-    // Trigger browser password manager save dialog
-    if (navigator.credentials && PasswordCredential) {
-      try {
-        const cred = new PasswordCredential({
-          id: username,
-          password: password,
-          name: username,
-          iconURL:
-            "https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Ff2e39f8a2b5f4c6f9a8b0c1d2e3f4a5b",
-        });
-
-        navigator.credentials
-          .store(cred)
-          .then(() => {
-            console.log("✓ Browser password manager save dialog triggered");
-          })
-          .catch((error) => {
-            console.log("Password manager not available:", error.message);
-          });
-      } catch (error) {
-        console.log("Could not trigger password save:", error.message);
-      }
-    }
-
     // Run diagnostics to verify setup
     setTimeout(() => diagnoseSupabaseSetup(), 1000);
 
@@ -737,6 +713,44 @@ async function handleLogin() {
 
     // Load data in background
     await startDashboardAsync();
+
+    // Trigger browser password save dialog with form submission
+    // This is the most reliable way to get browsers to show the save password prompt
+    setTimeout(() => {
+      try {
+        const hiddenForm = document.createElement("form");
+        hiddenForm.method = "POST";
+        hiddenForm.style.display = "none";
+
+        const usernameInput = document.createElement("input");
+        usernameInput.type = "text";
+        usernameInput.name = "username";
+        usernameInput.value = username;
+
+        const passwordInput = document.createElement("input");
+        passwordInput.type = "password";
+        passwordInput.name = "password";
+        passwordInput.value = password;
+
+        hiddenForm.appendChild(usernameInput);
+        hiddenForm.appendChild(passwordInput);
+        document.body.appendChild(hiddenForm);
+
+        // Submit the form - this triggers the browser's password manager
+        hiddenForm.submit();
+
+        // Clean up
+        setTimeout(() => {
+          if (document.body.contains(hiddenForm)) {
+            document.body.removeChild(hiddenForm);
+          }
+        }, 100);
+
+        console.log("✓ Browser password save dialog triggered");
+      } catch (error) {
+        console.log("Could not trigger password save:", error.message);
+      }
+    }, 300);
   } else {
     // Show error
     loginError.textContent = "Invalid username or password";
