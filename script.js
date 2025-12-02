@@ -82,18 +82,22 @@ async function createRememberMeToken(username) {
       );
 
     if (error) {
-      console.warn("Could not create remember-me token:", error.message);
-      return null;
+      console.warn("⚠ Remember-me not available:", error.message);
+      // Still save to localStorage as fallback
+      localStorage.setItem("remember_me_username", username);
+      return token;
     }
 
     // Also store in localStorage for quick access
     localStorage.setItem("remember_me_token", token);
     localStorage.setItem("remember_me_username", username);
-    console.log("Remember Me token created successfully");
+    console.log("✓ Remember-me token saved");
     return token;
   } catch (error) {
-    console.warn("Error creating remember-me token:", error.message);
-    return null;
+    console.warn("⚠ Remember-me not available:", error.message);
+    // Fallback to localStorage
+    localStorage.setItem("remember_me_username", username);
+    return token;
   }
 }
 
