@@ -226,6 +226,9 @@ function handleLogin() {
       localStorage.removeItem("rememberMe");
     }
 
+    // Register user as active in Supabase
+    registerActiveUser(username);
+
     // Show dashboard immediately (without waiting for data load)
     showDashboard();
 
