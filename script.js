@@ -59,8 +59,7 @@ function getOrCreateDeviceId() {
 // Create a secure remember-me token and store in Supabase
 async function createRememberMeToken(username) {
   if (!supabaseClient) {
-    initSupabaseClient();
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await initSupabaseClient();
   }
 
   const deviceId = getOrCreateDeviceId();
