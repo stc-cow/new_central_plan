@@ -187,6 +187,27 @@ async function checkRememberMeToken() {
   return null;
 }
 
+// Store credentials in browser for autofill when Remember Me is used
+async function saveBrowserCredentials(username, password) {
+  // Always persist username locally so we can prefill even without credential API
+  localStorage.setItem("remember_me_username", username);
+
+  if ("credentials" in navigator && window.PasswordCredential) {
+    try {
+      const credential = new window.PasswordCredential({
+        id: username,
+        name: username,
+        password: password,
+      });
+
+      await navigator.credentials.store(credential);
+      console.log("✓ Saved login to browser credential manager");
+    } catch (error) {
+      console.warn("⚠ Could not store credentials:", error.message);
+    }
+  }
+}
+
 // Clear remember-me token on logout
 async function clearRememberMeToken() {
   // Clear from localStorage first
@@ -693,9 +714,11 @@ async function handleLogin() {
 
     // Handle Remember Me
     if (rememberMe) {
+      await saveBrowserCredentials(username, password);
       await createRememberMeToken(username);
       console.log("✓ Remember Me enabled - token stored in Supabase");
     } else {
+      localStorage.removeItem("remember_me_username");
       await clearRememberMeToken();
       console.log("✓ Remember Me disabled");
     }
