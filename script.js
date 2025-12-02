@@ -171,11 +171,12 @@ async function removeActiveUser() {
     await supabaseClient
       .from("active_users")
       .delete()
-      .eq("session_id", currentSessionId);
+      .eq("session_id", currentSessionId)
+      .catch(err => null); // Silently fail if table doesn't exist
 
     currentSessionId = null;
   } catch (error) {
-    console.error("Error removing active user:", error);
+    // Silently fail on logout
   }
 }
 
