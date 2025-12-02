@@ -71,7 +71,6 @@ function showLoginPage() {
 function showDashboard() {
   document.getElementById("loginPage").style.display = "none";
   document.getElementById("dashboardPage").style.display = "grid";
-  startDashboard();
 }
 
 function setupLoginForm() {
