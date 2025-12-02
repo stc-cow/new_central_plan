@@ -245,11 +245,12 @@ async function registerActiveUser(username) {
     );
 
     if (error) {
-      console.warn("Could not register active user:", error.message);
+      console.warn("⚠ Active user tracking not available:", error.message);
+      // Gracefully continue even if active user tracking fails
       return;
     }
 
-    console.log("User registered as active with session:", currentSessionId);
+    console.log("✓ User registered as active with session:", currentSessionId);
     updateActiveUsersCount();
 
     // Update activity every 20 seconds
@@ -260,7 +261,7 @@ async function registerActiveUser(username) {
     if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
     activeUsersIntervalId = setInterval(updateActiveUsersCount, 10000);
   } catch (error) {
-    console.warn("Could not register active user:", error.message);
+    console.warn("⚠ Active user tracking unavailable:", error.message);
   }
 }
 
