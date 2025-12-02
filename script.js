@@ -177,6 +177,7 @@ function initializeApp() {
 
   if (isLoggedIn) {
     showDashboard();
+    registerActiveUser("Aces@MSD");
     startDashboardAsync();
   } else {
     // Check if user has "Remember Me" enabled
@@ -186,6 +187,7 @@ function initializeApp() {
       // Auto-login with remembered credentials
       sessionStorage.setItem("isLoggedIn", "true");
       showDashboard();
+      registerActiveUser("Aces@MSD");
       startDashboardAsync();
     } else {
       // Show login page
