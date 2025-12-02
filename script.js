@@ -448,7 +448,9 @@ async function startDashboardAsync() {
 window.handleLogout = function handleLogout() {
   // Clear login status
   sessionStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("rememberMe");
+
+  // Clear remember-me token from Supabase
+  clearRememberMeToken();
 
   // Remove user from active users and clear intervals
   removeActiveUser();
