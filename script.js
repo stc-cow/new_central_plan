@@ -338,35 +338,8 @@ async function fetchCSV() {
     return parsed;
   } catch (error) {
     console.error("Error fetching CSV directly:", error);
-    console.log("Attempting fallback with CORS proxy...");
-
-    try {
-      const proxyUrl = PROXIED_CSV_URL;
-      const proxyResponse = await fetch(proxyUrl, {
-        method: "GET",
-        headers: {
-          Accept: "text/csv",
-        },
-      });
-
-      if (!proxyResponse.ok) {
-        throw new Error(`HTTP Error: ${proxyResponse.status}`);
-      }
-
-      const csvText = await proxyResponse.text();
-      console.log("CSV fetched via proxy, length:", csvText.length);
-
-      if (!csvText.trim()) {
-        return [];
-      }
-
-      const parsed = parseCSV(csvText);
-      console.log("Parsed CSV rows from proxy:", parsed.length);
-      return parsed;
-    } catch (proxyError) {
-      console.error("Proxy fetch also failed:", proxyError);
-      return [];
-    }
+    console.warn("CSV fetch failed. Using empty data array as fallback.");
+    return [];
   }
 }
 
