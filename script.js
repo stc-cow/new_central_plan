@@ -313,17 +313,21 @@ async function fallbackCountActiveUsers() {
       .gt("last_activity", new Date(Date.now() - 2 * 60 * 1000).toISOString());
 
     if (error) {
-      console.error("❌ Fallback count error:", error.message);
+      // Active user count not critical, gracefully continue
+      const countElement = document.getElementById("activeUsersCount");
+      if (countElement) {
+        countElement.textContent = "0";
+      }
       return;
     }
 
     const countElement = document.getElementById("activeUsersCount");
     if (countElement) {
       countElement.textContent = data?.length || 0;
-      console.log("✓ Fallback: Active users count updated:", data?.length || 0);
+      console.log("✓ Active users count:", data?.length || 0);
     }
   } catch (error) {
-    console.error("❌ Fallback count exception:", error.message);
+    // Silently fail
   }
 }
 
