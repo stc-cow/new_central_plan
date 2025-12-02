@@ -78,7 +78,6 @@ function showLoginPage() {
   const loginPage = document.getElementById("loginPage");
   loginPage.classList.add("show");
   document.getElementById("dashboardPage").style.display = "none";
-  setupLogoParallax();
 }
 
 function showDashboard() {
