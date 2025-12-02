@@ -257,8 +257,10 @@ function handleLogin() {
     // Store Remember Me preference
     if (rememberMe) {
       localStorage.setItem("rememberMe", "true");
+      console.log("Remember Me enabled - stored in localStorage");
     } else {
       localStorage.removeItem("rememberMe");
+      console.log("Remember Me disabled");
     }
 
     // Register user as active in Supabase
