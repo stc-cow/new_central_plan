@@ -56,6 +56,7 @@ function initializeApp() {
 
   if (isLoggedIn) {
     showDashboard();
+    startDashboardAsync();
   } else {
     showLoginPage();
     setupLoginForm();
