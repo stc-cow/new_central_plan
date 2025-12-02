@@ -1168,6 +1168,8 @@ body {
   margin-bottom: 32px;
   box-shadow: 0 4px 16px rgba(32, 43, 109, 0.06);
   border-top: 4px solid var(--aces-primary);
+  display: flex;
+  flex-direction: column;
 }
 
 .kpi-card h3 {
