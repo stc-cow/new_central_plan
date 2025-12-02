@@ -127,9 +127,10 @@ async function updateUserActivity() {
     await supabaseClient
       .from("active_users")
       .update({ last_activity: new Date().toISOString() })
-      .eq("session_id", currentSessionId);
+      .eq("session_id", currentSessionId)
+      .catch(err => null); // Silently fail if table doesn't exist
   } catch (error) {
-    console.error("Error updating user activity:", error);
+    // Silently fail - activity tracking is optional
   }
 }
 
