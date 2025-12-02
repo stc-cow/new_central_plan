@@ -46,17 +46,6 @@ function getOrCreateSessionId() {
 }
 
 // Get or create device ID
-function getOrCreateDeviceId() {
-  let deviceId = localStorage.getItem("device_id");
-  if (!deviceId) {
-    deviceId =
-      "device_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
-    localStorage.setItem("device_id", deviceId);
-  }
-  return deviceId;
-}
-
-// Create a secure remember-me token and store in Supabase
 // All remember-me functionality removed
 
 const SA_CENTER = [23.8859, 45.0792];
