@@ -453,11 +453,11 @@ async function testSupabaseRESTEndpoints() {
       `${baseUrl}/rest/v1/active_users?select=*&limit=5`,
       {
         headers: {
-          "apikey": apiKey,
-          "Authorization": `Bearer ${apiKey}`,
+          apikey: apiKey,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     const data = await response.json();
     if (response.ok) {
@@ -477,11 +477,11 @@ async function testSupabaseRESTEndpoints() {
       `${baseUrl}/rest/v1/remember_me_tokens?select=*&limit=5`,
       {
         headers: {
-          "apikey": apiKey,
-          "Authorization": `Bearer ${apiKey}`,
+          apikey: apiKey,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     const data = await response.json();
     if (response.ok) {
@@ -497,17 +497,14 @@ async function testSupabaseRESTEndpoints() {
   // Test 3: Call count_active_users RPC function
   console.log("\n📋 Test 3: Call count_active_users RPC");
   try {
-    const response = await fetch(
-      `${baseUrl}/rest/v1/rpc/count_active_users`,
-      {
-        method: "POST",
-        headers: {
-          "apikey": apiKey,
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(`${baseUrl}/rest/v1/rpc/count_active_users`, {
+      method: "POST",
+      headers: {
+        apikey: apiKey,
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+    });
     const data = await response.json();
     if (response.ok) {
       console.log("✅ RPC function working. Active users:", data);
@@ -522,13 +519,11 @@ async function testSupabaseRESTEndpoints() {
   console.log("\n📋 Test 4: Insert test record (via SDK)");
   try {
     const testSession = "test_" + Date.now();
-    const { data, error } = await supabaseClient
-      .from("active_users")
-      .insert({
-        session_id: testSession,
-        username: "test_user",
-        last_activity: new Date().toISOString(),
-      });
+    const { data, error } = await supabaseClient.from("active_users").insert({
+      session_id: testSession,
+      username: "test_user",
+      last_activity: new Date().toISOString(),
+    });
 
     if (error) {
       console.error("❌ Insert error:", error.message);
