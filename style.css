@@ -652,7 +652,11 @@ body {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: linear-gradient(135deg, rgba(18, 183, 178, 0.1), rgba(18, 183, 178, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(18, 183, 178, 0.1),
+    rgba(18, 183, 178, 0.05)
+  );
   border: 1px solid rgba(18, 183, 178, 0.3);
   border-radius: 8px;
   margin-right: 16px;
@@ -665,7 +669,8 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

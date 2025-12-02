@@ -22,7 +22,8 @@ const VVVIP_SITES_LIST = [
 
 // Supabase configuration for active users tracking
 const VITE_SUPABASE_URL = "https://qpnpqudrrrzgvfwdkljo.supabase.co";
-const VITE_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbnBxdWRycnJ6Z3Zmd2RrbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NDQ1MjcsImV4cCI6MjA3NDEyMDUyN30.v4MAx44YMTq7hYufn5IlIWCu_SGrKulZIHXwCY999WE";
+const VITE_SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbnBxdWRycnJ6Z3Zmd2RrbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NDQ1MjcsImV4cCI6MjA3NDEyMDUyN30.v4MAx44YMTq7hYufn5IlIWCu_SGrKulZIHXwCY999WE";
 
 let supabaseClient = null;
 let currentSessionId = null;
@@ -70,22 +71,29 @@ function initSupabaseClient() {
   if (!window.supabase) {
     // Load Supabase library if not already loaded
     const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js";
-    script.onload = function() {
+    script.src =
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js";
+    script.onload = function () {
       try {
-        supabaseClient = window.supabase.createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
+        supabaseClient = window.supabase.createClient(
+          VITE_SUPABASE_URL,
+          VITE_SUPABASE_KEY,
+        );
         console.log("Supabase client initialized");
       } catch (err) {
         console.warn("Could not initialize Supabase client:", err.message);
       }
     };
-    script.onerror = function() {
+    script.onerror = function () {
       console.warn("Could not load Supabase library");
     };
     document.head.appendChild(script);
   } else {
     try {
-      supabaseClient = window.supabase.createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
+      supabaseClient = window.supabase.createClient(
+        VITE_SUPABASE_URL,
+        VITE_SUPABASE_KEY,
+      );
       console.log("Supabase client initialized");
     } catch (err) {
       console.warn("Could not initialize Supabase client:", err.message);
@@ -97,24 +105,25 @@ async function registerActiveUser(username) {
   if (!supabaseClient) {
     initSupabaseClient();
     // Wait a moment for client to load
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
-  currentSessionId = "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+  currentSessionId =
+    "session_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
 
   try {
     // Try to insert, but don't fail if table doesn't exist
-    const { error } = await supabaseClient
-      .from("active_users")
-      .insert({
-        username: username,
-        session_id: currentSessionId,
-        last_activity: new Date().toISOString(),
-      });
+    const { error } = await supabaseClient.from("active_users").insert({
+      username: username,
+      session_id: currentSessionId,
+      last_activity: new Date().toISOString(),
+    });
 
     if (error && error.code !== "PGRST116") {
       // Only log if it's not a "table does not exist" error
-      console.warn("Note: Active users tracking not available - create table in Supabase");
+      console.warn(
+        "Note: Active users tracking not available - create table in Supabase",
+      );
       return;
     }
 
@@ -141,7 +150,7 @@ async function updateUserActivity() {
       .from("active_users")
       .update({ last_activity: new Date().toISOString() })
       .eq("session_id", currentSessionId)
-      .catch(err => null); // Silently fail if table doesn't exist
+      .catch((err) => null); // Silently fail if table doesn't exist
   } catch (error) {
     // Silently fail - activity tracking is optional
   }
@@ -157,7 +166,9 @@ async function updateActiveUsersCount() {
       .from("active_users")
       .delete()
       .lt("last_activity", fiveMinutesAgo)
-      .catch(err => console.log("Cleanup error (may be expected if table empty):", err));
+      .catch((err) =>
+        console.log("Cleanup error (may be expected if table empty):", err),
+      );
 
     // Get current active users count
     const { count, error } = await supabaseClient
@@ -186,7 +197,7 @@ async function removeActiveUser() {
       .from("active_users")
       .delete()
       .eq("session_id", currentSessionId)
-      .catch(err => null); // Silently fail if table doesn't exist
+      .catch((err) => null); // Silently fail if table doesn't exist
 
     currentSessionId = null;
   } catch (error) {
