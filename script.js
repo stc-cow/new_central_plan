@@ -1124,6 +1124,42 @@ function isVVVIPSite(site) {
   return true;
 }
 
+function getGradientStyleForFuelDate(days) {
+  if (days === null || days === undefined) {
+    return { backgroundColor: "#e0e0e0", color: "#333" };
+  }
+
+  if (days < 0) {
+    // Overdue: Red gradient (more red as days overdue increase)
+    const intensityDays = Math.min(Math.abs(days), 10);
+    const intensity = intensityDays / 10;
+    const red = Math.round(255);
+    const green = Math.round(200 * (1 - intensity));
+    const blue = Math.round(200 * (1 - intensity));
+    return {
+      backgroundColor: `rgb(${red}, ${green}, ${blue})`,
+      color: intensity > 0.6 ? "#fff" : "#000",
+    };
+  } else if (days > 0) {
+    // Remaining days: Green gradient (more green as days remaining increase)
+    const intensityDays = Math.min(days, 30);
+    const intensity = intensityDays / 30;
+    const red = Math.round(200 * (1 - intensity));
+    const green = Math.round(255);
+    const blue = Math.round(200 * (1 - intensity));
+    return {
+      backgroundColor: `rgb(${red}, ${green}, ${blue})`,
+      color: intensity > 0.5 ? "#fff" : "#000",
+    };
+  } else {
+    // Today: Yellow/Orange
+    return {
+      backgroundColor: "#ffbe0b",
+      color: "#000",
+    };
+  }
+}
+
 function updateEventCards(sites) {
   console.log("=== Event Cards Debug ===");
   console.log("Total sites:", sites.length);
