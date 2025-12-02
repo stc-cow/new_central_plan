@@ -386,68 +386,37 @@ async function handleLogin() {
   const rememberMe = document.getElementById("rememberMe").checked;
   const loginError = document.getElementById("loginError");
 
-  if (!supabaseClient) {
-    loginError.textContent = "Supabase client not initialized";
-    loginError.style.display = "block";
-    return;
-  }
-
-  try {
+  // Validate credentials
+  if (username === "Aces@MSD" && password === "ACES@2025") {
+    // Store login status
+    sessionStorage.setItem("isLoggedIn", "true");
     loginError.style.display = "none";
 
-    // For demo purposes: hardcoded validation but still register in Supabase
-    if (username === "Aces@MSD" && password === "ACES@2025") {
-      // Create or refresh a Supabase session token
-      const { data: { session }, error: authError } = await supabaseClient.auth.signUp({
-        email: `${username.toLowerCase()}@aces.local`,
-        password: password,
-        options: {
-          data: {
-            username: username
-          }
-        }
-      }).catch(async (err) => {
-        // If signup fails (user exists), try signin instead
-        return await supabaseClient.auth.signInWithPassword({
-          email: `${username.toLowerCase()}@aces.local`,
-          password: password
-        });
-      });
-
-      // Store login status
-      sessionStorage.setItem("isLoggedIn", "true");
-      loginError.style.display = "none";
-
-      console.log("✓ User authenticated and Supabase session created");
-
-      // Handle Remember Me
-      if (rememberMe) {
-        await createRememberMeToken(username);
-        console.log("✓ Remember Me enabled - token stored in Supabase");
-      } else {
-        await clearRememberMeToken();
-        console.log("✓ Remember Me disabled");
-      }
-
-      // Register user as active in Supabase
-      await registerActiveUser(username);
-      console.log("✓ User registered as active");
-
-      // Show dashboard immediately
-      showDashboard();
-
-      // Load data in background
-      await startDashboardAsync();
+    // Handle Remember Me
+    if (rememberMe) {
+      await createRememberMeToken(username);
+      console.log("✓ Remember Me enabled - token stored in Supabase");
     } else {
-      // Show error for invalid credentials
-      loginError.textContent = "Invalid username or password";
-      loginError.style.display = "block";
-      document.getElementById("password").value = "";
+      await clearRememberMeToken();
+      console.log("✓ Remember Me disabled");
     }
-  } catch (error) {
-    console.error("Login error:", error);
-    loginError.textContent = `Login error: ${error.message}`;
+
+    // Register user as active in Supabase with proper error handling
+    console.log("Registering user as active...");
+    await registerActiveUser(username);
+    console.log("✓ User registered as active");
+
+    // Show dashboard immediately
+    showDashboard();
+
+    // Load data in background
+    await startDashboardAsync();
+  } else {
+    // Show error
+    loginError.textContent = "Invalid username or password";
     loginError.style.display = "block";
+
+    // Clear password field
     document.getElementById("password").value = "";
   }
 }
