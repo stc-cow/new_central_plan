@@ -692,12 +692,20 @@ function showDashboard() {
 
 function setupLoginForm() {
   const loginForm = document.getElementById("loginForm");
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    await handleLogin();
-    // After successful login, submit the form normally so browser can save password
-    // This triggers the browser's password manager save dialog
-  });
+
+  // Check for login error from query params (when backend redirects back due to invalid credentials)
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('login_error')) {
+    const loginError = document.getElementById("loginError");
+    loginError.textContent = "Invalid username or password";
+    loginError.style.display = "block";
+    document.getElementById("password").value = "";
+  }
+
+  // Allow normal form submission to the backend API at /login-api
+  // DO NOT preventDefault - let the browser handle the form submission
+  // The backend will validate credentials and redirect (HTTP 302)
+  // The browser will then show the "Save Password?" dialog
 }
 
 async function handleLogin() {
