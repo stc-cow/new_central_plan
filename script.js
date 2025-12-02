@@ -2004,11 +2004,16 @@ window.addEventListener("click", (event) => {
 function selectRegion(region) {
   selectedRegion = region;
 
+  // Save last selected region for remember-me restoration
+  localStorage.setItem("last_selected_region", region);
+
   // Update active tab styling
   document.querySelectorAll(".region-tab").forEach((tab) => {
     tab.classList.remove("active");
   });
-  event.target.classList.add("active");
+  if (event && event.target) {
+    event.target.classList.add("active");
+  }
 
   // Update event cards visibility based on region
   const eventCardsContainer = document.getElementById("eventCardsContainer");
