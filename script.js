@@ -496,6 +496,9 @@ async function handleLogin() {
     await registerActiveUser(username);
     console.log("✓ User registered as active");
 
+    // Run diagnostics to verify setup
+    setTimeout(() => diagnoseSuppbaseSetup(), 1000);
+
     // Show dashboard immediately
     showDashboard();
 
