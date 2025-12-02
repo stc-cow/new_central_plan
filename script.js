@@ -86,18 +86,16 @@ async function createRememberMeToken(username) {
   // Also try to save to Supabase (optional backup)
   if (supabaseClient) {
     try {
-      const { error } = await supabaseClient
-        .from("remember_me_tokens")
-        .upsert(
-          {
-            device_id: deviceId,
-            username: username,
-            token: token,
-            is_active: true,
-            expires_at: expiresAt.toISOString(),
-          },
-          { onConflict: "device_id" },
-        );
+      const { error } = await supabaseClient.from("remember_me_tokens").upsert(
+        {
+          device_id: deviceId,
+          username: username,
+          token: token,
+          is_active: true,
+          expires_at: expiresAt.toISOString(),
+        },
+        { onConflict: "device_id" },
+      );
 
       if (error) {
         console.warn("⚠ Supabase backup failed:", error.message);
@@ -131,7 +129,10 @@ async function checkRememberMeToken() {
         console.log("✓ Remember-me session found for:", sessionData.username);
         // Update last login timestamp
         sessionData.last_login = now.toISOString();
-        localStorage.setItem("remember_me_session", JSON.stringify(sessionData));
+        localStorage.setItem(
+          "remember_me_session",
+          JSON.stringify(sessionData),
+        );
         return sessionData;
       } else {
         console.log("⚠ Remember-me session expired");
@@ -157,7 +158,10 @@ async function checkRememberMeToken() {
         .single();
 
       if (!error && data) {
-        console.log("✓ Remember-me token found in Supabase for:", data.username);
+        console.log(
+          "✓ Remember-me token found in Supabase for:",
+          data.username,
+        );
         // Restore to localStorage
         const sessionData = {
           username: data.username,
@@ -169,7 +173,10 @@ async function checkRememberMeToken() {
           last_region: "CER",
           last_login: new Date().toISOString(),
         };
-        localStorage.setItem("remember_me_session", JSON.stringify(sessionData));
+        localStorage.setItem(
+          "remember_me_session",
+          JSON.stringify(sessionData),
+        );
         return sessionData;
       }
     } catch (error) {
@@ -620,7 +627,10 @@ async function initializeApp() {
 
       // Restore last selected region
       if (rememberMeToken.last_region) {
-        localStorage.setItem("last_selected_region", rememberMeToken.last_region);
+        localStorage.setItem(
+          "last_selected_region",
+          rememberMeToken.last_region,
+        );
         console.log("✓ Restored last region:", rememberMeToken.last_region);
       }
 
