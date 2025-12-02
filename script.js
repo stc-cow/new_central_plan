@@ -306,7 +306,7 @@ async function removeActiveUser() {
   }
 }
 
-function initializeApp() {
+async function initializeApp() {
   // Initialize Supabase client
   initSupabaseClient();
 
@@ -318,19 +318,31 @@ function initializeApp() {
     registerActiveUser("Aces@MSD");
     startDashboardAsync();
   } else {
-    // Check if user has "Remember Me" enabled
-    const rememberMeData = localStorage.getItem("rememberMe");
+    // Check for remember-me token in Supabase
+    const rememberMeToken = await checkRememberMeToken();
 
-    if (rememberMeData) {
-      // Auto-login with remembered credentials
-      console.log("Remember Me data found - auto-logging in");
+    if (rememberMeToken) {
+      // Auto-login with remember-me token
+      console.log("Remember Me token found - auto-logging in as:", rememberMeToken.username);
       sessionStorage.setItem("isLoggedIn", "true");
+
+      // Prefill the login form for visual feedback
+      document.getElementById("username").value = rememberMeToken.username;
+      document.getElementById("rememberMe").checked = true;
+
       showDashboard();
-      registerActiveUser("Aces@MSD");
+      registerActiveUser(rememberMeToken.username);
       startDashboardAsync();
     } else {
+      // Check localStorage for remembered username (for form prefill)
+      const savedUsername = localStorage.getItem("remember_me_username");
+      if (savedUsername) {
+        document.getElementById("username").value = savedUsername;
+        document.getElementById("rememberMe").checked = true;
+      }
+
       // Show login page
-      console.log("No Remember Me data - showing login page");
+      console.log("No valid remember-me token - showing login page");
       showLoginPage();
       setupLoginForm();
     }
