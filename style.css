@@ -647,49 +647,6 @@ body {
   gap: 16px;
 }
 
-.active-users-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: linear-gradient(
-    135deg,
-    rgba(18, 183, 178, 0.1),
-    rgba(18, 183, 178, 0.05)
-  );
-  border: 1px solid rgba(18, 183, 178, 0.3);
-  border-radius: 8px;
-  margin-right: 16px;
-}
-
-.active-users-icon {
-  color: #12b7b2;
-  font-size: 12px;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.active-users-count {
-  font-weight: 700;
-  color: rgb(255, 255, 255);
-  font-size: 14px;
-}
-
-.active-users-label {
-  font-size: 12px;
-  font-weight: 500;
-  margin: 0;
-  padding: 0;
-}
 
 .logout-btn {
   padding: 8px 16px;
