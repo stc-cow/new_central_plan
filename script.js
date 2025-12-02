@@ -327,7 +327,7 @@ async function fallbackCountActiveUsers() {
   }
 }
 
-async function diagnoseSuppbaseSetup() {
+async function diagnoseSupabaseSetup() {
   console.group("🔍 Supabase Diagnostic Report");
 
   // Check 1: Supabase client
