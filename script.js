@@ -430,8 +430,8 @@ async function removeActiveUser() {
 }
 
 async function initializeApp() {
-  // Initialize Supabase client
-  initSupabaseClient();
+  // Initialize Supabase client and wait for it
+  await initSupabaseClient();
 
   // Check if user is already logged in (session)
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
