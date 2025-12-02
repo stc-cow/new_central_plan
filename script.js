@@ -211,12 +211,14 @@ function initializeApp() {
 
     if (rememberMeData) {
       // Auto-login with remembered credentials
+      console.log("Remember Me data found - auto-logging in");
       sessionStorage.setItem("isLoggedIn", "true");
       showDashboard();
       registerActiveUser("Aces@MSD");
       startDashboardAsync();
     } else {
       // Show login page
+      console.log("No Remember Me data - showing login page");
       showLoginPage();
       setupLoginForm();
     }
