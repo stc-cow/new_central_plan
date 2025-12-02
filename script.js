@@ -103,8 +103,7 @@ async function createRememberMeToken(username) {
 // Check and restore remember-me session
 async function checkRememberMeToken() {
   if (!supabaseClient) {
-    initSupabaseClient();
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await initSupabaseClient();
   }
 
   const deviceId = getOrCreateDeviceId();
