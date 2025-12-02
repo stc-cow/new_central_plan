@@ -20,6 +20,15 @@ const VVVIP_SITES_LIST = [
   "COW552",
 ];
 
+// Supabase configuration for active users tracking
+const VITE_SUPABASE_URL = "https://qpnpqudrrrzgvfwdkljo.supabase.co";
+const VITE_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbnBxdWRycnJ6Z3Zmd2RrbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NDQ1MjcsImV4cCI6MjA3NDEyMDUyN30.v4MAx44YMTq7hYufn5IlIWCu_SGrKulZIHXwCY999WE";
+
+let supabaseClient = null;
+let currentSessionId = null;
+let activeUsersIntervalId = null;
+let updateActivityIntervalId = null;
+
 const SA_CENTER = [23.8859, 45.0792];
 const SA_BOUNDS = [
   [16.3, 32.0],
