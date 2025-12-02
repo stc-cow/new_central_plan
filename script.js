@@ -72,11 +72,24 @@ function initSupabaseClient() {
     const script = document.createElement("script");
     script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js";
     script.onload = function() {
-      supabaseClient = window.supabase.createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
+      try {
+        supabaseClient = window.supabase.createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
+        console.log("Supabase client initialized");
+      } catch (err) {
+        console.warn("Could not initialize Supabase client:", err.message);
+      }
+    };
+    script.onerror = function() {
+      console.warn("Could not load Supabase library");
     };
     document.head.appendChild(script);
   } else {
-    supabaseClient = window.supabase.createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
+    try {
+      supabaseClient = window.supabase.createClient(VITE_SUPABASE_URL, VITE_SUPABASE_KEY);
+      console.log("Supabase client initialized");
+    } catch (err) {
+      console.warn("Could not initialize Supabase client:", err.message);
+    }
   }
 }
 
