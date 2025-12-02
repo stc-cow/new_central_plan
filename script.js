@@ -287,7 +287,6 @@ async function updateActiveUsersCount() {
     const { data, error } = await supabaseClient.rpc("count_active_users");
 
     if (error) {
-      console.warn("❌ RPC error:", error.code, error.message);
       // Fallback: directly count from table
       await fallbackCountActiveUsers();
       return;
@@ -299,10 +298,7 @@ async function updateActiveUsersCount() {
       console.log("✓ Active users count updated:", data);
     }
   } catch (error) {
-    console.warn(
-      "❌ Warning: Could not fetch active users count:",
-      error.message,
-    );
+    // Silently fail for active user count
     await fallbackCountActiveUsers();
   }
 }
