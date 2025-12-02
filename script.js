@@ -65,7 +65,6 @@ function initializeApp() {
 function showLoginPage() {
   document.getElementById("loginPage").style.display = "flex";
   document.getElementById("dashboardPage").style.display = "none";
-  setupLogoParallax();
 }
 
 function showDashboard() {
