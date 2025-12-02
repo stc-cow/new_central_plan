@@ -692,25 +692,39 @@ function showDashboard() {
 
 function setupLoginForm() {
   const loginForm = document.getElementById("loginForm");
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    handleLogin();
+  });
+}
 
-  // Check for login error from query params (when backend redirects back due to invalid credentials)
-  const params = new URLSearchParams(window.location.search);
-  if (params.has("login_error")) {
-    const loginError = document.getElementById("loginError");
+async function handleLogin() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
+  const loginError = document.getElementById("loginError");
+
+  // Validate credentials
+  if (username === "Aces@MSD" && password === "ACES@2025") {
+    // Store login status
+    sessionStorage.setItem("isLoggedIn", "true");
+    sessionStorage.setItem("username", username);
+    loginError.style.display = "none";
+
+    // Clear form
+    document.getElementById("password").value = "";
+
+    // Show dashboard
+    showDashboard();
+
+    // Load data in background
+    await startDashboardAsync();
+  } else {
+    // Show error
     loginError.textContent = "Invalid username or password";
     loginError.style.display = "block";
     document.getElementById("password").value = "";
   }
-
-  // Allow normal form submission to the backend API at /login-api
-  // DO NOT preventDefault - let the browser handle the form submission
-  // The backend will validate credentials and redirect (HTTP 302)
-  // The browser will then show the "Save Password?" dialog
 }
-
-// handleLogin is replaced by backend form submission to /login-api
-// Backend validates credentials and returns HTTP 302 redirect to /new_central_plan/
-// Browser automatically saves password after successful login redirect
 
 async function startDashboardAsync() {
   if (dashboardInitialized) return;
