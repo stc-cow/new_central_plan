@@ -169,8 +169,8 @@ let refreshIntervalId = null;
 let selectedRegion = "CER";
 
 // Load dashboard on page load
-document.addEventListener("DOMContentLoaded", () => {
-  initializeApp();
+document.addEventListener("DOMContentLoaded", async () => {
+  await initializeApp();
 });
 
 // Clean up active user when page is closed or navigated away
