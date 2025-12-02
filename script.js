@@ -44,6 +44,105 @@ function getOrCreateSessionId() {
   return sessionId;
 }
 
+// Get or create device ID
+function getOrCreateDeviceId() {
+  let deviceId = localStorage.getItem("device_id");
+  if (!deviceId) {
+    deviceId = "device_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now();
+    localStorage.setItem("device_id", deviceId);
+  }
+  return deviceId;
+}
+
+// Create a secure remember-me token and store in Supabase
+async function createRememberMeToken(username) {
+  if (!supabaseClient) {
+    initSupabaseClient();
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+
+  const deviceId = getOrCreateDeviceId();
+  const token = "token_" + Math.random().toString(36).substr(2, 20) + "_" + Date.now();
+
+  try {
+    // Store only the token (not password) in Supabase
+    const { data, error } = await supabaseClient
+      .from("remember_me_tokens")
+      .upsert({
+        device_id: deviceId,
+        username: username,
+        token: token,
+        is_active: true
+      }, { onConflict: "device_id" });
+
+    if (error) {
+      console.warn("Could not create remember-me token:", error.message);
+      return null;
+    }
+
+    // Also store in localStorage for quick access
+    localStorage.setItem("remember_me_token", token);
+    localStorage.setItem("remember_me_username", username);
+    console.log("Remember Me token created successfully");
+    return token;
+  } catch (error) {
+    console.warn("Error creating remember-me token:", error.message);
+    return null;
+  }
+}
+
+// Check and restore remember-me session
+async function checkRememberMeToken() {
+  if (!supabaseClient) {
+    initSupabaseClient();
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+
+  const deviceId = getOrCreateDeviceId();
+
+  try {
+    // Query the token from Supabase
+    const { data, error } = await supabaseClient
+      .from("remember_me_tokens")
+      .select("*")
+      .eq("device_id", deviceId)
+      .eq("is_active", true)
+      .gt("expires_at", new Date().toISOString())
+      .single();
+
+    if (error || !data) {
+      console.log("No valid remember-me token found");
+      return null;
+    }
+
+    console.log("Remember Me token found for:", data.username);
+    return data;
+  } catch (error) {
+    console.log("Could not check remember-me token:", error.message);
+    return null;
+  }
+}
+
+// Clear remember-me token on logout
+async function clearRememberMeToken() {
+  if (!supabaseClient) return;
+
+  const deviceId = localStorage.getItem("device_id");
+
+  try {
+    await supabaseClient
+      .from("remember_me_tokens")
+      .update({ is_active: false })
+      .eq("device_id", deviceId)
+      .catch(err => null);
+
+    localStorage.removeItem("remember_me_token");
+    localStorage.removeItem("remember_me_username");
+  } catch (error) {
+    console.log("Error clearing remember-me token");
+  }
+}
+
 const SA_CENTER = [23.8859, 45.0792];
 const SA_BOUNDS = [
   [16.3, 32.0],
