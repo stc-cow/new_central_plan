@@ -82,7 +82,7 @@ function showLoginPage() {
 }
 
 function showDashboard() {
-  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("loginPage").classList.remove("show");
   document.getElementById("dashboardPage").style.display = "grid";
 }
 
