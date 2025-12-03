@@ -875,14 +875,14 @@ function dayDiff(targetDate) {
 }
 
 function classify(days) {
-  if (days === null) return { label: "next15", color: "#3ad17c" };
+  if (days === null) return { label: "next15", color: "#27ae60" };
 
-  if (days < 0) return { label: "due", color: "#ff6b6b" };
-  if (days === 0) return { label: "today", color: "#ff6b6b" };
-  if (days >= 1 && days <= 3) return { label: "coming3", color: "#ffbe0b" };
-  if (days >= 4 && days <= 15) return { label: "next15", color: "#3ad17c" };
+  if (days < 0) return { label: "due", color: "#d32f2f" };
+  if (days === 0) return { label: "today", color: "#d32f2f" };
+  if (days >= 1 && days <= 3) return { label: "coming3", color: "#ff9e00" };
+  if (days >= 4 && days <= 15) return { label: "next15", color: "#27ae60" };
 
-  return { label: "next15", color: "#3ad17c" };
+  return { label: "next15", color: "#27ae60" };
 }
 
 function getStatusColor(status) {
