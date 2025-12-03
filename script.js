@@ -65,6 +65,7 @@ let sitesData = [];
 let markers = [];
 let siteMap = {};
 let pulsingCircles = [];
+let pulsingIntervals = [];
 let markersLayer;
 let currentPopupOverlay = null;
 let dashboardInitialized = false;
