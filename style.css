@@ -1414,6 +1414,12 @@ body {
 }
 
 .map-legend {
+  display: block !important;
+  visibility: visible !important;
+  position: absolute !important;
+  bottom: 15px !important;
+  left: 15px !important;
+  z-index: 1000 !important;
   background: white;
   padding: 16px;
   border-radius: 12px;
@@ -1421,6 +1427,7 @@ body {
   border: 2px solid var(--border-color);
   font-family: Verdana, sans-serif;
   font-size: 13px;
+  pointer-events: auto;
 }
 
 .legend-title {
