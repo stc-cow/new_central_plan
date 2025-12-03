@@ -545,6 +545,25 @@ window.handleLogout = function handleLogout() {
   removeActiveUser();
   if (updateActivityIntervalId) clearInterval(updateActivityIntervalId);
   if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
+  if (headerIntervalId) clearInterval(headerIntervalId);
+  if (refreshIntervalId) clearInterval(refreshIntervalId);
+
+  // Clear pulsing intervals
+  pulsingIntervals.forEach((interval) => clearInterval(interval));
+  pulsingIntervals = [];
+
+  // Reset dashboard state
+  dashboardInitialized = false;
+
+  // Clear markers and map
+  if (map) {
+    map.off();
+    map.remove();
+    map = null;
+  }
+  markers = [];
+  siteMap = {};
+  sitesData = [];
 
   // Show login page
   showLoginPage();
