@@ -1,6 +1,8 @@
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+
 const ACES_ACCESS_CODE = "ACES2025";
 
 const VVVIP_SITES_LIST = [
