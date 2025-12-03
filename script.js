@@ -1,4 +1,4 @@
-const CSV_API_URL = "/.netlify/functions/fetch-csv";
+const CSV_API_URL = "/api/fetch-csv";
 
 const ACES_ACCESS_CODE = "ACES2025";
 
