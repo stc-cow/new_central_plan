@@ -1003,6 +1003,42 @@ function initMap() {
     const zoom = map.getView().getZoom();
     updateMapVisualization(zoom);
   });
+
+  // Add map legend
+  addMapLegend();
+}
+
+function addMapLegend() {
+  const legendContainer = document.createElement("div");
+  legendContainer.className = "map-legend";
+  legendContainer.innerHTML = `
+    <div class="legend-title">Status Legend</div>
+    <div class="legend-item">
+      <div class="legend-color healthy"></div>
+      <span class="legend-label">Healthy</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color due"></div>
+      <span class="legend-label">Due</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color coming"></div>
+      <span class="legend-label">Coming Soon</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color sec"></div>
+      <span class="legend-label">SEC Site</span>
+    </div>
+  `;
+
+  const legendOverlay = new ol.Overlay({
+    element: legendContainer,
+    positioning: "bottom-left",
+    offset: [10, -10],
+  });
+
+  map.addOverlay(legendOverlay);
+  legendOverlay.setPosition(map.getView().getCenter());
 }
 
 function addPulsingCircles(features) {
