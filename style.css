@@ -95,7 +95,7 @@ body {
 
 .login-left {
   flex: 1;
-  background:
+  background-image:
     radial-gradient(
       circle at 20% 50%,
       rgba(226, 43, 43, 0.15) 0%,
@@ -106,7 +106,11 @@ body {
       rgba(18, 55, 102, 0.25) 0%,
       transparent 50%
     ),
-    linear-gradient(135deg, #0a1d3c 0%, #123766 50%, #1a2f5a 100%);
+    linear-gradient(135deg, rgba(10, 29, 60, 0.7) 0%, rgba(18, 55, 102, 0.7) 50%, rgba(26, 47, 90, 0.7) 100%),
+    url('https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2Ff0ef93ecfb6141eaab50874e92a66e84?format=webp&width=800');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
