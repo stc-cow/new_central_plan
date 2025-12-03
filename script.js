@@ -1096,40 +1096,23 @@ function addPulsingCircles(markers) {
 
 function updateMapVisualization(zoom) {
   const HEATMAP_THRESHOLD = 10;
-  const features = markersLayer.getSource().getFeatures();
 
-  features.forEach((feature) => {
+  markersLayer.eachLayer((marker) => {
     if (zoom >= HEATMAP_THRESHOLD) {
       // Show individual markers at high zoom
-      const color =
-        feature.get("color") || STATUS_COLORS[feature.get("status")];
-      const style = new ol.style.Style({
-        image: new ol.style.Circle({
-          radius: 8,
-          fill: new ol.style.Fill({ color: color }),
-          stroke: new ol.style.Stroke({ color: "white", width: 2 }),
-        }),
+      marker.setRadius(8);
+      marker.setStyle({
+        fillOpacity: 0.8,
+        opacity: 1
       });
-      feature.setStyle(style);
     } else {
       // Show heatmap-style visualization at low zoom
-      const color =
-        feature.get("color") || STATUS_COLORS[feature.get("status")];
-      const opacity = 0.6;
-      const rgbColor = hexToRgb(color);
-      const style = new ol.style.Style({
-        image: new ol.style.Circle({
-          radius: 15 - (zoom || 5),
-          fill: new ol.style.Fill({
-            color: `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`,
-          }),
-          stroke: new ol.style.Stroke({
-            color: `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.8)`,
-            width: 1,
-          }),
-        }),
+      const radius = 15 - (zoom || 5);
+      marker.setRadius(radius);
+      marker.setStyle({
+        fillOpacity: 0.6,
+        opacity: 0.6
       });
-      feature.setStyle(style);
     }
   });
 }
