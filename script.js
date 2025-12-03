@@ -555,48 +555,36 @@ window.handleLogout = function handleLogout() {
 };
 
 async function fetchCSV() {
-  console.log("Attempting to fetch CSV from:", CSV_URL);
+  try {
+    console.log("Fetching CSV from API endpoint:", CSV_API_URL);
 
-  for (let i = 0; i < CORS_PROXIES.length; i++) {
-    try {
-      const proxyUrl = CORS_PROXIES[i] + CSV_URL;
-      console.log(`Trying proxy ${i + 1}/${CORS_PROXIES.length}:`, CORS_PROXIES[i]);
+    const response = await fetch(CSV_API_URL, {
+      method: "GET",
+      headers: {
+        Accept: "text/csv",
+      },
+    });
 
-      const response = await fetch(proxyUrl, {
-        method: "GET",
-        headers: {
-          Accept: "text/plain",
-        },
-      });
-
-      if (!response.ok) {
-        console.warn(
-          `Proxy ${i + 1} failed with status ${response.status}, trying next...`
-        );
-        continue;
-      }
-
-      const csvText = await response.text();
-      console.log("CSV fetched successfully, length:", csvText.length);
-
-      if (!csvText.trim()) {
-        console.warn("CSV response is empty");
-        continue;
-      }
-
-      const parsed = parseCSV(csvText);
-      console.log("Parsed CSV rows:", parsed.length);
-      return parsed;
-    } catch (error) {
-      console.warn(`Proxy ${i + 1} error:`, error.message);
-      if (i === CORS_PROXIES.length - 1) {
-        console.error("All CORS proxies failed");
-      }
+    if (!response.ok) {
+      throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
     }
-  }
 
-  console.warn("CSV fetch failed with all proxies. Using empty data array as fallback.");
-  return [];
+    const csvText = await response.text();
+    console.log("CSV fetched successfully, length:", csvText.length);
+
+    if (!csvText.trim()) {
+      console.warn("CSV response is empty");
+      return [];
+    }
+
+    const parsed = parseCSV(csvText);
+    console.log("Parsed CSV rows:", parsed.length);
+    return parsed;
+  } catch (error) {
+    console.error("Error fetching CSV:", error);
+    console.warn("CSV fetch failed. Using empty data array as fallback.");
+    return [];
+  }
 }
 
 function parseCSV(csvText) {
