@@ -560,13 +560,13 @@ window.handleLogout = function handleLogout() {
 async function fetchCSV() {
   try {
     console.log("Attempting to fetch CSV from:", CSV_URL);
-    const response = await fetch(CSV_URL, {
+    const proxyUrl = CORS_PROXY + encodeURIComponent(CSV_URL);
+
+    const response = await fetch(proxyUrl, {
       method: "GET",
       headers: {
-        Accept: "text/csv",
+        Accept: "text/plain",
       },
-      mode: "cors",
-      credentials: "omit",
     });
 
     if (!response.ok) {
