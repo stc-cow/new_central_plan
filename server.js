@@ -15,23 +15,30 @@ app.use(express.static(join(__dirname, "dist")));
 
 app.get("/api/fetch-csv", async (req, res) => {
   try {
-    console.log("Fetching CSV from Google Sheets...");
+    console.log("Server: Fetching CSV from Google Sheets...");
 
-    const response = await fetch(CSV_URL);
+    const response = await fetch(CSV_URL, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      }
+    });
 
     if (!response.ok) {
+      console.error(`Failed to fetch CSV: ${response.status} ${response.statusText}`);
       return res
         .status(response.status)
         .json({ error: `Failed to fetch CSV: ${response.statusText}` });
     }
 
     const csvText = await response.text();
+    console.log(`Server: Successfully fetched CSV, length: ${csvText.length}`);
 
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cache-Control", "no-cache");
     res.send(csvText);
   } catch (error) {
-    console.error("Error fetching CSV:", error);
+    console.error("Server: Error fetching CSV:", error.message);
     res.status(500).json({ error: error.message });
   }
 });
