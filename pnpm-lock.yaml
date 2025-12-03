@@ -11,6 +11,9 @@ importers:
       express:
         specifier: ^4.18.2
         version: 4.22.1
+      leaflet:
+        specifier: ^1.9.4
+        version: 1.9.4
       node-fetch:
         specifier: ^2.7.0
         version: 2.7.0
@@ -454,6 +457,9 @@ packages:
   jiti@1.21.7:
     resolution: {integrity: sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==}
     hasBin: true
+
+  leaflet@1.9.4:
+    resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -1064,6 +1070,8 @@ snapshots:
 
   jiti@1.21.7:
     optional: true
+
+  leaflet@1.9.4: {}
 
   math-intrinsics@1.1.0: {}
 
