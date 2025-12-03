@@ -970,18 +970,21 @@ function initMap() {
   map = L.map("map").setView([SA_CENTER[0], SA_CENTER[1]], 5);
 
   // Street Layer (OSM Standard)
-  const street = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors"
-  });
+  const street = L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors",
+    },
+  );
 
   // Satellite Layer (ESRI)
   const satellite = L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     {
       maxZoom: 19,
-      attribution: "Tiles © Esri"
-    }
+      attribution: "Tiles © Esri",
+    },
   );
 
   // Hybrid Layer (satellite + labels)
@@ -991,9 +994,9 @@ function initMap() {
       "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
       {
         maxZoom: 19,
-        attribution: "Labels © Esri"
-      }
-    )
+        attribution: "Labels © Esri",
+      },
+    ),
   ]);
 
   // Terrain Layer
@@ -1001,24 +1004,26 @@ function initMap() {
     "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
     {
       maxZoom: 17,
-      attribution: "Map data © OpenTopoMap"
-    }
+      attribution: "Map data © OpenTopoMap",
+    },
   );
 
   // Add default street layer
   street.addTo(map);
 
   // Add layer control
-  L.control.layers(
-    {
-      "Street": street,
-      "Satellite": satellite,
-      "Hybrid": hybrid,
-      "Terrain": terrain
-    },
-    {},
-    { position: "topright" }
-  ).addTo(map);
+  L.control
+    .layers(
+      {
+        Street: street,
+        Satellite: satellite,
+        Hybrid: hybrid,
+        Terrain: terrain,
+      },
+      {},
+      { position: "topright" },
+    )
+    .addTo(map);
 
   // Create feature group for markers
   markersLayer = L.featureGroup().addTo(map);
@@ -1086,7 +1091,7 @@ function addPulsingCircles(markers) {
         marker.setStyle({
           fillOpacity: opacity,
           opacity: opacity,
-          color: "#ff6b6b"
+          color: "#ff6b6b",
         });
       }
     });
@@ -1104,7 +1109,7 @@ function updateMapVisualization(zoom) {
       marker.setRadius(8);
       marker.setStyle({
         fillOpacity: 0.8,
-        opacity: 1
+        opacity: 1,
       });
     } else {
       // Show heatmap-style visualization at low zoom
@@ -1112,7 +1117,7 @@ function updateMapVisualization(zoom) {
       marker.setRadius(radius);
       marker.setStyle({
         fillOpacity: 0.6,
-        opacity: 0.6
+        opacity: 0.6,
       });
     }
   });
@@ -1136,7 +1141,7 @@ function addMarkersToMap(sites) {
   siteMap = {};
 
   // Clear any existing pulsing intervals
-  pulsingIntervals.forEach(interval => clearInterval(interval));
+  pulsingIntervals.forEach((interval) => clearInterval(interval));
   pulsingIntervals = [];
 
   const bounds = L.latLngBounds();
@@ -1158,7 +1163,7 @@ function addMarkersToMap(sites) {
         days: site.days,
         nextFuelingPlan: site.nextfuelingplan,
         statusLabel: getStatusLabel(site.status),
-      }
+      },
     });
 
     // Add to markers layer
