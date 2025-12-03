@@ -574,7 +574,9 @@ async function fetchCSV() {
         proxyUrl = CORS_PROXIES[i] + encodeURIComponent(CSV_URL);
       }
 
-      console.log(`Trying CORS proxy ${i + 1}/${CORS_PROXIES.length}: ${CORS_PROXIES[i]}`);
+      console.log(
+        `Trying CORS proxy ${i + 1}/${CORS_PROXIES.length}: ${CORS_PROXIES[i]}`,
+      );
 
       const response = await fetch(proxyUrl, {
         method: "GET",
@@ -596,9 +598,7 @@ async function fetchCSV() {
           return parsed;
         }
       } else {
-        console.warn(
-          `CORS proxy ${i + 1} returned status ${response.status}`,
-        );
+        console.warn(`CORS proxy ${i + 1} returned status ${response.status}`);
       }
     } catch (proxyError) {
       console.warn(`CORS proxy ${i + 1} error:`, proxyError.message);
