@@ -712,6 +712,12 @@ function filterAndValidateSites(rawData) {
       );
       const sitelabel = sitelabelKey ? row[sitelabelKey] : "";
 
+      let siteColor = statusObj.color;
+
+      if (sitelabel === "SEC Site" && nextfuelingplan.trim() !== "") {
+        siteColor = "#9b59b6";
+      }
+
       return {
         sitename: row.sitename || "Unknown Site",
         regionname: row.regionname || "",
@@ -727,7 +733,7 @@ function filterAndValidateSites(rawData) {
         fuelDate: fuelDate,
         days: days,
         status: statusObj.label,
-        color: statusObj.color,
+        color: siteColor,
       };
     });
 }
