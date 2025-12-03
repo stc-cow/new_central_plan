@@ -19,12 +19,15 @@ app.get("/api/fetch-csv", async (req, res) => {
 
     const response = await fetch(CSV_URL, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-      }
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
     });
 
     if (!response.ok) {
-      console.error(`Failed to fetch CSV: ${response.status} ${response.statusText}`);
+      console.error(
+        `Failed to fetch CSV: ${response.status} ${response.statusText}`,
+      );
       return res
         .status(response.status)
         .json({ error: `Failed to fetch CSV: ${response.statusText}` });

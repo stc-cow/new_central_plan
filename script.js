@@ -577,13 +577,18 @@ async function fetchCSV() {
     if (response.ok) {
       const csvText = await response.text();
       if (csvText.trim()) {
-        console.log("CSV fetched successfully from API endpoint, length:", csvText.length);
+        console.log(
+          "CSV fetched successfully from API endpoint, length:",
+          csvText.length,
+        );
         const parsed = parseCSV(csvText);
         console.log("Parsed CSV rows:", parsed.length);
         return parsed;
       }
     } else {
-      console.warn(`API endpoint returned status ${response.status}, trying alternatives...`);
+      console.warn(
+        `API endpoint returned status ${response.status}, trying alternatives...`,
+      );
     }
   } catch (error) {
     console.warn("API endpoint not available, trying alternatives...");
