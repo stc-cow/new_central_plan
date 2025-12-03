@@ -54,10 +54,10 @@ const SA_BOUNDS = [
 ];
 
 const STATUS_COLORS = {
-  due: "#ff6b6b",
-  today: "#ffbe0b",
-  coming3: "#ffe99f",
-  next15: "#3ad17c",
+  due: "#d32f2f",
+  today: "#ff9e00",
+  coming3: "#ffd700",
+  next15: "#27ae60",
 };
 
 let map;
