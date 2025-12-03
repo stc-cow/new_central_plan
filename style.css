@@ -1400,6 +1400,7 @@ body {
 }
 
 .map-container {
+  position: relative;
   width: 100%;
   height: calc(100% - 32px);
   border-radius: 20px;
