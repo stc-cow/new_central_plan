@@ -1129,130 +1129,83 @@ function hexToRgb(hex) {
 }
 
 function addMarkersToMap(sites) {
-  // Clear existing markers and features
-  markersLayer.getSource().clear();
+  // Clear existing markers
+  markersLayer.clearLayers();
   markers = [];
   siteMap = {};
-  pulsingCircles = [];
 
-  // Remove existing pulsing layer if present
-  const layersToRemove = [];
-  map.getLayers().forEach((layer) => {
-    if (layer instanceof ol.layer.Vector && layer !== markersLayer) {
-      const source = layer.getSource();
-      if (source && source.getFeatures().length > 0) {
-        const firstFeature = source.getFeatures()[0];
-        if (firstFeature && firstFeature.get("pulseScale") !== undefined) {
-          layersToRemove.push(layer);
-        }
-      }
-    }
-  });
-  layersToRemove.forEach((layer) => map.removeLayer(layer));
-
-  const features = [];
-  const bounds = [];
+  const bounds = L.latLngBounds();
 
   sites.forEach((site) => {
     const color = site.color || getStatusColor(site.status);
-    const coords = ol.proj.fromLonLat([site.lng, site.lat]);
 
-    // Create marker feature
-    const feature = new ol.Feature({
-      geometry: new ol.geom.Point(coords),
+    // Create circle marker for this site
+    const circleMarker = L.circleMarker([site.lat, site.lng], {
+      radius: 8,
+      fillColor: color,
+      color: "white",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8,
+      siteData: {
+        siteName: site.sitename,
+        status: site.status,
+        days: site.days,
+        nextFuelingPlan: site.nextfuelingplan,
+        statusLabel: getStatusLabel(site.status),
+      }
+    });
+
+    // Add to markers layer
+    circleMarker.addTo(markersLayer);
+
+    // Store marker reference
+    circleMarker.siteData = {
       siteName: site.sitename,
       status: site.status,
       days: site.days,
       nextFuelingPlan: site.nextfuelingplan,
       statusLabel: getStatusLabel(site.status),
-      color: color,
-    });
-
-    features.push(feature);
-    bounds.push(coords);
+    };
+    markers.push(circleMarker);
 
     // Store marker info for interaction
-    markers.push(feature);
     siteMap[site.sitename] = {
-      feature: feature,
+      marker: circleMarker,
       site: site,
-      coords: coords,
+      coords: [site.lat, site.lng],
     };
-  });
 
-  // Add all features to the layer
-  markersLayer.getSource().addFeatures(features);
-
-  // Initialize map visualization
-  const zoom = map.getView().getZoom();
-  updateMapVisualization(zoom);
-
-  // Add pulsing circles for red sites (due/overdue)
-  addPulsingCircles(features);
-
-  // Add click handler for markers
-  map.on("click", function (evt) {
-    const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
-      return feature;
-    });
-
-    if (feature && markersLayer.getSource().getFeatures().includes(feature)) {
-      const siteName = feature.get("siteName");
-      const status = feature.get("status");
-      const days = feature.get("days");
-      const nextFuelingPlan = feature.get("nextFuelingPlan");
-      const statusLabel = feature.get("statusLabel");
-
+    // Add popup on click
+    circleMarker.on("click", () => {
       const popupContent = `
-        <div class="ol-popup-content">
+        <div class="leaflet-popup-content-wrapper">
           <div class="ol-popup-header">
-            <h4>${siteName}</h4>
-            <button class="ol-popup-close">&times;</button>
+            <h4>${site.sitename}</h4>
           </div>
-          <p><strong>Status:</strong> ${statusLabel}</p>
-          <p><strong>Days:</strong> ${days !== null ? days : "N/A"}</p>
-          <p><strong>Fuel Date:</strong> ${nextFuelingPlan || "No Date"}</p>
+          <p><strong>Status:</strong> ${getStatusLabel(site.status)}</p>
+          <p><strong>Days:</strong> ${site.days !== null ? site.days : "N/A"}</p>
+          <p><strong>Fuel Date:</strong> ${site.nextfuelingplan || "No Date"}</p>
         </div>
       `;
 
-      const popup = document.createElement("div");
-      popup.innerHTML = popupContent;
-      popup.className = "ol-popup";
+      circleMarker.bindPopup(popupContent).openPopup();
+    });
 
-      // Remove old popup if exists
-      if (currentPopupOverlay) {
-        map.removeOverlay(currentPopupOverlay);
-      }
-
-      // Add close button handler
-      const closeBtn = popup.querySelector(".ol-popup-close");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-          if (currentPopupOverlay) {
-            map.removeOverlay(currentPopupOverlay);
-            currentPopupOverlay = null;
-          }
-        });
-      }
-
-      // Add new popup to map
-      const overlay = new ol.Overlay({
-        element: popup,
-        positioning: "bottom-center",
-        offset: [0, -8],
-        autoPan: true,
-        autoPanMargin: 250,
-      });
-      map.addOverlay(overlay);
-      overlay.setPosition(feature.getGeometry().getCoordinates());
-      currentPopupOverlay = overlay;
-    }
+    // Add to bounds
+    bounds.extend([site.lat, site.lng]);
   });
 
+  // Initialize map visualization
+  const zoom = map.getZoom();
+  updateMapVisualization(zoom);
+
+  // Add pulsing circles for red sites (due/overdue)
+  addPulsingCircles(markers);
+
   // Fit map to bounds
-  if (bounds.length > 0) {
-    const extent = ol.extent.boundingExtent(bounds);
-    map.getView().fit(extent, {
+  if (bounds.isValid()) {
+    map.fitBounds(bounds, {
       padding: [50, 50, 50, 50],
       maxZoom: 17,
     });
