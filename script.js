@@ -477,21 +477,43 @@ async function handleLogin() {
   const password = document.getElementById("password").value;
   const loginError = document.getElementById("loginError");
 
+  // Validate inputs
+  if (!username || !password) {
+    loginError.textContent = "Please enter both username and password";
+    loginError.style.display = "block";
+    return;
+  }
+
   // Validate credentials
   if (username === "Aces@MSD" && password === "ACES@2025") {
-    // Store login status
-    sessionStorage.setItem("isLoggedIn", "true");
-    sessionStorage.setItem("username", username);
-    loginError.style.display = "none";
+    try {
+      // Hide error message
+      loginError.style.display = "none";
 
-    // Clear form
-    document.getElementById("password").value = "";
+      // Store login status
+      sessionStorage.setItem("isLoggedIn", "true");
+      sessionStorage.setItem("username", username);
 
-    // Show dashboard
-    showDashboard();
+      // Show dashboard
+      showDashboard();
 
-    // Load data in background
-    await startDashboardAsync();
+      // Load data
+      await startDashboardAsync();
+
+      // Clear form
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+    } catch (error) {
+      console.error("Error during login:", error);
+      loginError.textContent = "An error occurred during login. Please try again.";
+      loginError.style.display = "block";
+
+      // Reset login state on error
+      sessionStorage.removeItem("isLoggedIn");
+      sessionStorage.removeItem("username");
+      dashboardInitialized = false;
+      showLoginPage();
+    }
   } else {
     // Show error
     loginError.textContent = "Invalid username or password";
