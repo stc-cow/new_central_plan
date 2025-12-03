@@ -556,7 +556,8 @@ window.handleLogout = function handleLogout() {
 };
 
 async function fetchCSV() {
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
+  const CSV_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
   const CORS_PROXIES = [
     "https://cors-anywhere.herokuapp.com/",
     "https://api.codetabs.com/v1/proxy?quest=",
@@ -595,11 +596,16 @@ async function fetchCSV() {
       const response = await fetch(CSV_URL);
 
       if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `HTTP Error: ${response.status} ${response.statusText}`,
+        );
       }
 
       const csvText = await response.text();
-      console.log("CSV fetched successfully from Google Sheets, length:", csvText.length);
+      console.log(
+        "CSV fetched successfully from Google Sheets, length:",
+        csvText.length,
+      );
 
       if (!csvText.trim()) {
         console.warn("CSV response is empty");
@@ -626,12 +632,17 @@ async function fetchCSV() {
           });
 
           if (!response.ok) {
-            console.warn(`CORS proxy ${i + 1} failed with status ${response.status}`);
+            console.warn(
+              `CORS proxy ${i + 1} failed with status ${response.status}`,
+            );
             continue;
           }
 
           const csvText = await response.text();
-          console.log(`CSV fetched successfully from CORS proxy ${i + 1}, length:`, csvText.length);
+          console.log(
+            `CSV fetched successfully from CORS proxy ${i + 1}, length:`,
+            csvText.length,
+          );
 
           if (!csvText.trim()) {
             console.warn("CSV response is empty");
@@ -646,7 +657,9 @@ async function fetchCSV() {
         }
       }
 
-      console.error("CSV fetch failed with all methods. Using empty data array as fallback.");
+      console.error(
+        "CSV fetch failed with all methods. Using empty data array as fallback.",
+      );
       return [];
     }
   }
