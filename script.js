@@ -630,7 +630,7 @@ async function fetchCSV() {
     }
   }
 
-  // Fallback: try direct Google Sheets fetch
+  // Last resort: try direct Google Sheets fetch
   try {
     console.log("Attempting to fetch CSV directly from Google Sheets...");
     const response = await fetch(CSV_URL, {
