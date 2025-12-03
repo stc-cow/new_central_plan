@@ -1,7 +1,11 @@
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
-const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+const CORS_PROXIES = [
+  "https://cors-anywhere.herokuapp.com/",
+  "https://api.codetabs.com/v1/proxy?quest=",
+  "https://thingproxy.freeboard.io/fetch/",
+];
 
 const ACES_ACCESS_CODE = "ACES2025";
 
