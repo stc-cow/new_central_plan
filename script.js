@@ -965,42 +965,66 @@ function populateComingTable(sites) {
 }
 
 function initMap() {
-  // OpenLayers base layer
-  const baseLayer = new ol.layer.Tile({
-    source: new ol.source.OSM({
-      attributions: ol.source.OSM.ATTRIBUTION,
-    }),
+  // Initialize Leaflet map
+  map = L.map("map").setView([SA_CENTER[0], SA_CENTER[1]], 5);
+
+  // Street Layer (OSM Standard)
+  const street = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors"
   });
 
-  // Transit layer from OSM data (using a public transit overlay)
-  const transitLayer = new ol.layer.Tile({
-    source: new ol.source.XYZ({
-      url: "https://tiles.openptmap.org/ptlines/{z}/{x}/{y}.png",
-      attributions: "© OpenStreetMap contributors | © OpenPT Map",
-    }),
-  });
+  // Satellite Layer (ESRI)
+  const satellite = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 19,
+      attribution: "Tiles © Esri"
+    }
+  );
 
-  // Initialize map
-  map = new ol.Map({
-    target: "map",
-    layers: [baseLayer, transitLayer],
-    view: new ol.View({
-      center: ol.proj.fromLonLat([SA_CENTER[1], SA_CENTER[0]]),
-      zoom: 5,
-      minZoom: 3,
-      maxZoom: 18,
-    }),
-  });
+  // Hybrid Layer (satellite + labels)
+  const hybrid = L.layerGroup([
+    satellite,
+    L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+      {
+        maxZoom: 19,
+        attribution: "Labels © Esri"
+      }
+    )
+  ]);
 
-  // Store markers layer for heatmap
-  markersLayer = new ol.layer.Vector({
-    source: new ol.source.Vector(),
-  });
-  map.addLayer(markersLayer);
+  // Terrain Layer
+  const terrain = L.tileLayer(
+    "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 17,
+      attribution: "Map data © OpenTopoMap"
+    }
+  );
 
-  // Listen for zoom changes to toggle between heatmap and markers
-  map.getView().on("change:resolution", function () {
-    const zoom = map.getView().getZoom();
+  // Add default street layer
+  street.addTo(map);
+
+  // Add layer control
+  L.control.layers(
+    {
+      "Street": street,
+      "Satellite": satellite,
+      "Hybrid": hybrid,
+      "Terrain": terrain
+    },
+    {},
+    { position: "topright" }
+  ).addTo(map);
+
+  // Create feature group for markers
+  markersLayer = L.featureGroup().addTo(map);
+
+  // Listen for zoom changes
+  map.on("zoomend", function () {
+    const zoom = map.getZoom();
     updateMapVisualization(zoom);
   });
 
