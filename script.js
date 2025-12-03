@@ -561,10 +561,35 @@ async function fetchCSV() {
   const CORS_PROXIES = [
     "https://corsproxy.io/?",
     "https://api.codetabs.com/v1/proxy?quest=",
-    "https://cors-anywhere.herokuapp.com/",
   ];
 
-  // Try CORS proxies first (most reliable for all environments)
+  // Try API endpoint first (for servers with backend like Fly.dev)
+  try {
+    console.log("Fetching CSV from API endpoint: /api/fetch-csv");
+
+    const response = await fetch("/api/fetch-csv", {
+      method: "GET",
+      headers: {
+        Accept: "text/csv",
+      },
+    });
+
+    if (response.ok) {
+      const csvText = await response.text();
+      if (csvText.trim()) {
+        console.log("CSV fetched successfully from API endpoint, length:", csvText.length);
+        const parsed = parseCSV(csvText);
+        console.log("Parsed CSV rows:", parsed.length);
+        return parsed;
+      }
+    } else {
+      console.warn(`API endpoint returned status ${response.status}, trying alternatives...`);
+    }
+  } catch (error) {
+    console.warn("API endpoint not available, trying alternatives...");
+  }
+
+  // Try CORS proxies
   for (let i = 0; i < CORS_PROXIES.length; i++) {
     try {
       let proxyUrl;
