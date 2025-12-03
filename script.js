@@ -714,7 +714,7 @@ function filterAndValidateSites(rawData) {
 
       let siteColor = statusObj.color;
 
-      if (sitelabel === "SEC Site" && nextfuelingplan.trim() !== "") {
+      if (nextfuelingplan.trim() === "SEC Site") {
         siteColor = "#9b59b6";
       }
 
