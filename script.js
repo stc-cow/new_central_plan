@@ -505,7 +505,8 @@ async function handleLogin() {
       document.getElementById("password").value = "";
     } catch (error) {
       console.error("Error during login:", error);
-      loginError.textContent = "An error occurred during login. Please try again.";
+      loginError.textContent =
+        "An error occurred during login. Please try again.";
       loginError.style.display = "block";
 
       // Reset login state on error
