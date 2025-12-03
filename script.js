@@ -564,106 +564,75 @@ async function fetchCSV() {
     "https://cors-anywhere.herokuapp.com/",
   ];
 
-  try {
-    console.log("Fetching CSV from API endpoint:", CSV_API_URL);
-
-    const response = await fetch(CSV_API_URL, {
-      method: "GET",
-      headers: {
-        Accept: "text/csv",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-    }
-
-    const csvText = await response.text();
-    console.log("CSV fetched successfully from API, length:", csvText.length);
-
-    if (!csvText.trim()) {
-      console.warn("CSV response is empty");
-      return [];
-    }
-
-    const parsed = parseCSV(csvText);
-    console.log("Parsed CSV rows:", parsed.length);
-    return parsed;
-  } catch (error) {
-    console.error("Error fetching CSV from API:", error);
-    console.log("Attempting to fetch CSV directly from Google Sheets...");
-
+  // Try CORS proxies first (most reliable for all environments)
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
     try {
-      const response = await fetch(CSV_URL);
-
-      if (!response.ok) {
-        throw new Error(
-          `HTTP Error: ${response.status} ${response.statusText}`,
-        );
+      let proxyUrl;
+      if (CORS_PROXIES[i].includes("?")) {
+        proxyUrl = CORS_PROXIES[i] + CSV_URL;
+      } else {
+        proxyUrl = CORS_PROXIES[i] + encodeURIComponent(CSV_URL);
       }
 
-      const csvText = await response.text();
-      console.log(
-        "CSV fetched successfully from Google Sheets, length:",
-        csvText.length,
-      );
+      console.log(`Trying CORS proxy ${i + 1}/${CORS_PROXIES.length}: ${CORS_PROXIES[i]}`);
 
-      if (!csvText.trim()) {
-        console.warn("CSV response is empty");
-        return [];
-      }
+      const response = await fetch(proxyUrl, {
+        method: "GET",
+        headers: {
+          Accept: "text/plain",
+        },
+      });
 
-      const parsed = parseCSV(csvText);
-      console.log("Parsed CSV rows:", parsed.length);
-      return parsed;
-    } catch (directError) {
-      console.error("Error fetching CSV directly:", directError);
-      console.log("Attempting CORS proxy methods...");
+      if (response.ok) {
+        const csvText = await response.text();
 
-      for (let i = 0; i < CORS_PROXIES.length; i++) {
-        try {
-          const proxyUrl = CORS_PROXIES[i] + encodeURIComponent(CSV_URL);
-          console.log(`Trying CORS proxy ${i + 1}/${CORS_PROXIES.length}...`);
-
-          const response = await fetch(proxyUrl, {
-            method: "GET",
-            headers: {
-              Accept: "text/plain",
-            },
-          });
-
-          if (!response.ok) {
-            console.warn(
-              `CORS proxy ${i + 1} failed with status ${response.status}`,
-            );
-            continue;
-          }
-
-          const csvText = await response.text();
+        if (csvText.trim()) {
           console.log(
             `CSV fetched successfully from CORS proxy ${i + 1}, length:`,
             csvText.length,
           );
-
-          if (!csvText.trim()) {
-            console.warn("CSV response is empty");
-            continue;
-          }
-
           const parsed = parseCSV(csvText);
           console.log("Parsed CSV rows:", parsed.length);
           return parsed;
-        } catch (proxyError) {
-          console.warn(`CORS proxy ${i + 1} error:`, proxyError.message);
         }
+      } else {
+        console.warn(
+          `CORS proxy ${i + 1} returned status ${response.status}`,
+        );
       }
-
-      console.error(
-        "CSV fetch failed with all methods. Using empty data array as fallback.",
-      );
-      return [];
+    } catch (proxyError) {
+      console.warn(`CORS proxy ${i + 1} error:`, proxyError.message);
     }
   }
+
+  // Fallback: try direct Google Sheets fetch
+  try {
+    console.log("Attempting to fetch CSV directly from Google Sheets...");
+    const response = await fetch(CSV_URL, {
+      method: "GET",
+      mode: "cors",
+    });
+
+    if (response.ok) {
+      const csvText = await response.text();
+      if (csvText.trim()) {
+        console.log(
+          "CSV fetched successfully from Google Sheets, length:",
+          csvText.length,
+        );
+        const parsed = parseCSV(csvText);
+        console.log("Parsed CSV rows:", parsed.length);
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.warn("Direct Google Sheets fetch failed:", error.message);
+  }
+
+  console.error(
+    "CSV fetch failed with all methods. Using empty data array as fallback.",
+  );
+  return [];
 }
 
 function parseCSV(csvText) {
