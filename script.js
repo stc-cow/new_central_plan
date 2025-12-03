@@ -562,37 +562,48 @@ window.handleLogout = function handleLogout() {
 };
 
 async function fetchCSV() {
-  try {
-    console.log("Attempting to fetch CSV from:", CSV_URL);
-    const proxyUrl = CORS_PROXY + encodeURIComponent(CSV_URL);
+  console.log("Attempting to fetch CSV from:", CSV_URL);
 
-    const response = await fetch(proxyUrl, {
-      method: "GET",
-      headers: {
-        Accept: "text/plain",
-      },
-    });
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
+    try {
+      const proxyUrl = CORS_PROXIES[i] + CSV_URL;
+      console.log(`Trying proxy ${i + 1}/${CORS_PROXIES.length}:`, CORS_PROXIES[i]);
 
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+      const response = await fetch(proxyUrl, {
+        method: "GET",
+        headers: {
+          Accept: "text/plain",
+        },
+      });
+
+      if (!response.ok) {
+        console.warn(
+          `Proxy ${i + 1} failed with status ${response.status}, trying next...`
+        );
+        continue;
+      }
+
+      const csvText = await response.text();
+      console.log("CSV fetched successfully, length:", csvText.length);
+
+      if (!csvText.trim()) {
+        console.warn("CSV response is empty");
+        continue;
+      }
+
+      const parsed = parseCSV(csvText);
+      console.log("Parsed CSV rows:", parsed.length);
+      return parsed;
+    } catch (error) {
+      console.warn(`Proxy ${i + 1} error:`, error.message);
+      if (i === CORS_PROXIES.length - 1) {
+        console.error("All CORS proxies failed");
+      }
     }
-
-    const csvText = await response.text();
-    console.log("CSV fetched successfully, length:", csvText.length);
-
-    if (!csvText.trim()) {
-      console.warn("CSV response is empty");
-      return [];
-    }
-
-    const parsed = parseCSV(csvText);
-    console.log("Parsed CSV rows:", parsed.length);
-    return parsed;
-  } catch (error) {
-    console.error("Error fetching CSV directly:", error);
-    console.warn("CSV fetch failed. Using empty data array as fallback.");
-    return [];
   }
+
+  console.warn("CSV fetch failed with all proxies. Using empty data array as fallback.");
+  return [];
 }
 
 function parseCSV(csvText) {
