@@ -1064,47 +1064,9 @@ function addMapLegend() {
   legendContainer.style.zIndex = "100";
 }
 
-function addPulsingCircles(features) {
-  const pulsingLayer = new ol.layer.Vector({
-    source: new ol.source.Vector(),
-    style: function (feature) {
-      const scale = feature.get("pulseScale") || 1;
-      return new ol.style.Style({
-        image: new ol.style.Circle({
-          radius: 20 * scale,
-          fill: new ol.style.Fill({
-            color: `rgba(255, 107, 107, ${0.3 * (2 - scale)})`,
-          }),
-          stroke: new ol.style.Stroke({
-            color: "#ff6b6b",
-            width: 1,
-          }),
-        }),
-      });
-    },
-  });
-  map.addLayer(pulsingLayer);
+function addPulsingCircles(markers) {
+  if (!markers || markers.length === 0) return;
 
-  features.forEach((feature) => {
-    if (feature.get("status") === "due") {
-      const circleFeature = new ol.Feature({
-        geometry: new ol.geom.Circle(
-          feature.getGeometry().getCoordinates(),
-          40000,
-        ),
-      });
-      circleFeature.set("pulseScale", 1);
-      pulsingLayer.getSource().addFeature(circleFeature);
-      pulsingCircles.push({ feature: circleFeature, layer: pulsingLayer });
-    }
-  });
-
-  if (pulsingCircles.length > 0) {
-    animatePulse();
-  }
-}
-
-function animatePulse() {
   let pulsePhase = 0;
   const pulseInterval = setInterval(() => {
     pulsePhase += 0.05;
@@ -1112,12 +1074,24 @@ function animatePulse() {
       pulsePhase = 0;
     }
 
-    pulsingCircles.forEach(({ feature }) => {
-      const scale = 1 + 0.3 * Math.sin(pulsePhase);
-      feature.set("pulseScale", scale);
-      feature.changed();
+    markers.forEach((marker) => {
+      const siteData = marker.siteData;
+      if (siteData && siteData.status === "due") {
+        const scale = 1 + 0.3 * Math.sin(pulsePhase);
+        const radius = 8 * scale;
+        const opacity = 0.3 * (2 - scale);
+
+        marker.setRadius(radius);
+        marker.setStyle({
+          fillOpacity: opacity,
+          opacity: opacity,
+          color: "#ff6b6b"
+        });
+      }
     });
   }, 50);
+
+  pulsingIntervals.push(pulseInterval);
 }
 
 function updateMapVisualization(zoom) {
