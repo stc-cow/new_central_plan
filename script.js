@@ -557,6 +557,10 @@ window.handleLogout = function handleLogout() {
 
 async function fetchCSV() {
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
+  const CORS_PROXIES = [
+    "https://cors-anywhere.herokuapp.com/",
+    "https://api.codetabs.com/v1/proxy?quest=",
+  ];
 
   try {
     console.log("Fetching CSV from API endpoint:", CSV_API_URL);
@@ -605,9 +609,44 @@ async function fetchCSV() {
       const parsed = parseCSV(csvText);
       console.log("Parsed CSV rows:", parsed.length);
       return parsed;
-    } catch (fallbackError) {
-      console.error("Error fetching CSV from Google Sheets:", fallbackError);
-      console.warn("CSV fetch failed with all methods. Using empty data array as fallback.");
+    } catch (directError) {
+      console.error("Error fetching CSV directly:", directError);
+      console.log("Attempting CORS proxy methods...");
+
+      for (let i = 0; i < CORS_PROXIES.length; i++) {
+        try {
+          const proxyUrl = CORS_PROXIES[i] + encodeURIComponent(CSV_URL);
+          console.log(`Trying CORS proxy ${i + 1}/${CORS_PROXIES.length}...`);
+
+          const response = await fetch(proxyUrl, {
+            method: "GET",
+            headers: {
+              Accept: "text/plain",
+            },
+          });
+
+          if (!response.ok) {
+            console.warn(`CORS proxy ${i + 1} failed with status ${response.status}`);
+            continue;
+          }
+
+          const csvText = await response.text();
+          console.log(`CSV fetched successfully from CORS proxy ${i + 1}, length:`, csvText.length);
+
+          if (!csvText.trim()) {
+            console.warn("CSV response is empty");
+            continue;
+          }
+
+          const parsed = parseCSV(csvText);
+          console.log("Parsed CSV rows:", parsed.length);
+          return parsed;
+        } catch (proxyError) {
+          console.warn(`CORS proxy ${i + 1} error:`, proxyError.message);
+        }
+      }
+
+      console.error("CSV fetch failed with all methods. Using empty data array as fallback.");
       return [];
     }
   }
