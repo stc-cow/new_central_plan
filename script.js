@@ -1031,14 +1031,13 @@ function addMapLegend() {
     </div>
   `;
 
-  const legendOverlay = new ol.Overlay({
-    element: legendContainer,
-    positioning: "bottom-left",
-    offset: [10, -10],
-  });
+  const mapContainer = document.getElementById("map");
+  mapContainer.appendChild(legendContainer);
 
-  map.addOverlay(legendOverlay);
-  legendOverlay.setPosition(map.getView().getCenter());
+  legendContainer.style.position = "absolute";
+  legendContainer.style.bottom = "15px";
+  legendContainer.style.left = "15px";
+  legendContainer.style.zIndex = "100";
 }
 
 function addPulsingCircles(features) {
