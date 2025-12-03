@@ -1130,10 +1130,14 @@ function hexToRgb(hex) {
 }
 
 function addMarkersToMap(sites) {
-  // Clear existing markers
+  // Clear existing markers and pulsing intervals
   markersLayer.clearLayers();
   markers = [];
   siteMap = {};
+
+  // Clear any existing pulsing intervals
+  pulsingIntervals.forEach(interval => clearInterval(interval));
+  pulsingIntervals = [];
 
   const bounds = L.latLngBounds();
 
