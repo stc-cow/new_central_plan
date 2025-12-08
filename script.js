@@ -2327,9 +2327,10 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   return data || [];
 }
 
-function generateInvoiceExcel(records, startDate, endDate) {
+function generateInvoiceExcel(records, startDate, endDate, regionFilter = "") {
   const invoiceData = records.map((record) => ({
     "Site Name": record.sitename,
+    "Region": record.region || "",
     "Refilled Date": formatDateDDMMYYYY(record.refilled_date),
     "Refilled Quantity": record.refilled_quantity || "",
   }));
@@ -2337,10 +2338,11 @@ function generateInvoiceExcel(records, startDate, endDate) {
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.json_to_sheet(invoiceData);
 
-  worksheet["!cols"] = [{ wch: 25 }, { wch: 15 }, { wch: 18 }];
+  worksheet["!cols"] = [{ wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 18 }];
 
   XLSX.utils.book_append_sheet(workbook, worksheet, "Fuel Invoice");
 
-  const fileName = `Fuel_Invoice_${startDate}_to_${endDate}_${new Date().toISOString().split("T")[0]}.xlsx`;
+  const regionSuffix = regionFilter ? `_${regionFilter}` : "";
+  const fileName = `Fuel_Invoice${regionSuffix}_${startDate}_to_${endDate}_${new Date().toISOString().split("T")[0]}.xlsx`;
   XLSX.writeFile(workbook, fileName);
 }
