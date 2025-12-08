@@ -2038,16 +2038,18 @@ window.addEventListener("click", (event) => {
 window.loadInvoiceDataByDateRange = async function loadInvoiceDataByDateRange() {
   const startDateInput = document.getElementById("invoiceStartDate");
   const endDateInput = document.getElementById("invoiceEndDate");
+  const regionSelect = document.getElementById("invoiceRegion");
   const statusDiv = document.getElementById("invoiceStatus");
 
   const startDate = startDateInput.value;
   const endDate = endDateInput.value;
+  const selectedRegionFilter = regionSelect.value;
 
   if (!startDate || !endDate) {
     statusDiv.textContent = "ℹ️ Please select both start and end dates";
     statusDiv.className = "invoice-status info";
     document.getElementById("invoicePreviewBody").innerHTML =
-      '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">Select dates to view records</td></tr>';
+      '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Select dates to view records</td></tr>';
     return;
   }
 
@@ -2063,14 +2065,15 @@ window.loadInvoiceDataByDateRange = async function loadInvoiceDataByDateRange() 
   try {
     const filteredRecords = await fetchFuelQuantitiesByDateRange(
       startDate,
-      endDate
+      endDate,
+      selectedRegionFilter
     );
 
     if (filteredRecords.length === 0) {
-      statusDiv.textContent = "ℹ️ No records found for selected date range";
+      statusDiv.textContent = "ℹ️ No records found for selected date range and region";
       statusDiv.className = "invoice-status info";
       document.getElementById("invoicePreviewBody").innerHTML =
-        '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">No records in this date range</td></tr>';
+        '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No records in this date range</td></tr>';
       return;
     }
 
@@ -2094,7 +2097,7 @@ function updateInvoicePreview() {
 
   if (fuelQuantitiesData.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">No records to display</td></tr>';
+      '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No records to display</td></tr>';
     return;
   }
 
@@ -2103,6 +2106,9 @@ function updateInvoicePreview() {
 
     const siteCell = document.createElement("td");
     siteCell.textContent = record.sitename || "N/A";
+
+    const regionCell = document.createElement("td");
+    regionCell.textContent = record.region || "N/A";
 
     const dateCell = document.createElement("td");
     // Convert DATE to DD/MM/YYYY format for display
@@ -2116,6 +2122,7 @@ function updateInvoicePreview() {
       : "N/A";
 
     tr.appendChild(siteCell);
+    tr.appendChild(regionCell);
     tr.appendChild(dateCell);
     tr.appendChild(qtyCell);
     tbody.appendChild(tr);
@@ -2146,7 +2153,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
     }
 
     // Transform CSV data to fuel_quantities format
-    // Mapping: Column A -> sitename, Column AE -> refilled_date (DD/MM/YYYY), Column AF -> refilled_quantity
+    // Mapping: Column A -> sitename, Column D -> region, Column AE -> refilled_date (DD/MM/YYYY), Column AF -> refilled_quantity
     const fuelRecords = rawData
       .map((row) => {
         // Get sitename - try different possible column names for column A
@@ -2155,6 +2162,13 @@ async function saveCsvFuelDataToSupabase(rawData) {
                         row['site name'] ||
                         row['sitename'] ||
                         '';
+
+        // Get region - try different possible column names for column D (RegionName)
+        const region = row.regionname ||
+                       row.region ||
+                       row['region name'] ||
+                       row['regionname'] ||
+                       '';
 
         // Get refilled date - try different possible column names for column AE (LastFuelingDate)
         const refilled_date_raw = row.lastfuelingdate ||
@@ -2188,6 +2202,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
         return {
           sitename: String(sitename).trim(),
+          region: region && region.trim() !== '' ? String(region).trim() : null,
           refilled_date: refilled_date_iso,
           refilled_quantity: refilled_qty_raw && refilled_qty_raw !== ''
             ? parseFloat(refilled_qty_raw)
@@ -2208,7 +2223,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
     // Log first 5 records for debugging date format
     console.log("📋 Sample records to be migrated:");
     fuelRecords.slice(0, 5).forEach((record, idx) => {
-      console.log(`  [${idx + 1}] Site: ${record.sitename}, Date: ${record.refilled_date}, Qty: ${record.refilled_quantity}`);
+      console.log(`  [${idx + 1}] Site: ${record.sitename}, Region: ${record.region}, Date: ${record.refilled_date}, Qty: ${record.refilled_quantity}`);
     });
 
     // Insert records into fuel_quantities table
@@ -2222,7 +2237,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(
         `✅ Successfully migrated ${fuelRecords.length} fuel records to Supabase`
       );
-      console.log("📍 Data source: Column A (Sitename), Column AE (Refilled Date), Column AF (Refilled Quantity)");
+      console.log("📍 Data source: Column A (Sitename), Column D (Region), Column AE (Refilled Date), Column AF (Refilled Quantity)");
     }
   } catch (err) {
     console.error("Error in saveCsvFuelDataToSupabase:", err);
