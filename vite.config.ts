@@ -457,10 +457,21 @@ function csvProxyPlugin() {
 
             console.log(`✅ Fetched ${data.length} records from database (within date range)`);
 
+            // Deduplicate records: keep only the latest version of each site+date combination
+            const deduped = {};
+            for (const record of data) {
+              const key = `${record.sitename}|${record.refilled_date}`;
+              deduped[key] = record;
+            }
+            let filteredData = Object.values(deduped);
+            const dupesRemoved = data.length - filteredData.length;
+            if (dupesRemoved > 0) {
+              console.log(`🔄 Removed ${dupesRemoved} duplicate records`);
+            }
+
             // Apply region filter if specified
-            let filteredData = data;
             if (region && region.trim() !== "" && region !== "All") {
-              filteredData = data.filter((record) => {
+              filteredData = filteredData.filter((record) => {
                 if (region === "CER") {
                   return record.region?.toLowerCase().includes("central") ||
                          record.region?.toLowerCase().includes("east");
@@ -474,6 +485,14 @@ function csvProxyPlugin() {
               console.log(`✅ After region filter (${region}): ${filteredData.length} records`);
             }
 
+            // Sort by site name, then by date (newest first)
+            filteredData.sort((a, b) => {
+              if (a.sitename !== b.sitename) {
+                return a.sitename.localeCompare(b.sitename);
+              }
+              return new Date(b.refilled_date) - new Date(a.refilled_date);
+            });
+
             console.log(`📊 Sample records:`);
             filteredData.slice(0, 5).forEach((record, idx) => {
               console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
@@ -485,7 +504,8 @@ function csvProxyPlugin() {
               records: filteredData,
               count: filteredData.length,
               total: data.length,
-              filtered: data.length - filteredData.length
+              filtered: data.length - filteredData.length,
+              deduplicated: dupesRemoved
             }));
           } catch (error) {
             console.error("❌ Error in /api/get-invoice-data:", error.message);
