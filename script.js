@@ -2329,18 +2329,16 @@ async function saveCsvFuelDataToSupabase(rawData) {
     }
 
     console.log(`\n📍 Migration complete!`);
-    console.log(`📊 Total records inserted: ${insertedCount}/${fuelRecords.length}`);
+    console.log(`📊 Supabase records inserted: ${insertedCount}/${fuelRecords.length}`);
     if (insertedCount === fuelRecords.length) {
-      console.log(`✅ All records inserted successfully to Supabase!`);
+      console.log(`✅ All records synced to Supabase!`);
+      supabaseAvailable = true;
+    } else if (insertedCount > 0) {
+      console.log(`⚠️ Partial sync: ${insertedCount} records synced to Supabase`);
       supabaseAvailable = true;
     } else {
-      console.warn(`⚠️ Some records failed to insert. Fallback to cached data enabled.`);
+      console.log(`⚠️ Supabase sync failed - Using cached data for invoice functionality`);
     }
-
-    // Cache data locally for offline access
-    cachedFuelData = fuelRecords;
-    localStorage.setItem("cachedFuelData", JSON.stringify(fuelRecords));
-    console.log(`✅ Data cached locally (${fuelRecords.length} records)`);
     console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
   } catch (err) {
     console.error("❌ Error in saveCsvFuelDataToSupabase:", err);
