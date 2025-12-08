@@ -535,6 +535,9 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
     const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
+    console.log(`📋 Supabase URL: ${supabaseUrl ? "✓ Set" : "✗ Missing"}`);
+    console.log(`🔑 Supabase Key: ${supabaseKey ? "✓ Set" : "✗ Missing"}`);
+
     if (!supabaseUrl || !supabaseKey) {
       console.error("Missing Supabase credentials");
       return res.status(500).json({
@@ -553,11 +556,13 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
       .order("id", { ascending: true });
 
     if (fetchError) {
-      console.error("❌ Error fetching records:", fetchError.message);
+      console.error("❌ Error fetching records:", fetchError);
+      console.error("   Error details:", JSON.stringify(fetchError, null, 2));
       return res.status(500).json({
         status: "error",
         error: "Failed to fetch records",
-        details: fetchError.message,
+        details: fetchError?.message || String(fetchError),
+        code: fetchError?.code,
       });
     }
 
