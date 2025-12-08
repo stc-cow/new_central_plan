@@ -2190,23 +2190,55 @@ async function saveCsvFuelDataToSupabase(rawData) {
       const storagePromise = (async () => {
         let allRecords = [];
         try {
-          console.log("🔄 Downloading fuel_quantities.json...");
+          console.log("🔄 Downloading fuel_quantities.json from Storage...");
           const { data, error } = await supabaseClient.storage
             .from('fuel_data')
             .download('fuel_quantities.json');
 
           if (error) {
-            console.warn("⚠️  Storage file doesn't exist yet or read error:", error.message);
-            console.log("ℹ️  Starting fresh (first sync or file not created)");
+            console.warn("⚠️  Storage file doesn't exist yet:", error.message);
+            console.log("🔄 Attempting to load existing data from Supabase database table as fallback...");
+
+            // Try to load from database table as fallback
+            try {
+              const { data: dbData, error: dbError } = await supabaseClient
+                .from('fuel_quantities')
+                .select('sitename, region, refilled_date, refilled_quantity');
+
+              if (dbError) {
+                console.warn("⚠️  Database read also failed:", dbError.message);
+                console.log("ℹ️  Starting fresh (no existing data found)");
+              } else if (dbData && dbData.length > 0) {
+                allRecords = dbData;
+                console.log(`✅ Loaded ${allRecords.length} existing records from database table`);
+              } else {
+                console.log("ℹ️  Database is empty - starting fresh");
+              }
+            } catch (dbErr) {
+              console.warn("⚠️  Database fallback failed:", dbErr.message);
+              console.log("ℹ️  Starting fresh");
+            }
           } else if (data) {
             const text = await data.text();
             allRecords = JSON.parse(text);
             console.log(`✅ Found ${allRecords.length} existing records in storage - PRESERVING ALL OLD DATA`);
           }
         } catch (readErr) {
-          console.error("❌ CRITICAL: Error reading existing data from storage:", readErr.message);
-          console.warn("⚠️  This could mean old records will be lost!");
-          console.log("ℹ️  Attempting to continue - will start with empty records");
+          console.error("❌ Error reading existing data from storage:", readErr.message);
+          console.warn("⚠️  Attempting database table as fallback...");
+
+          try {
+            const { data: dbData, error: dbError } = await supabaseClient
+              .from('fuel_quantities')
+              .select('sitename, region, refilled_date, refilled_quantity');
+
+            if (!dbError && dbData) {
+              allRecords = dbData;
+              console.log(`✅ Loaded ${allRecords.length} records from database table`);
+            }
+          } catch (dbErr) {
+            console.log("ℹ️  Both storage and database reads failed - starting fresh");
+          }
         }
 
         // Add new records with timestamp
