@@ -294,6 +294,170 @@ app.get("/api/get-invoice-data", async (req, res) => {
   }
 });
 
+app.post("/api/sync-fuel-sheet", async (req, res) => {
+  try {
+    console.log("\n🔄 Starting Google Sheets Fuel Data Sync (hash-based deduplication)...");
+    const syncStartTime = Date.now();
+
+    const { createClient } = await import("@supabase/supabase-js");
+
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE;
+
+    if (!supabaseUrl || !supabaseServiceRole) {
+      console.error("❌ Missing Supabase credentials for sync");
+      return res.status(500).json({
+        status: "error",
+        error: "Supabase credentials not configured",
+        records: { processed: 0, inserted: 0, skipped: 0, invalid: 0 }
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceRole);
+
+    // Fetch CSV from Google Sheets
+    console.log("📥 Fetching CSV from Google Sheets...");
+    const csvResponse = await fetch(CSV_URL, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      }
+    });
+
+    if (!csvResponse.ok) {
+      throw new Error(`Failed to fetch CSV: ${csvResponse.statusText}`);
+    }
+
+    const csvText = await csvResponse.text();
+    const rows = csvText.split("\n").map(r => r.split(","));
+    const headers = rows[0];
+    const dataRows = rows.slice(1).filter(row => row.length >= 4);
+
+    console.log(`📊 CSV fetched successfully: ${dataRows.length} data rows`);
+
+    let processed = 0;
+    let inserted = 0;
+    let skipped = 0;
+    let invalid = 0;
+    const errors = [];
+
+    for (const row of dataRows) {
+      try {
+        const sitename = row[0]?.trim();
+        const region = row[1]?.trim() || null;
+        const refilled_date = row[2]?.trim();
+        const refilled_quantity = parseFloat(row[3]?.trim());
+
+        processed++;
+
+        // Validation: skip invalid records
+        if (!refilled_quantity || refilled_quantity <= 0) {
+          invalid++;
+          continue;
+        }
+
+        if (isNaN(Date.parse(refilled_date))) {
+          invalid++;
+          continue;
+        }
+
+        if (!sitename) {
+          invalid++;
+          continue;
+        }
+
+        // Create hash for deduplication
+        const row_hash = crypto
+          .createHash("sha256")
+          .update(`${sitename}-${region}-${refilled_date}-${refilled_quantity}`)
+          .digest("hex");
+
+        // Check if this row already exists (using unique constraint)
+        const { data: existing, error: checkError } = await supabase
+          .from("fuel_quantities")
+          .select("id")
+          .eq("row_hash", row_hash)
+          .maybeSingle();
+
+        if (checkError) {
+          console.warn(`⚠️  Error checking existing row: ${checkError.message}`);
+        }
+
+        if (existing) {
+          skipped++;
+          continue;
+        }
+
+        // Insert new record with row_hash
+        const { data: insertData, error: insertError } = await supabase
+          .from("fuel_quantities")
+          .insert([{
+            sitename,
+            region,
+            refilled_date,
+            refilled_quantity,
+            row_hash
+          }]);
+
+        if (insertError) {
+          errors.push({
+            sitename,
+            date: refilled_date,
+            error: insertError.message
+          });
+          console.warn(`⚠️  Insert failed for ${sitename}: ${insertError.message}`);
+        } else {
+          inserted++;
+        }
+      } catch (rowError) {
+        console.warn(`⚠️  Error processing row: ${rowError.message}`);
+        errors.push({
+          error: rowError.message
+        });
+      }
+    }
+
+    lastSyncTime = new Date().toISOString();
+    const syncDurationMs = Date.now() - syncStartTime;
+
+    console.log(`\n✅ Sync Complete!`);
+    console.log(`   📊 Total processed: ${processed}`);
+    console.log(`   ✨ Inserted: ${inserted}`);
+    console.log(`   ⏭️  Skipped (duplicates): ${skipped}`);
+    console.log(`   ❌ Invalid: ${invalid}`);
+    console.log(`   ⏱️  Duration: ${syncDurationMs}ms`);
+
+    res.json({
+      status: "success",
+      message: "Google Sheet synced successfully with hash-based deduplication",
+      records: {
+        processed,
+        inserted,
+        skipped,
+        invalid
+      },
+      lastSync: lastSyncTime,
+      durationMs: syncDurationMs,
+      errors: errors.length > 0 ? errors.slice(0, 10) : []
+    });
+  } catch (error) {
+    console.error("❌ Sync failed:", error.message);
+    res.status(500).json({
+      status: "error",
+      error: error.message,
+      records: { processed: 0, inserted: 0, skipped: 0, invalid: 0 }
+    });
+  }
+});
+
+app.get("/api/sync-fuel-sheet", async (req, res) => {
+  res.json({
+    status: "info",
+    message: "Use POST /api/sync-fuel-sheet to trigger a sync",
+    lastSync: lastSyncTime,
+    nextScheduledSync: "Every 6 hours (configurable)"
+  });
+});
+
 app.get("*", (req, res) => {
   res.sendFile(join(__dirname, "dist", "index.html"));
 });
