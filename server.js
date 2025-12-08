@@ -58,6 +58,54 @@ app.post("/api/save-fuel-data", async (req, res) => {
 
     console.log(`Server: Received ${records.length} fuel records to save`);
 
+    // Server-side validation: ensure only valid data is sent to Supabase
+    console.log(`Server: Validating records (must have valid date and quantity > 0)...`);
+    const validRecords = [];
+    const invalidRecords = [];
+
+    records.forEach((record, idx) => {
+      const hasValidDate = record.refilled_date && String(record.refilled_date).trim() !== '';
+      const hasValidQty = record.refilled_quantity && Number(record.refilled_quantity) > 0;
+
+      if (hasValidDate && hasValidQty) {
+        validRecords.push(record);
+      } else {
+        invalidRecords.push({
+          index: idx,
+          sitename: record.sitename,
+          date: record.refilled_date || 'MISSING',
+          qty: record.refilled_quantity || 'MISSING',
+          reason: !hasValidDate ? 'Invalid/Missing Date' : 'Quantity ≤ 0'
+        });
+      }
+    });
+
+    console.log(`Server: Validation complete`);
+    console.log(`  ✅ Valid records: ${validRecords.length}`);
+    console.log(`  ❌ Invalid records: ${invalidRecords.length}`);
+
+    if (invalidRecords.length > 0) {
+      console.warn(`Server: Invalid records that will be EXCLUDED:`);
+      invalidRecords.slice(0, 10).forEach(rec => {
+        console.warn(`  - ${rec.sitename}: Date=${rec.date}, Qty=${rec.qty} (${rec.reason})`);
+      });
+      if (invalidRecords.length > 10) {
+        console.warn(`  ... and ${invalidRecords.length - 10} more invalid records`);
+      }
+    }
+
+    if (validRecords.length === 0) {
+      console.warn(`Server: No valid records to insert after validation`);
+      return res.json({
+        success: false,
+        inserted: 0,
+        total: records.length,
+        message: "No valid records (all records had invalid date or quantity ≤ 0)",
+        invalidRecords: invalidRecords.length,
+        batchResults: []
+      });
+    }
+
     // Import Supabase client
     const { createClient } = await import("@supabase/supabase-js");
 
@@ -79,8 +127,8 @@ app.post("/api/save-fuel-data", async (req, res) => {
     const MAX_RETRIES = 3;
     const batchResults = [];
 
-    for (let i = 0; i < records.length; i += BATCH_SIZE) {
-      const batch = records.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < validRecords.length; i += BATCH_SIZE) {
+      const batch = validRecords.slice(i, i + BATCH_SIZE);
       const batchNum = Math.floor(i / BATCH_SIZE) + 1;
       let inserted = false;
       let retryCount = 0;
