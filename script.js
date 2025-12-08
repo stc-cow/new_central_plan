@@ -2244,6 +2244,10 @@ async function saveCsvFuelDataToSupabase(rawData) {
         console.log(`📝 New records added: ${newRecordsWithMeta.length}`);
         console.log(`📂 File path: fuel_data/fuel_quantities.json`);
         console.log(`📦 File size: ${(jsonBlob.size / 1024).toFixed(2)} KB`);
+        console.log(`\n📋 Sample of all records now in storage:`);
+        allRecords.forEach((record, idx) => {
+          console.log(`  [${record.id || idx}] Site: ${record.sitename} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+        });
 
         return { success: true, allRecords };
       })();
