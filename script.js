@@ -612,36 +612,42 @@ async function fetchCSV() {
 
   // Try API endpoint first (for servers with backend like Fly.dev)
   try {
-    console.log("Fetching CSV from API endpoint: /api/fetch-csv");
+    console.log("📥 Attempting CSV fetch from API endpoint: /api/fetch-csv");
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
     const response = await fetch("/api/fetch-csv", {
       method: "GET",
       headers: {
         Accept: "text/csv",
       },
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
 
     if (response.ok) {
       const csvText = await response.text();
       if (csvText.trim()) {
         console.log(
-          "CSV fetched successfully from API endpoint, length:",
+          "✅ CSV fetched from API endpoint, length:",
           csvText.length,
         );
         const parsed = parseCSV(csvText);
-        console.log("Parsed CSV rows:", parsed.length);
+        console.log("✅ Parsed CSV rows:", parsed.length);
         return parsed;
       }
     } else {
       console.warn(
-        `API endpoint returned status ${response.status}, trying alternatives...`,
+        `⚠️  API endpoint status ${response.status}, trying alternatives...`,
       );
     }
   } catch (error) {
-    console.warn("API endpoint not available, trying alternatives...");
+    console.warn(`⚠️  API endpoint error (${error.name}): ${error.message}`);
   }
 
-  // Try CORS proxies
+  // Try CORS proxies (skip if network is completely unavailable)
   for (let i = 0; i < CORS_PROXIES.length; i++) {
     try {
       let proxyUrl;
@@ -652,63 +658,78 @@ async function fetchCSV() {
       }
 
       console.log(
-        `Trying CORS proxy ${i + 1}/${CORS_PROXIES.length}: ${CORS_PROXIES[i]}`,
+        `📥 CORS proxy ${i + 1}/${CORS_PROXIES.length}: ${CORS_PROXIES[i]}`,
       );
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
       const response = await fetch(proxyUrl, {
         method: "GET",
         headers: {
           Accept: "text/plain",
         },
+        signal: controller.signal
       });
+
+      clearTimeout(timeout);
 
       if (response.ok) {
         const csvText = await response.text();
 
         if (csvText.trim()) {
           console.log(
-            `CSV fetched successfully from CORS proxy ${i + 1}, length:`,
+            `✅ CSV fetched from CORS proxy ${i + 1}, length:`,
             csvText.length,
           );
           const parsed = parseCSV(csvText);
-          console.log("Parsed CSV rows:", parsed.length);
+          console.log("✅ Parsed CSV rows:", parsed.length);
           return parsed;
         }
       } else {
-        console.warn(`CORS proxy ${i + 1} returned status ${response.status}`);
+        console.warn(`⚠️  CORS proxy ${i + 1} status ${response.status}`);
       }
     } catch (proxyError) {
-      console.warn(`CORS proxy ${i + 1} error:`, proxyError.message);
+      console.warn(`⚠️  CORS proxy ${i + 1} error: ${proxyError.name}`);
     }
   }
 
   // Last resort: try direct Google Sheets fetch
   try {
-    console.log("Attempting to fetch CSV directly from Google Sheets...");
+    console.log("📥 Direct fetch from Google Sheets (last attempt)...");
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
     const response = await fetch(CSV_URL, {
       method: "GET",
       mode: "cors",
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
 
     if (response.ok) {
       const csvText = await response.text();
       if (csvText.trim()) {
         console.log(
-          "CSV fetched successfully from Google Sheets, length:",
+          "✅ CSV fetched directly, length:",
           csvText.length,
         );
         const parsed = parseCSV(csvText);
-        console.log("Parsed CSV rows:", parsed.length);
+        console.log("✅ Parsed CSV rows:", parsed.length);
         return parsed;
       }
     }
   } catch (error) {
-    console.warn("Direct Google Sheets fetch failed:", error.message);
+    console.warn(`⚠️  Direct fetch error (${error.name}): ${error.message}`);
   }
 
   console.error(
-    "CSV fetch failed with all methods. Using empty data array as fallback.",
+    "❌ CSV fetch failed with all methods. Using cached data or database instead.",
   );
+
+  // Return empty array - app will fall back to database API for invoice data
   return [];
 }
 
