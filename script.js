@@ -2435,7 +2435,7 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
 
 async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter = "") {
   try {
-    console.log(`🔍 Reading from backend API: /api/get-invoice-data`);
+    console.log(`🔍 Fetching invoice data from backend API: /api/get-invoice-data`);
     console.log(`   Date range: ${startDate} to ${endDate}, Region: ${regionFilter || 'All'}`);
 
     // Call backend endpoint to read directly from database (source of truth)
@@ -2444,17 +2444,25 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
       endDate: endDate,
       region: regionFilter || ''
     });
+
+    // Add timeout to fetch
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
     const response = await fetch(`/api/get-invoice-data?${queryParams.toString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
 
     if (response.ok) {
       const data = await response.json();
       if (data.success && data.records && Array.isArray(data.records)) {
-        console.log(`✅ Loaded ${data.records.length} records from database (via backend)`);
+        console.log(`✅ Loaded ${data.records.length} records from database`);
         console.log(`📋 Sample records:`);
         data.records.slice(0, 5).forEach((record, idx) => {
           console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
@@ -2464,18 +2472,18 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
       }
     }
 
-    console.warn(`⚠️ Backend API returned non-success response, attempting fallback`);
+    console.warn(`⚠️ Backend API status ${response.status}, attempting fallback...`);
   } catch (err) {
-    console.warn("⚠️ Backend API fetch failed:", err.message);
+    console.warn(`⚠️ Backend API failed (${err.name}): ${err.message}`);
   }
 
-  // Fallback 1: Try localStorage with fuel_quantities_storage key
+  // Fallback 1: Try localStorage with fuel_quantities_sample key (small cache)
   try {
-    console.log("📖 Trying localStorage (fuel_quantities_storage)...");
-    const cached = localStorage.getItem("fuel_quantities_storage");
+    console.log("📖 Trying localStorage sample cache...");
+    const cached = localStorage.getItem("fuel_quantities_sample");
     if (cached) {
       const allRecords = JSON.parse(cached);
-      console.log(`✅ Loaded ${allRecords.length} records from localStorage (fuel_quantities_storage)`);
+      console.log(`⚠️  Using sample cache (${allRecords.length} recent records)`);
 
       // Filter by date range and region
       let filteredRecords = allRecords.filter(record => {
@@ -2498,15 +2506,18 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
         return true;
       });
 
-      console.log(`✅ Filtered ${filteredRecords.length} records from localStorage (fuel_quantities_storage)`);
-      return filteredRecords;
+      if (filteredRecords.length > 0) {
+        console.log(`✅ Found ${filteredRecords.length} records in sample cache`);
+        return filteredRecords;
+      }
     }
   } catch (localErr) {
-    console.warn("⚠️ localStorage (fuel_quantities_storage) fallback failed:", localErr.message);
+    console.warn("⚠️ localStorage sample cache failed:", localErr.message);
   }
 
-  // Fallback 2: Try cachedFuelData
-  return filterCachedFuelData(startDate, endDate, regionFilter);
+  // Fallback 2: Return empty array and show user message
+  console.error("❌ No data available - backend API offline and no cached data");
+  return [];
 }
 
 function filterCachedFuelData(startDate, endDate, regionFilter = "") {
