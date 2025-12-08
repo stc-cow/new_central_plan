@@ -335,6 +335,90 @@
       </div>
     </div>
 
+    <!-- Fuel Quantity Invoice Modal -->
+    <div id="invoiceModal" class="modal">
+      <div class="modal-content invoice-modal-content">
+        <div class="modal-header">
+          <h2>Fuel Quantity Management & Invoice</h2>
+          <button class="modal-close" onclick="closeInvoiceModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="invoice-container">
+            <!-- Upload Section -->
+            <div class="invoice-section">
+              <h3>Import Fuel Quantities from Excel</h3>
+              <div class="file-upload-area">
+                <input
+                  type="file"
+                  id="fuelQuantityFile"
+                  accept=".xlsx,.xls,.csv"
+                  class="file-input"
+                />
+                <label for="fuelQuantityFile" class="file-label">
+                  📁 Select Excel/CSV File
+                </label>
+                <button
+                  class="upload-btn"
+                  onclick="uploadFuelQuantities()"
+                >
+                  Upload & Save to Database
+                </button>
+                <div id="uploadStatus" class="upload-status"></div>
+              </div>
+            </div>
+
+            <!-- Date Range Filter Section -->
+            <div class="invoice-section">
+              <h3>Download Invoice by Date Range</h3>
+              <div class="date-range-filter">
+                <div class="date-input-group">
+                  <label for="invoiceStartDate">Start Date:</label>
+                  <input
+                    type="date"
+                    id="invoiceStartDate"
+                    class="date-input"
+                  />
+                </div>
+                <div class="date-input-group">
+                  <label for="invoiceEndDate">End Date:</label>
+                  <input
+                    type="date"
+                    id="invoiceEndDate"
+                    class="date-input"
+                  />
+                </div>
+                <button
+                  class="download-invoice-btn"
+                  onclick="downloadInvoiceByDateRange()"
+                >
+                  📥 Download Invoice
+                </button>
+              </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="invoice-section">
+              <h3>Imported Records Preview</h3>
+              <div id="invoicePreview" class="invoice-preview">
+                <table class="invoice-table">
+                  <thead>
+                    <tr>
+                      <th>Site Name</th>
+                      <th>Refilled Date</th>
+                      <th>Refilled Quantity</th>
+                    </tr>
+                  </thead>
+                  <tbody id="invoicePreviewBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- MDL Beast Modal -->
     <div id="mdlModal" class="modal">
       <div class="modal-content mdl-modal-content">
