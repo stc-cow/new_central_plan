@@ -353,29 +353,6 @@
         </div>
         <div class="modal-body">
           <div class="invoice-container">
-            <!-- Upload Section -->
-            <div class="invoice-section">
-              <h3>Import Fuel Quantities from Excel</h3>
-              <div class="file-upload-area">
-                <input
-                  type="file"
-                  id="fuelQuantityFile"
-                  accept=".xlsx,.xls,.csv"
-                  class="file-input"
-                />
-                <label for="fuelQuantityFile" class="file-label">
-                  📁 Select Excel/CSV File
-                </label>
-                <button
-                  class="upload-btn"
-                  onclick="uploadFuelQuantities()"
-                >
-                  Upload & Save to Database
-                </button>
-                <div id="uploadStatus" class="upload-status"></div>
-              </div>
-            </div>
-
             <!-- Date Range Filter Section -->
             <div class="invoice-section">
               <h3>Download Invoice by Date Range</h3>
@@ -386,6 +363,7 @@
                     type="date"
                     id="invoiceStartDate"
                     class="date-input"
+                    onchange="loadInvoiceDataByDateRange()"
                   />
                 </div>
                 <div class="date-input-group">
@@ -394,6 +372,7 @@
                     type="date"
                     id="invoiceEndDate"
                     class="date-input"
+                    onchange="loadInvoiceDataByDateRange()"
                   />
                 </div>
                 <button
@@ -403,11 +382,12 @@
                   📥 Download Invoice
                 </button>
               </div>
+              <div id="invoiceStatus" class="invoice-status"></div>
             </div>
 
             <!-- Preview Section -->
             <div class="invoice-section">
-              <h3>Imported Records Preview</h3>
+              <h3>Fuel Records</h3>
               <div id="invoicePreview" class="invoice-preview">
                 <table class="invoice-table">
                   <thead>
