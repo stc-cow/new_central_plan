@@ -1925,79 +1925,28 @@ body {
   margin-top: 0;
 }
 
-.file-upload-area {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-  padding: 20px;
-  background: white;
-  border: 2px dashed #e8ecff;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.file-upload-area:hover {
-  border-color: var(--aces-primary);
-  background: #f9fbff;
-}
-
-.file-input {
-  display: none;
-}
-
-.file-label {
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--aces-primary);
-  padding: 10px 16px;
-  background: white;
-  border: 2px solid var(--aces-primary);
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.file-label:hover {
-  background: var(--aces-primary);
-  color: white;
-}
-
-.upload-btn {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2);
-}
-
-.upload-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(39, 174, 96, 0.3);
-}
-
-.upload-status {
+.invoice-status {
   font-size: 13px;
   padding: 10px;
   border-radius: 6px;
   text-align: center;
   min-height: 20px;
+  margin-top: 12px;
 }
 
-.upload-status.success {
+.invoice-status.success {
   color: #27ae60;
   background: #d5f4e6;
 }
 
-.upload-status.error {
+.invoice-status.error {
   color: #d32f2f;
   background: #ffebee;
+}
+
+.invoice-status.info {
+  color: #1976d2;
+  background: #e3f2fd;
 }
 
 .date-range-filter {
