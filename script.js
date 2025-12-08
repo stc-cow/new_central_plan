@@ -2136,18 +2136,15 @@ async function saveCsvFuelDataToSupabase(rawData) {
           return null;
         }
 
-        // Parse DD/MM/YYYY date and convert to YYYY-MM-DD for DATE storage
-        let refilled_date_iso = null;
+        // Convert DD/MM/YYYY date directly to YYYY-MM-DD for DATE storage
+        let refilled_date_yyyymmdd = null;
         if (refilled_date_raw && refilled_date_raw.trim() !== '') {
-          const parsedDate = parseFuelDate(refilled_date_raw);
-          if (parsedDate) {
-            refilled_date_iso = parsedDate.toISOString().split("T")[0];
-          }
+          refilled_date_yyyymmdd = convertDDMMYYYYtoYYYYMMDD(refilled_date_raw);
         }
 
         return {
           sitename: String(sitename).trim(),
-          refilled_date: refilled_date_iso,
+          refilled_date: refilled_date_yyyymmdd,
           refilled_quantity: refilled_qty_raw && refilled_qty_raw !== ''
             ? parseFloat(refilled_qty_raw)
             : null,
