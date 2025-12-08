@@ -2109,50 +2109,12 @@ async function saveCsvFuelDataToSupabase(rawData) {
     console.log(`  Valid records extracted: ${fuelRecords.length}`);
     console.log(`  Excluded records (invalid date or quantity ≤ 0): ${rawData.length - fuelRecords.length}`);
 
-    // Deduplicate records: Only migrate records that are NEW (not already in Supabase)
-    console.log("\n🔍 Checking for duplicate records (deduplication)...");
-    const recordsToMigrate = [];
-    const duplicates = [];
+    // Always migrate all CSV records (allow duplicate site names with different timestamps and IDs)
+    console.log("\n📝 Preparing all records for migration...");
+    const recordsToMigrate = [...fuelRecords];
 
-    // Get existing records from Supabase (if available)
-    try {
-      if (supabaseClient) {
-        const { data: existingRecords, error } = await supabaseClient
-          .from("fuel_quantities")
-          .select("sitename, refilled_date, refilled_quantity");
-
-        if (!error && existingRecords && existingRecords.length > 0) {
-          console.log(`Found ${existingRecords.length} existing records in Supabase`);
-
-          // Check each record against existing ones
-          fuelRecords.forEach((record) => {
-            const isDuplicate = existingRecords.some(existing =>
-              existing.sitename === record.sitename &&
-              existing.refilled_date === record.refilled_date &&
-              existing.refilled_quantity === record.refilled_quantity
-            );
-
-            if (isDuplicate) {
-              duplicates.push(record);
-            } else {
-              recordsToMigrate.push(record);
-            }
-          });
-
-          console.log(`  ✅ New records to migrate: ${recordsToMigrate.length}`);
-          console.log(`  ⏭️  Duplicate records (skipped): ${duplicates.length}`);
-        } else {
-          // If can't fetch existing records, migrate all (first sync)
-          recordsToMigrate.push(...fuelRecords);
-          console.log(`  (Cannot check for duplicates, will migrate all ${fuelRecords.length} records)`);
-        }
-      } else {
-        recordsToMigrate.push(...fuelRecords);
-      }
-    } catch (err) {
-      console.warn(`⚠️ Error checking duplicates: ${err.message} - will migrate all records`);
-      recordsToMigrate.push(...fuelRecords);
-    }
+    console.log(`  ✅ Records to migrate: ${recordsToMigrate.length}`);
+    console.log(`  📌 Note: Duplicate site names allowed - each record gets unique ID + timestamp`);
 
     if (recordsToMigrate.length > 0) {
       console.log("\n📋 Sample of records to migrate (first 3):");
