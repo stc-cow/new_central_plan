@@ -1873,3 +1873,223 @@ body {
     height: 16px;
   }
 }
+
+/* Invoice Modal Styles */
+.invoice-btn {
+  padding: 12px 20px;
+  border: 2px solid var(--aces-primary);
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--aces-primary) 0%, #1a1f4f 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(32, 43, 109, 0.06);
+}
+
+.invoice-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(32, 43, 109, 0.12);
+}
+
+.invoice-btn:active {
+  transform: translateY(0);
+}
+
+.invoice-modal-content {
+  border-top: 4px solid var(--aces-primary);
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.invoice-container {
+  padding: 20px;
+}
+
+.invoice-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8faff;
+  border-radius: 12px;
+  border: 2px solid #e8ecff;
+}
+
+.invoice-section h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--aces-primary);
+  margin-bottom: 16px;
+  margin-top: 0;
+}
+
+.file-upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  padding: 20px;
+  background: white;
+  border: 2px dashed #e8ecff;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-upload-area:hover {
+  border-color: var(--aces-primary);
+  background: #f9fbff;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-label {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--aces-primary);
+  padding: 10px 16px;
+  background: white;
+  border: 2px solid var(--aces-primary);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.file-label:hover {
+  background: var(--aces-primary);
+  color: white;
+}
+
+.upload-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2);
+}
+
+.upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(39, 174, 96, 0.3);
+}
+
+.upload-status {
+  font-size: 13px;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  min-height: 20px;
+}
+
+.upload-status.success {
+  color: #27ae60;
+  background: #d5f4e6;
+}
+
+.upload-status.error {
+  color: #d32f2f;
+  background: #ffebee;
+}
+
+.date-range-filter {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.date-input-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--aces-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date-input {
+  padding: 10px 12px;
+  border: 2px solid #e8ecff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: Verdana, sans-serif;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--aces-primary);
+  box-shadow: 0 0 0 4px rgba(32, 43, 109, 0.1);
+}
+
+.download-invoice-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--aces-red) 0%, #b71c1c 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+  white-space: nowrap;
+}
+
+.download-invoice-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(211, 47, 47, 0.3);
+}
+
+.invoice-preview {
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.invoice-table thead {
+  background: linear-gradient(90deg, #f9fbff 0%, #f0f4ff 100%);
+  position: sticky;
+  top: 0;
+}
+
+.invoice-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--aces-primary);
+  border-bottom: 2px solid #e8ecff;
+}
+
+.invoice-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8ecff;
+  color: var(--text-primary);
+}
+
+.invoice-table tbody tr:hover {
+  background-color: #f8faff;
+}
