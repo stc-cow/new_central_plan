@@ -1796,17 +1796,9 @@ window.closeVVVIPModal = function closeVVVIPModal() {
 
 window.addEventListener("click", (event) => {
   const vvvipModal = document.getElementById("vvvipModal");
-  const camelModal = document.getElementById("camelModal");
-  const mdlModal = document.getElementById("mdlModal");
 
   if (event.target === vvvipModal) {
     closeVVVIPModal();
-  }
-  if (event.target === camelModal) {
-    closeCamelModal();
-  }
-  if (event.target === mdlModal) {
-    closeMDLModal();
   }
 });
 
