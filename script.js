@@ -2048,9 +2048,8 @@ function updateInvoicePreview() {
     siteCell.textContent = record.sitename || "N/A";
 
     const dateCell = document.createElement("td");
-    dateCell.textContent = record.refilled_date
-      ? new Date(record.refilled_date).toLocaleDateString("en-GB")
-      : "N/A";
+    // Date is stored in DD/MM/YYYY format in Supabase
+    dateCell.textContent = record.refilled_date || "N/A";
 
     const qtyCell = document.createElement("td");
     qtyCell.textContent = record.refilled_quantity
