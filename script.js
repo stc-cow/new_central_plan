@@ -2008,40 +2008,52 @@ function formatDateDDMMYYYY(dateStr) {
 
 async function ensureStorageBucket() {
   if (!supabaseClient) {
+    console.log("🔌 Initializing Supabase client for storage...");
     await initSupabaseClient();
   }
 
   if (!supabaseClient) {
-    console.warn("⚠️ Supabase client not available");
+    console.error("❌ Supabase client not available");
     return false;
   }
 
   try {
-    // Try to access bucket - if it doesn't exist, create it
-    const { data, error } = await supabaseClient.storage.listBuckets();
+    console.log("📦 Checking storage bucket 'fuel_data'...");
 
-    if (error) {
-      console.warn("⚠️ Cannot access storage:", error.message);
+    // Direct check - just try to access the bucket
+    const { data: buckets, error: listError } = await supabaseClient.storage.listBuckets();
+
+    if (listError) {
+      console.error("❌ Cannot list buckets:", listError);
       return false;
     }
 
-    const bucketExists = data?.some(b => b.name === 'fuel_data');
+    console.log(`✅ Found ${buckets?.length || 0} buckets`);
 
-    if (!bucketExists) {
-      console.log("📦 Creating 'fuel_data' storage bucket...");
-      const { data: bucket, error: createError } = await supabaseClient.storage.createBucket('fuel_data', {
-        public: false
-      });
+    const bucketExists = buckets?.some(b => b.name === 'fuel_data');
 
-      if (createError) {
-        console.warn("⚠️ Could not create bucket:", createError.message);
-        return false;
-      }
-      console.log("✅ Bucket created successfully");
+    if (bucketExists) {
+      console.log("✅ Bucket 'fuel_data' exists");
+      return true;
     }
+
+    console.log("📝 Bucket 'fuel_data' not found - attempting to create...");
+    const { data: bucket, error: createError } = await supabaseClient.storage.createBucket('fuel_data', {
+      public: false,
+      fileSizeLimit: 104857600 // 100MB
+    });
+
+    if (createError) {
+      console.error("❌ Failed to create bucket:", createError.message);
+      console.error("Error code:", createError.statusCode);
+      return false;
+    }
+
+    console.log("✅ Bucket created successfully:", bucket);
     return true;
   } catch (err) {
-    console.warn("⚠️ Error with storage bucket:", err.message);
+    console.error("❌ Error with storage bucket:", err.message);
+    console.error("Stack:", err.stack);
     return false;
   }
 }
