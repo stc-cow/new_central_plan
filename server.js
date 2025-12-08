@@ -458,10 +458,92 @@ app.get("/api/sync-fuel-sheet", async (req, res) => {
   });
 });
 
+// Schedule automatic syncs every 6 hours
+function startScheduledSync() {
+  const SYNC_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+  syncScheduleIntervalId = setInterval(async () => {
+    console.log("\n⏰ Scheduled sync triggered...");
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+      const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE;
+
+      if (!supabaseUrl || !supabaseServiceRole) {
+        console.warn("⚠️  Scheduled sync skipped: missing Supabase credentials");
+        return;
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseServiceRole);
+      const csvResponse = await fetch(CSV_URL, {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
+      });
+
+      if (!csvResponse.ok) {
+        throw new Error(`CSV fetch failed: ${csvResponse.statusText}`);
+      }
+
+      const csvText = await csvResponse.text();
+      const rows = csvText.split("\n").map(r => r.split(","));
+      const dataRows = rows.slice(1).filter(row => row.length >= 4);
+
+      let syncInserted = 0;
+      let syncSkipped = 0;
+
+      for (const row of dataRows) {
+        try {
+          const sitename = row[0]?.trim();
+          const region = row[1]?.trim() || null;
+          const refilled_date = row[2]?.trim();
+          const refilled_quantity = parseFloat(row[3]?.trim());
+
+          if (!refilled_quantity || refilled_quantity <= 0 || isNaN(Date.parse(refilled_date)) || !sitename) {
+            continue;
+          }
+
+          const row_hash = crypto
+            .createHash("sha256")
+            .update(`${sitename}-${region}-${refilled_date}-${refilled_quantity}`)
+            .digest("hex");
+
+          const { data: existing } = await supabase
+            .from("fuel_quantities")
+            .select("id")
+            .eq("row_hash", row_hash)
+            .maybeSingle();
+
+          if (existing) {
+            syncSkipped++;
+            continue;
+          }
+
+          const { error: insertError } = await supabase
+            .from("fuel_quantities")
+            .insert([{ sitename, region, refilled_date, refilled_quantity, row_hash }]);
+
+          if (!insertError) {
+            syncInserted++;
+          }
+        } catch (err) {
+          // Continue processing other rows
+        }
+      }
+
+      lastSyncTime = new Date().toISOString();
+      console.log(`✅ Scheduled sync complete: Inserted ${syncInserted}, Skipped ${syncSkipped}`);
+    } catch (error) {
+      console.error("❌ Scheduled sync failed:", error.message);
+    }
+  }, SYNC_INTERVAL_MS);
+
+  console.log("⏰ Scheduled sync started (every 6 hours)");
+}
+
 app.get("*", (req, res) => {
   res.sendFile(join(__dirname, "dist", "index.html"));
 });
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
+  startScheduledSync();
 });
