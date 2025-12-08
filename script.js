@@ -2386,38 +2386,48 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   }
 
   try {
-    console.log(`🔍 Querying Supabase: date range ${startDate} to ${endDate}, region: ${regionFilter || 'All'}`);
+    console.log(`🔍 Reading from Supabase Storage: date range ${startDate} to ${endDate}, region: ${regionFilter || 'All'}`);
 
-    // Fetch records filtered by date range
-    let query = supabaseClient
-      .from("fuel_quantities")
-      .select("*")
-      .gte("refilled_date", startDate)
-      .lte("refilled_date", endDate);
-
-    // Apply region filter if specified
-    if (regionFilter && regionFilter.trim() !== "") {
-      if (regionFilter === "CER") {
-        query = query.or(`region.like.%Central%,region.like.%East%`);
-      } else if (regionFilter === "Central") {
-        query = query.like("region", "%Central%");
-      } else if (regionFilter === "East") {
-        query = query.like("region", "%East%");
-      }
-    }
-
-    const { data, error } = await query.order("refilled_date", { ascending: true });
+    // Read from storage
+    const { data, error } = await supabaseClient.storage
+      .from('fuel_data')
+      .download('fuel_quantities.json');
 
     if (error) {
-      console.warn("⚠️ Supabase query failed, using cached data:", error.message);
+      console.warn("⚠️ Storage read failed, using cached data:", error.message);
       return filterCachedFuelData(startDate, endDate, regionFilter);
     }
 
-    console.log(`✅ Fetched ${data?.length || 0} records from Supabase`);
+    const text = await data.text();
+    const allRecords = JSON.parse(text);
+    console.log(`✅ Loaded ${allRecords.length} records from storage`);
+
+    // Filter by date range and region
+    let filteredRecords = allRecords.filter(record => {
+      const recordDate = record.refilled_date;
+      const dateMatch = recordDate >= startDate && recordDate <= endDate;
+
+      if (!dateMatch) return false;
+
+      // Apply region filter if specified
+      if (regionFilter && regionFilter.trim() !== "") {
+        if (regionFilter === "CER") {
+          return record.region?.toLowerCase().includes("central") || record.region?.toLowerCase().includes("east");
+        } else if (regionFilter === "Central") {
+          return record.region?.toLowerCase().includes("central");
+        } else if (regionFilter === "East") {
+          return record.region?.toLowerCase().includes("east");
+        }
+      }
+
+      return true;
+    });
+
+    console.log(`✅ Filtered ${filteredRecords.length} records by date range and region`);
     supabaseAvailable = true;
-    return data || [];
+    return filteredRecords;
   } catch (err) {
-    console.warn("⚠️ Cannot reach Supabase (network issue), using cached data");
+    console.warn("⚠️ Cannot read from storage (network issue), using cached data");
     console.log("   Error:", err.message);
     return filterCachedFuelData(startDate, endDate, regionFilter);
   }
