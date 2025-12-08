@@ -2313,16 +2313,18 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   if (regionFilter && regionFilter.trim() !== "") {
     if (regionFilter === "CER") {
       // For CER, include both Central and East regions
-      query = query.or(`region.ilike.%Central%,region.ilike.%East%`);
-    } else {
-      // For specific regions (Central or East)
-      query = query.ilike("region", `%${regionFilter}%`);
+      query = query.or("region.ilike.%Central%,region.ilike.%East%");
+    } else if (regionFilter === "Central") {
+      query = query.ilike("region", "%Central%");
+    } else if (regionFilter === "East") {
+      query = query.ilike("region", "%East%");
     }
   }
 
   const { data, error } = await query.order("refilled_date", { ascending: true });
 
   if (error) {
+    console.error("Supabase query error:", error);
     throw new Error(`Database error: ${error.message}`);
   }
 
