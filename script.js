@@ -2105,15 +2105,15 @@ async function saveCsvFuelDataToSupabase(rawData) {
           return null;
         }
 
-        const refilled_date = refilled_date_raw
-          ? parseFuelDate(refilled_date_raw)
-          : null;
+        // Store date in DD/MM/YYYY format (same as CSV format)
+        let refilled_date_formatted = null;
+        if (refilled_date_raw && refilled_date_raw.trim() !== '') {
+          refilled_date_formatted = refilled_date_raw.trim();
+        }
 
         return {
           sitename: String(sitename).trim(),
-          refilled_date: refilled_date
-            ? refilled_date.toISOString().split("T")[0]
-            : null,
+          refilled_date: refilled_date_formatted,
           refilled_quantity: refilled_qty_raw && refilled_qty_raw !== ''
             ? parseFloat(refilled_qty_raw)
             : null,
@@ -2141,7 +2141,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(
         `✅ Successfully migrated ${fuelRecords.length} fuel records to Supabase`
       );
-      console.log("📍 Data source: Column A (Sitename), Column AE (Refilled Date), Column AF (Refilled Quantity)");
+      console.log("📍 Data source: Column A (Sitename), Column AE (Refilled Date DD/MM/YYYY), Column AF (Refilled Quantity)");
     }
   } catch (err) {
     console.error("Error in saveCsvFuelDataToSupabase:", err);
