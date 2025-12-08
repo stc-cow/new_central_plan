@@ -2166,6 +2166,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
+    console.log("🔍 Starting region data extraction from raw CSV...");
+    console.log("Raw data sample - first row keys:", rawData.length > 0 ? Object.keys(rawData[0]) : "No data");
+
     // Transform CSV data to fuel_quantities format
     // Mapping: Column A -> sitename, Column D -> region, Column AE -> refilled_date (DD/MM/YYYY), Column AF -> refilled_quantity
     const fuelRecords = rawData
@@ -2177,12 +2180,26 @@ async function saveCsvFuelDataToSupabase(rawData) {
                         row['sitename'] ||
                         '';
 
-        // Get region - try different possible column names for column D (RegionName)
-        const region = row.regionname ||
-                       row.region ||
-                       row['region name'] ||
-                       row['regionname'] ||
-                       '';
+        // Get region - try MANY possible column name variations
+        let region = row.regionname ||
+                     row.region ||
+                     row['region name'] ||
+                     row['regionname'] ||
+                     row['Region Name'] ||
+                     row['region'] ||
+                     row['Region'] ||
+                     row['RegionName'] ||
+                     '';
+
+        // If still not found, try to get it by checking all keys for "region"
+        if (!region) {
+          const regionKey = Object.keys(row).find(key =>
+            key.toLowerCase().includes('region')
+          );
+          if (regionKey) {
+            region = row[regionKey];
+          }
+        }
 
         // Get refilled date - try different possible column names for column AE (LastFuelingDate)
         const refilled_date_raw = row.lastfuelingdate ||
@@ -2243,8 +2260,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
     // Log sample raw data to check region extraction
     console.log("📊 Raw CSV data (first 3 rows) - checking region extraction:");
     rawData.slice(0, 3).forEach((row, idx) => {
-      console.log(`  [${idx + 1}] Row keys:`, Object.keys(row));
-      console.log(`       regionname: "${row.regionname}", region: "${row.region}", region name: "${row['region name']}"`);
+      console.log(`  [${idx + 1}] All row keys:`, Object.keys(row).join(", "));
+      const regionKey = Object.keys(row).find(k => k.toLowerCase().includes('region'));
+      console.log(`       Found region key: "${regionKey}" = "${regionKey ? row[regionKey] : 'NOT FOUND'}"`);
     });
 
     // Insert records into fuel_quantities table
