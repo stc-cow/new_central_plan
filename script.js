@@ -1868,31 +1868,6 @@ function startDashboard() {
 }
 
 // ============================================
-// Fuel Quantity & Invoice Management
-// ============================================
-
-let fuelQuantitiesData = [];
-
-window.openInvoiceModal = function openInvoiceModal() {
-  const modal = document.getElementById("invoiceModal");
-  if (modal) {
-    modal.style.display = "block";
-  }
-};
-
-window.closeInvoiceModal = function closeInvoiceModal() {
-  const modal = document.getElementById("invoiceModal");
-  if (modal) {
-    modal.style.display = "none";
-  }
-};
-
-window.addEventListener("click", (event) => {
-  const invoiceModal = document.getElementById("invoiceModal");
-  if (event.target === invoiceModal) {
-    closeInvoiceModal();
-  }
-});
 
 window.loadInvoiceDataByDateRange =
   async function loadInvoiceDataByDateRange() {
