@@ -22,7 +22,7 @@ const VVVIP_SITES_LIST = [
 // Supabase configuration - using environment variables
 const VITE_SUPABASE_URL = "https://vtsqazxhszbmwiswthgt.supabase.co";
 const VITE_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0c3Fhenhvc3pibXdpc3d0aGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMTk3NjUsImV4cCI6MjA4MDc5NTc2NX0.NPARti9ZsiJEjAZhP4OmQf6dXSHaCESw26dBMkLFWCo";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0c3Fhenhoc3pibXdpc3d0aGd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUyMTk3NjUsImV4cCI6MjA4MDc5NTc2NX0.NPARti9ZsiJEjAZhP4OmQf6dXSHaCESw26dBMkLFWCo";
 
 let supabaseClient = null;
 let currentSessionId = null;
