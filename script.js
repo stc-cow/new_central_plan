@@ -2048,8 +2048,10 @@ function updateInvoicePreview() {
     siteCell.textContent = record.sitename || "N/A";
 
     const dateCell = document.createElement("td");
-    // Date is stored in DD/MM/YYYY format in Supabase
-    dateCell.textContent = record.refilled_date || "N/A";
+    // Convert DATE to DD/MM/YYYY format for display
+    dateCell.textContent = record.refilled_date
+      ? formatDateDDMMYYYY(record.refilled_date)
+      : "N/A";
 
     const qtyCell = document.createElement("td");
     qtyCell.textContent = record.refilled_quantity
@@ -2061,6 +2063,18 @@ function updateInvoicePreview() {
     tr.appendChild(qtyCell);
     tbody.appendChild(tr);
   });
+}
+
+function formatDateDDMMYYYY(dateStr) {
+  if (!dateStr) return "N/A";
+  const date = new Date(dateStr + "T00:00:00Z");
+  if (isNaN(date.getTime())) return "N/A";
+
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
+
+  return `${day}/${month}/${year}`;
 }
 
 async function saveCsvFuelDataToSupabase(rawData) {
