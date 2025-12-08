@@ -827,35 +827,6 @@ body {
 }
 
 
-.camel-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #fffbf0;
-}
-
-.camel-table thead {
-  background-color: #f59e0b;
-  color: white;
-}
-
-.camel-table th {
-  padding: 12px;
-  text-align: left;
-  font-weight: 700;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 1px solid #ddd;
-}
-
-.camel-table td {
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.camel-table tbody tr:hover {
-  background-color: #fef3c7;
-}
 
 .mdl-modal-content {
   border-top: 4px solid #ec4899;
