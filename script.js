@@ -2200,18 +2200,35 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate) {
     throw new Error("Supabase client not initialized");
   }
 
+  // Fetch all records and filter by date range in JavaScript
+  // since dates are stored as DD/MM/YYYY text format
   const { data, error } = await supabaseClient
     .from("fuel_quantities")
     .select("*")
-    .gte("refilled_date", startDate)
-    .lte("refilled_date", endDate)
     .order("refilled_date", { ascending: true });
 
   if (error) {
     throw new Error(`Database error: ${error.message}`);
   }
 
-  return data || [];
+  // Filter records by date range
+  // Convert startDate and endDate from YYYY-MM-DD to DD/MM/YYYY for comparison
+  const startParts = startDate.split("-");
+  const endParts = endDate.split("-");
+  const startDDMMYYYY = `${startParts[2]}/${startParts[1]}/${startParts[0]}`;
+  const endDDMMYYYY = `${endParts[2]}/${endParts[1]}/${endParts[0]}`;
+
+  const filteredData = (data || []).filter((record) => {
+    if (!record.refilled_date) return false;
+
+    // Compare dates as strings in DD/MM/YYYY format
+    return (
+      record.refilled_date >= startDDMMYYYY &&
+      record.refilled_date <= endDDMMYYYY
+    );
+  });
+
+  return filteredData;
 }
 
 function generateInvoiceExcel(records, startDate, endDate) {
