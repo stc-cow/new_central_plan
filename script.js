@@ -2237,7 +2237,14 @@ async function saveCsvFuelDataToSupabase(rawData) {
     // Log first 5 records for debugging date format
     console.log("📋 Sample records to be migrated:");
     fuelRecords.slice(0, 5).forEach((record, idx) => {
-      console.log(`  [${idx + 1}] Site: ${record.sitename}, Region: ${record.region}, Date: ${record.refilled_date}, Qty: ${record.refilled_quantity}`);
+      console.log(`  [${idx + 1}] Site: ${record.sitename}, Region: "${record.region}" (null: ${record.region === null}), Date: ${record.refilled_date}, Qty: ${record.refilled_quantity}`);
+    });
+
+    // Log sample raw data to check region extraction
+    console.log("📊 Raw CSV data (first 3 rows) - checking region extraction:");
+    rawData.slice(0, 3).forEach((row, idx) => {
+      console.log(`  [${idx + 1}] Row keys:`, Object.keys(row));
+      console.log(`       regionname: "${row.regionname}", region: "${row.region}", region name: "${row['region name']}"`);
     });
 
     // Insert records into fuel_quantities table
