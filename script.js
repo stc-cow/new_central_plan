@@ -2520,80 +2520,9 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   return [];
 }
 
-function filterCachedFuelData(startDate, endDate, regionFilter = "") {
-  // Try to load from primary storage key first
-  try {
-    const storageCached = localStorage.getItem("fuel_quantities_storage");
-    if (storageCached) {
-      const records = JSON.parse(storageCached);
-      console.log(`📦 Loaded ${records.length} records from fuel_quantities_storage`);
-
-      let filtered = records.filter(record => {
-        const recordDate = record.refilled_date;
-        return recordDate >= startDate && recordDate <= endDate;
-      });
-
-      if (regionFilter && regionFilter.trim() !== "") {
-        filtered = filtered.filter(record => {
-          if (regionFilter === "CER") {
-            return record.region?.toLowerCase().includes("central") || record.region?.toLowerCase().includes("east");
-          } else if (regionFilter === "Central") {
-            return record.region?.toLowerCase().includes("central");
-          } else if (regionFilter === "East") {
-            return record.region?.toLowerCase().includes("east");
-          }
-          return true;
-        });
-      }
-
-      console.log(`📦 Using fuel_quantities_storage: ${filtered.length} records match filters`);
-      return filtered;
-    }
-  } catch (err) {
-    console.warn("⚠️ Failed to load from fuel_quantities_storage:", err.message);
-  }
-
-  // Fall back to cachedFuelData if primary storage not available
-  if (cachedFuelData.length === 0) {
-    try {
-      const cached = localStorage.getItem("cachedFuelData");
-      if (cached) {
-        cachedFuelData = JSON.parse(cached);
-        console.log(`📦 Loaded ${cachedFuelData.length} records from cachedFuelData`);
-      }
-    } catch (err) {
-      console.warn("⚠️ Failed to load from cachedFuelData:", err.message);
-    }
-  }
-
-  if (cachedFuelData.length === 0) {
-    console.warn("⚠️ No cached data available in either storage key");
-    return [];
-  }
-
-  // Filter by date range
-  let filtered = cachedFuelData.filter(record => {
-    const recordDate = record.refilled_date;
-    return recordDate >= startDate && recordDate <= endDate;
-  });
-
-  // Filter by region if specified
-  if (regionFilter && regionFilter.trim() !== "") {
-    filtered = filtered.filter(record => {
-      if (regionFilter === "CER") {
-        return record.region?.toLowerCase().includes("central") || record.region?.toLowerCase().includes("east");
-      } else if (regionFilter === "Central") {
-        return record.region?.toLowerCase().includes("central");
-      } else if (regionFilter === "East") {
-        return record.region?.toLowerCase().includes("east");
-      }
-      return true;
-    });
-  }
-
-  console.log(`📦 Using cachedFuelData: ${filtered.length} records match filters`);
-  return filtered;
-}
+// Note: Large dataset caching removed to prevent localStorage quota exceeded errors
+// Invoice data now comes from /api/get-invoice-data backend endpoint
+// This ensures data is always fresh and doesn't overwhelm browser storage
 
 function generateInvoiceExcel(records, startDate, endDate, regionFilter = "") {
   const invoiceData = records.map((record) => ({
