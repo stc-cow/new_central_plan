@@ -1723,42 +1723,6 @@ function updateEventCards(sites) {
 
   const vvvipSites = sites.filter((s) => isVVVIPSite(s));
 
-  const camelFestivalSites = [
-    "CWH076",
-    "CWH022",
-    "CWH188",
-    "COW652",
-    "CWH094",
-    "CWS808",
-    "CWH973",
-    "CWH941",
-    "CWH942",
-    "CWH940",
-    "CWH943",
-    "CWH944",
-    "CWH945",
-    "COW636",
-    "CWH352",
-    "CWH937",
-    "CWH935",
-  ];
-  const camelSites = sites.filter((s) =>
-    camelFestivalSites.includes(s.sitename),
-  );
-
-  const mdlBeastSites = [
-    "COW017",
-    "COW08",
-    "COW056",
-    "COW801",
-    "COW805",
-    "COW726",
-    "COW775",
-    "COW741",
-    "COW823",
-  ];
-  const mdlSites = sites.filter((s) => mdlBeastSites.includes(s.sitename));
-
   console.log("Final VVVIP sites (after criteria filter):", vvvipSites.length);
   console.log("VVVIP criteria check details:");
   if (sitesWithVVVIP.length > 0) {
@@ -1770,8 +1734,6 @@ function updateEventCards(sites) {
   }
 
   document.getElementById("vvvipCount").textContent = vvvipSites.length;
-  document.getElementById("camelCount").textContent = camelSites.length;
-  document.getElementById("mdlCount").textContent = mdlSites.length;
 }
 
 window.showVVVIPModal = function showVVVIPModal() {
