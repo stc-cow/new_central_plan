@@ -2099,10 +2099,24 @@ window.loadInvoiceDataByDateRange = async function loadInvoiceDataByDateRange() 
       return;
     }
 
-    fuelQuantitiesData = filteredRecords;
+    // Deduplicate records based on sitename + refilled_date combination
+    const uniqueRecords = [];
+    const seen = new Set();
+
+    filteredRecords.forEach((record) => {
+      const key = `${record.sitename}|${record.refilled_date}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueRecords.push(record);
+      }
+    });
+
+    console.log(`📊 Loaded ${filteredRecords.length} records, ${uniqueRecords.length} unique after deduplication`);
+
+    fuelQuantitiesData = uniqueRecords;
     updateInvoicePreview();
 
-    statusDiv.textContent = `✅ Loaded ${filteredRecords.length} records`;
+    statusDiv.textContent = `✅ Loaded ${uniqueRecords.length} records`;
     statusDiv.className = "invoice-status success";
   } catch (error) {
     console.error("Error loading invoice data:", error);
