@@ -375,6 +375,15 @@
                     onchange="loadInvoiceDataByDateRange()"
                   />
                 </div>
+                <div class="date-input-group">
+                  <label for="invoiceRegion">Region:</label>
+                  <select id="invoiceRegion" class="date-input" onchange="loadInvoiceDataByDateRange()">
+                    <option value="">-- All Regions --</option>
+                    <option value="Central">Central</option>
+                    <option value="East">East</option>
+                    <option value="CER">CER (Central & East)</option>
+                  </select>
+                </div>
                 <button
                   class="download-invoice-btn"
                   onclick="downloadInvoiceByDateRange()"
@@ -393,6 +402,7 @@
                   <thead>
                     <tr>
                       <th>Site Name</th>
+                      <th>Region</th>
                       <th>Refilled Date</th>
                       <th>Refilled Quantity</th>
                     </tr>
