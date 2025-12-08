@@ -73,6 +73,8 @@ let headerIntervalId = null;
 let refreshIntervalId = null;
 let selectedRegion = "CER";
 let csvDataMigrated = false;
+let supabaseAvailable = false;
+let cachedFuelData = [];
 
 // Load dashboard on page load
 document.addEventListener("DOMContentLoaded", async () => {
