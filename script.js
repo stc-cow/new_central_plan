@@ -2247,10 +2247,12 @@ async function saveCsvFuelDataToSupabase(rawData) {
 window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() {
   const startDateInput = document.getElementById("invoiceStartDate");
   const endDateInput = document.getElementById("invoiceEndDate");
+  const regionSelect = document.getElementById("invoiceRegion");
   const statusDiv = document.getElementById("uploadStatus");
 
   const startDate = startDateInput.value;
   const endDate = endDateInput.value;
+  const selectedRegionFilter = regionSelect.value;
 
   if (!startDate || !endDate) {
     alert("Please select both start and end dates");
@@ -2268,16 +2270,17 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
   try {
     const filteredRecords = await fetchFuelQuantitiesByDateRange(
       startDate,
-      endDate
+      endDate,
+      selectedRegionFilter
     );
 
     if (filteredRecords.length === 0) {
-      statusDiv.textContent = "❌ No records found for selected date range";
+      statusDiv.textContent = "❌ No records found for selected date range and region";
       statusDiv.className = "upload-status error";
       return;
     }
 
-    generateInvoiceExcel(filteredRecords, startDate, endDate);
+    generateInvoiceExcel(filteredRecords, startDate, endDate, selectedRegionFilter);
 
     statusDiv.textContent = `✅ Invoice downloaded (${filteredRecords.length} records)`;
     statusDiv.className = "upload-status success";
