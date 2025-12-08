@@ -2379,29 +2379,25 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   }
 
   try {
-    console.log(`🔍 Reading from Supabase Storage: date range ${startDate} to ${endDate}, region: ${regionFilter || 'All'}`);
+    console.log(`🔍 Reading from Supabase database table: date range ${startDate} to ${endDate}, region: ${regionFilter || 'All'}`);
 
-    // Read from storage
-    const { data, error } = await supabaseClient.storage
-      .from('fuel_data')
-      .download('fuel_quantities.json');
+    // Read from database table (preserves all historical data including deleted records from CSV)
+    const { data, error } = await supabaseClient
+      .from('fuel_quantities')
+      .select('sitename, region, refilled_date, refilled_quantity')
+      .gte('refilled_date', startDate)
+      .lte('refilled_date', endDate);
 
     if (error) {
-      console.warn("⚠️ Storage read failed, using cached data:", error.message);
+      console.warn("⚠️ Database read failed, using cached data:", error.message);
       return filterCachedFuelData(startDate, endDate, regionFilter);
     }
 
-    const text = await data.text();
-    const allRecords = JSON.parse(text);
-    console.log(`✅ Loaded ${allRecords.length} records from storage`);
+    const allRecords = data || [];
+    console.log(`✅ Loaded ${allRecords.length} records from database table (includes historical data)`);
 
-    // Filter by date range and region
+    // Filter by region if specified (date filtering already done in query)
     let filteredRecords = allRecords.filter(record => {
-      const recordDate = record.refilled_date;
-      const dateMatch = recordDate >= startDate && recordDate <= endDate;
-
-      if (!dateMatch) return false;
-
       // Apply region filter if specified
       if (regionFilter && regionFilter.trim() !== "") {
         if (regionFilter === "CER") {
@@ -2416,7 +2412,7 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
       return true;
     });
 
-    console.log(`✅ Filtered ${filteredRecords.length} records by date range and region`);
+    console.log(`✅ Filtered ${filteredRecords.length} records by region`);
     supabaseAvailable = true;
     return filteredRecords;
   } catch (err) {
