@@ -622,7 +622,7 @@ async function fetchCSV() {
       headers: {
         Accept: "text/csv",
       },
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeout);
@@ -669,7 +669,7 @@ async function fetchCSV() {
         headers: {
           Accept: "text/plain",
         },
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeout);
@@ -704,7 +704,7 @@ async function fetchCSV() {
     const response = await fetch(CSV_URL, {
       method: "GET",
       mode: "cors",
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeout);
@@ -712,10 +712,7 @@ async function fetchCSV() {
     if (response.ok) {
       const csvText = await response.text();
       if (csvText.trim()) {
-        console.log(
-          "✅ CSV fetched directly, length:",
-          csvText.length,
-        );
+        console.log("✅ CSV fetched directly, length:", csvText.length);
         const parsed = parseCSV(csvText);
         console.log("✅ Parsed CSV rows:", parsed.length);
         return parsed;
@@ -781,7 +778,10 @@ function parseCSV(csvText) {
 
   console.log("Sample parsed row:", data[0]);
   if (data.length > 0) {
-    console.log("Column D (Region) sample value:", data[0][headers[3]?.toLowerCase()] || "NOT FOUND");
+    console.log(
+      "Column D (Region) sample value:",
+      data[0][headers[3]?.toLowerCase()] || "NOT FOUND",
+    );
   }
   return data;
 }
@@ -942,7 +942,9 @@ function convertDateToISO(dateStr) {
 
     // Validate month and day
     if (month < 1 || month > 12 || day < 1 || day > 31) {
-      console.warn(`Invalid date values: ${dateStr} (day=${day}, month=${month})`);
+      console.warn(
+        `Invalid date values: ${dateStr} (day=${day}, month=${month})`,
+      );
       return null;
     }
 
@@ -967,7 +969,9 @@ function convertDateToISO(dateStr) {
     const year = parseInt(match[3], 10);
 
     if (month < 1 || month > 12 || day < 1 || day > 31) {
-      console.warn(`Invalid date values (MM/DD/YYYY): ${dateStr} (month=${month}, day=${day})`);
+      console.warn(
+        `Invalid date values (MM/DD/YYYY): ${dateStr} (month=${month}, day=${day})`,
+      );
       return null;
     }
 
@@ -1502,7 +1506,10 @@ async function loadDashboard() {
         await saveCsvFuelDataToSupabase(rawData);
       }
     } catch (migrationErr) {
-      console.error("⚠️ CSV migration error (app will continue with cached data):", migrationErr.message);
+      console.error(
+        "⚠️ CSV migration error (app will continue with cached data):",
+        migrationErr.message,
+      );
       // Continue with dashboard rendering even if migration fails
     }
 
@@ -1829,8 +1836,6 @@ window.closeVVVIPModal = function closeVVVIPModal() {
   modal.style.display = "none";
 };
 
-
-
 window.addEventListener("click", (event) => {
   const vvvipModal = document.getElementById("vvvipModal");
 
@@ -1907,62 +1912,66 @@ window.addEventListener("click", (event) => {
   }
 });
 
-window.loadInvoiceDataByDateRange = async function loadInvoiceDataByDateRange() {
-  const startDateInput = document.getElementById("invoiceStartDate");
-  const endDateInput = document.getElementById("invoiceEndDate");
-  const regionSelect = document.getElementById("invoiceRegion");
-  const statusDiv = document.getElementById("invoiceStatus");
+window.loadInvoiceDataByDateRange =
+  async function loadInvoiceDataByDateRange() {
+    const startDateInput = document.getElementById("invoiceStartDate");
+    const endDateInput = document.getElementById("invoiceEndDate");
+    const regionSelect = document.getElementById("invoiceRegion");
+    const statusDiv = document.getElementById("invoiceStatus");
 
-  const startDate = startDateInput.value;
-  const endDate = endDateInput.value;
-  const selectedRegionFilter = regionSelect.value;
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    const selectedRegionFilter = regionSelect.value;
 
-  if (!startDate || !endDate) {
-    statusDiv.textContent = "ℹ️ Please select both start and end dates";
-    statusDiv.className = "invoice-status info";
-    document.getElementById("invoicePreviewBody").innerHTML =
-      '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Select dates to view records</td></tr>';
-    return;
-  }
-
-  if (new Date(startDate) > new Date(endDate)) {
-    statusDiv.textContent = "❌ Start date must be before end date";
-    statusDiv.className = "invoice-status error";
-    return;
-  }
-
-  statusDiv.textContent = "⏳ Loading records...";
-  statusDiv.className = "invoice-status";
-
-  try {
-    const filteredRecords = await fetchFuelQuantitiesByDateRange(
-      startDate,
-      endDate,
-      selectedRegionFilter
-    );
-
-    if (filteredRecords.length === 0) {
-      statusDiv.textContent = "ℹ️ No records found for selected date range and region";
+    if (!startDate || !endDate) {
+      statusDiv.textContent = "ℹ️ Please select both start and end dates";
       statusDiv.className = "invoice-status info";
       document.getElementById("invoicePreviewBody").innerHTML =
-        '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No records in this date range</td></tr>';
+        '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Select dates to view records</td></tr>';
       return;
     }
 
-    // Keep all records - no deduplication (Option A: append all data with unique timestamps/IDs)
-    console.log(`📊 Loaded ${filteredRecords.length} records (Option A: all records kept, including duplicates by site name)`);
+    if (new Date(startDate) > new Date(endDate)) {
+      statusDiv.textContent = "❌ Start date must be before end date";
+      statusDiv.className = "invoice-status error";
+      return;
+    }
 
-    fuelQuantitiesData = filteredRecords;
-    updateInvoicePreview();
+    statusDiv.textContent = "⏳ Loading records...";
+    statusDiv.className = "invoice-status";
 
-    statusDiv.textContent = `✅ Loaded ${filteredRecords.length} records`;
-    statusDiv.className = "invoice-status success";
-  } catch (error) {
-    console.error("Error loading invoice data:", error);
-    statusDiv.textContent = `❌ Error: ${error.message}`;
-    statusDiv.className = "invoice-status error";
-  }
-};
+    try {
+      const filteredRecords = await fetchFuelQuantitiesByDateRange(
+        startDate,
+        endDate,
+        selectedRegionFilter,
+      );
+
+      if (filteredRecords.length === 0) {
+        statusDiv.textContent =
+          "ℹ️ No records found for selected date range and region";
+        statusDiv.className = "invoice-status info";
+        document.getElementById("invoicePreviewBody").innerHTML =
+          '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No records in this date range</td></tr>';
+        return;
+      }
+
+      // Keep all records - no deduplication (Option A: append all data with unique timestamps/IDs)
+      console.log(
+        `📊 Loaded ${filteredRecords.length} records (Option A: all records kept, including duplicates by site name)`,
+      );
+
+      fuelQuantitiesData = filteredRecords;
+      updateInvoicePreview();
+
+      statusDiv.textContent = `✅ Loaded ${filteredRecords.length} records`;
+      statusDiv.className = "invoice-status success";
+    } catch (error) {
+      console.error("Error loading invoice data:", error);
+      statusDiv.textContent = `❌ Error: ${error.message}`;
+      statusDiv.className = "invoice-status error";
+    }
+  };
 
 function updateInvoicePreview() {
   const tbody = document.getElementById("invoicePreviewBody");
@@ -1990,7 +1999,9 @@ function updateInvoicePreview() {
 
   // Log deduplication info
   if (deduplicatedData.length < fuelQuantitiesData.length) {
-    console.warn(`⚠️  Removed ${fuelQuantitiesData.length - deduplicatedData.length} duplicate records from preview`);
+    console.warn(
+      `⚠️  Removed ${fuelQuantitiesData.length - deduplicatedData.length} duplicate records from preview`,
+    );
   }
 
   deduplicatedData.forEach((record) => {
@@ -2036,7 +2047,9 @@ function formatDateDDMMYYYY(dateStr) {
 async function ensureStorageBucket() {
   // Skip bucket checks - just return true and let upload attempt
   // If storage is not available, we'll fall back to localStorage
-  console.log("📦 Storage mode: Will attempt Supabase Storage with localStorage fallback");
+  console.log(
+    "📦 Storage mode: Will attempt Supabase Storage with localStorage fallback",
+  );
   return true;
 }
 
@@ -2065,68 +2078,87 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
         // Extract sitename - look for the actual site name (not ID)
         // Try different possible column names for the site name
-        let sitename = row.sitename ||
-                       row['site name'] ||
-                       row['site_name'] ||
-                       row['sitelabel'] ||
-                       row['site label'] ||
-                       row['site_label'] ||
-                       '';
+        let sitename =
+          row.sitename ||
+          row["site name"] ||
+          row["site_name"] ||
+          row["sitelabel"] ||
+          row["site label"] ||
+          row["site_label"] ||
+          "";
 
         // If still empty, try to find any column that looks like a site name
         if (!sitename) {
-          const siteKey = Object.keys(row).find(key =>
-            key.toLowerCase().includes('site') &&
-            !key.toLowerCase().includes('id') &&
-            row[key] &&
-            String(row[key]).trim() !== ''
+          const siteKey = Object.keys(row).find(
+            (key) =>
+              key.toLowerCase().includes("site") &&
+              !key.toLowerCase().includes("id") &&
+              row[key] &&
+              String(row[key]).trim() !== "",
           );
-          sitename = siteKey ? row[siteKey] : '';
+          sitename = siteKey ? row[siteKey] : "";
         }
 
         // Column D (index 3) = region
-        const region = (rowHeaders[3] && row[rowHeaders[3]]) ? String(row[rowHeaders[3]]).trim() : '';
+        const region =
+          rowHeaders[3] && row[rowHeaders[3]]
+            ? String(row[rowHeaders[3]]).trim()
+            : "";
 
         // Column AE (index 30) = refilled_date (DD/MM/YYYY format)
-        const refilled_date_raw = (rowHeaders[30] && row[rowHeaders[30]]) ? String(row[rowHeaders[30]]).trim() : '';
+        const refilled_date_raw =
+          rowHeaders[30] && row[rowHeaders[30]]
+            ? String(row[rowHeaders[30]]).trim()
+            : "";
 
         // Column AF (index 31) = refilled_quantity
-        const refilled_qty_raw = (rowHeaders[31] && row[rowHeaders[31]]) ? String(row[rowHeaders[31]]).trim() : '';
+        const refilled_qty_raw =
+          rowHeaders[31] && row[rowHeaders[31]]
+            ? String(row[rowHeaders[31]]).trim()
+            : "";
 
         // Only include rows with sitename
-        if (!sitename || sitename.trim() === '') {
+        if (!sitename || sitename.trim() === "") {
           return null;
         }
 
         // Validate and convert date to YYYY-MM-DD format
         let refilled_date_iso = null;
-        if (refilled_date_raw && refilled_date_raw !== '') {
+        if (refilled_date_raw && refilled_date_raw !== "") {
           refilled_date_iso = convertDateToISO(refilled_date_raw);
           if (!refilled_date_iso) {
-            console.warn(`Excluding row for site ${sitename}: invalid date in column AE "${refilled_date_raw}"`);
+            console.warn(
+              `Excluding row for site ${sitename}: invalid date in column AE "${refilled_date_raw}"`,
+            );
             return null;
           }
         } else {
-          console.warn(`Excluding row for site ${sitename}: column AE (refilled_date) is empty`);
+          console.warn(
+            `Excluding row for site ${sitename}: column AE (refilled_date) is empty`,
+          );
           return null;
         }
 
         // Validate quantity is a number greater than zero
         let refilled_quantity_num = null;
-        if (refilled_qty_raw && refilled_qty_raw !== '') {
+        if (refilled_qty_raw && refilled_qty_raw !== "") {
           refilled_quantity_num = parseFloat(refilled_qty_raw);
           if (isNaN(refilled_quantity_num) || refilled_quantity_num <= 0) {
-            console.warn(`Excluding row for site ${sitename}: column AF (refilled_quantity) is not a valid number > 0 (got: "${refilled_qty_raw}")`);
+            console.warn(
+              `Excluding row for site ${sitename}: column AF (refilled_quantity) is not a valid number > 0 (got: "${refilled_qty_raw}")`,
+            );
             return null;
           }
         } else {
-          console.warn(`Excluding row for site ${sitename}: column AF (refilled_quantity) is empty`);
+          console.warn(
+            `Excluding row for site ${sitename}: column AF (refilled_quantity) is empty`,
+          );
           return null;
         }
 
         return {
           sitename: String(sitename).trim(),
-          region: region && region !== '' ? region : null,
+          region: region && region !== "" ? region : null,
           refilled_date: refilled_date_iso,
           refilled_quantity: refilled_quantity_num,
         };
@@ -2141,34 +2173,48 @@ async function saveCsvFuelDataToSupabase(rawData) {
     console.log(`\n📊 CSV Validation Summary:`);
     console.log(`  Total CSV rows processed: ${rawData.length}`);
     console.log(`  Valid records extracted: ${fuelRecords.length}`);
-    console.log(`  Excluded records (invalid date or quantity ≤ 0): ${rawData.length - fuelRecords.length}`);
+    console.log(
+      `  Excluded records (invalid date or quantity ≤ 0): ${rawData.length - fuelRecords.length}`,
+    );
 
     // Prepare records for INSERT-ONLY sync (append all, never replace)
     console.log("\n📝 Preparing all records for INSERT-ONLY migration...");
     const recordsToMigrate = [...fuelRecords];
 
     console.log(`  ✅ Records to migrate: ${recordsToMigrate.length}`);
-    console.log(`  📌 INSERT-ONLY: Every sync appends new records, never updates existing ones`);
+    console.log(
+      `  📌 INSERT-ONLY: Every sync appends new records, never updates existing ones`,
+    );
 
     if (recordsToMigrate.length > 0) {
       console.log("\n📋 Sample of records to migrate (first 3):");
       recordsToMigrate.slice(0, 3).forEach((record, idx) => {
-        console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+        console.log(
+          `  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || "NULL"} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`,
+        );
       });
     } else if (recordsToMigrate.length === 0 && duplicates.length > 0) {
-      console.log("ℹ️  No new records to migrate - CSV data hasn't changed since last sync");
+      console.log(
+        "ℹ️  No new records to migrate - CSV data hasn't changed since last sync",
+      );
     } else {
-      console.warn(`⚠️ No records matched the filters (valid date in AE + quantity > 0 in AF)`);
+      console.warn(
+        `⚠️ No records matched the filters (valid date in AE + quantity > 0 in AF)`,
+      );
     }
 
     // Cache data locally IMMEDIATELY before attempting backend sync
     cachedFuelData = fuelRecords;
     localStorage.setItem("cachedFuelData", JSON.stringify(fuelRecords));
-    console.log(`\n✅ Data cached locally (${fuelRecords.length} records) - invoice filtering will work offline`);
+    console.log(
+      `\n✅ Data cached locally (${fuelRecords.length} records) - invoice filtering will work offline`,
+    );
 
     // Final validation before sending to Supabase
-    console.log(`\n🔍 Final validation for ${recordsToMigrate.length} records...`);
-    const invalidMigrateRecords = recordsToMigrate.filter(record => {
+    console.log(
+      `\n🔍 Final validation for ${recordsToMigrate.length} records...`,
+    );
+    const invalidMigrateRecords = recordsToMigrate.filter((record) => {
       // Verify date exists and is valid
       if (!record.refilled_date) {
         console.warn(`  ❌ ${record.sitename}: Missing valid date`);
@@ -2176,22 +2222,35 @@ async function saveCsvFuelDataToSupabase(rawData) {
       }
       // Verify quantity is a positive number
       if (!record.refilled_quantity || record.refilled_quantity <= 0) {
-        console.warn(`  ❌ ${record.sitename}: Quantity is ${record.refilled_quantity} (must be > 0)`);
+        console.warn(
+          `  ❌ ${record.sitename}: Quantity is ${record.refilled_quantity} (must be > 0)`,
+        );
         return true;
       }
       return false;
     });
 
     if (invalidMigrateRecords.length > 0) {
-      console.error(`❌ CRITICAL: Found ${invalidMigrateRecords.length} invalid record(s) that should have been filtered!`);
-      console.error(`⛔ These records will NOT be sent to Supabase:`, invalidMigrateRecords);
+      console.error(
+        `❌ CRITICAL: Found ${invalidMigrateRecords.length} invalid record(s) that should have been filtered!`,
+      );
+      console.error(
+        `⛔ These records will NOT be sent to Supabase:`,
+        invalidMigrateRecords,
+      );
       // Remove invalid records to ensure Supabase only gets valid data
-      const validMigrateRecords = recordsToMigrate.filter(record => record.refilled_date && record.refilled_quantity > 0);
+      const validMigrateRecords = recordsToMigrate.filter(
+        (record) => record.refilled_date && record.refilled_quantity > 0,
+      );
       recordsToMigrate.length = 0;
       recordsToMigrate.push(...validMigrateRecords);
-      console.log(`✅ Cleaned records: ${validMigrateRecords.length} valid records remaining for Supabase`);
+      console.log(
+        `✅ Cleaned records: ${validMigrateRecords.length} valid records remaining for Supabase`,
+      );
     } else {
-      console.log(`✅ All ${recordsToMigrate.length} records validated - safe to send to Supabase`);
+      console.log(
+        `✅ All ${recordsToMigrate.length} records validated - safe to send to Supabase`,
+      );
     }
 
     // Send only NEW records to backend API for Supabase insertion
@@ -2200,7 +2259,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log(`\n📤 Saving ${recordsToMigrate.length} records to Supabase Storage...`);
+    console.log(
+      `\n📤 Saving ${recordsToMigrate.length} records to Supabase Storage...`,
+    );
 
     let syncSuccess = false;
     let useLocalFallback = false;
@@ -2213,7 +2274,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
       }
 
       if (!supabaseClient) {
-        console.warn("⚠️ Supabase client not available - will use localStorage fallback");
+        console.warn(
+          "⚠️ Supabase client not available - will use localStorage fallback",
+        );
         useLocalFallback = true;
       }
 
@@ -2232,13 +2295,15 @@ async function saveCsvFuelDataToSupabase(rawData) {
         try {
           console.log("🔄 Downloading fuel_quantities.json from Storage...");
           const { data, error } = await supabaseClient.storage
-            .from('fuel_data')
-            .download('fuel_quantities.json');
+            .from("fuel_data")
+            .download("fuel_quantities.json");
 
           if (!error && data) {
             const text = await data.text();
             allRecords = JSON.parse(text);
-            console.log(`✅ Found ${allRecords.length} existing records in storage`);
+            console.log(
+              `✅ Found ${allRecords.length} existing records in storage`,
+            );
           } else {
             console.log("ℹ️  Storage file doesn't exist yet - starting fresh");
           }
@@ -2246,7 +2311,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
           console.log("ℹ️  Storage read failed:", readErr.message);
         }
 
-        console.log("📌 Note: Historical data is queried server-side via /api/get-invoice-data when needed");
+        console.log(
+          "📌 Note: Historical data is queried server-side via /api/get-invoice-data when needed",
+        );
 
         // Add new records with timestamp
         const now = new Date().toISOString();
@@ -2254,7 +2321,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
           ...record,
           id: (allRecords.length + idx + 1).toString(),
           created_at: now,
-          updated_at: now
+          updated_at: now,
         }));
 
         console.log(`📝 Adding ${newRecordsWithMeta.length} new records`);
@@ -2263,15 +2330,17 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
         // Save all records back to storage
         const jsonContent = JSON.stringify(allRecords, null, 2);
-        const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
+        const jsonBlob = new Blob([jsonContent], { type: "application/json" });
 
-        console.log(`💾 Uploading to storage (${(jsonBlob.size / 1024).toFixed(2)} KB)...`);
+        console.log(
+          `💾 Uploading to storage (${(jsonBlob.size / 1024).toFixed(2)} KB)...`,
+        );
 
         const { error: uploadError } = await supabaseClient.storage
-          .from('fuel_data')
-          .upload('fuel_quantities.json', jsonBlob, {
+          .from("fuel_data")
+          .upload("fuel_quantities.json", jsonBlob, {
             upsert: true,
-            contentType: 'application/json'
+            contentType: "application/json",
           });
 
         if (uploadError) {
@@ -2285,7 +2354,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
         console.log(`📦 File size: ${(jsonBlob.size / 1024).toFixed(2)} KB`);
         console.log(`\n📋 Sample of all records now in storage:`);
         allRecords.forEach((record, idx) => {
-          console.log(`  [${record.id || idx}] Site: ${record.sitename} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+          console.log(
+            `  [${record.id || idx}] Site: ${record.sitename} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`,
+          );
         });
 
         return { success: true, allRecords };
@@ -2293,7 +2364,11 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
       // Timeout after 5 seconds - fail fast if no response
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Storage timeout - falling back to localStorage")), 5000)
+        setTimeout(
+          () =>
+            reject(new Error("Storage timeout - falling back to localStorage")),
+          5000,
+        ),
       );
 
       try {
@@ -2320,18 +2395,27 @@ async function saveCsvFuelDataToSupabase(rawData) {
           ...record,
           id: (idx + 1).toString(),
           created_at: now,
-          updated_at: now
+          updated_at: now,
         }));
 
         // Only keep the most recent records in localStorage
         const sampleRecords = newRecords.slice(-MAX_CACHE_SIZE);
 
         try {
-          localStorage.setItem("fuel_quantities_sample", JSON.stringify(sampleRecords));
-          console.log(`✅ Cached ${sampleRecords.length} recent records to localStorage (sample)`);
-          console.log(`📌 Full dataset (${recordsToMigrate.length} records) available via database API`);
+          localStorage.setItem(
+            "fuel_quantities_sample",
+            JSON.stringify(sampleRecords),
+          );
+          console.log(
+            `✅ Cached ${sampleRecords.length} recent records to localStorage (sample)`,
+          );
+          console.log(
+            `📌 Full dataset (${recordsToMigrate.length} records) available via database API`,
+          );
         } catch (quotaErr) {
-          console.warn(`⚠️  localStorage quota limit - using database API for invoice data`);
+          console.warn(
+            `⚠️  localStorage quota limit - using database API for invoice data`,
+          );
           // Clear old data to make room
           try {
             localStorage.removeItem("fuel_quantities_storage");
@@ -2367,95 +2451,117 @@ async function saveCsvFuelDataToSupabase(rawData) {
   }
 }
 
-window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() {
-  const startDateInput = document.getElementById("invoiceStartDate");
-  const endDateInput = document.getElementById("invoiceEndDate");
-  const regionSelect = document.getElementById("invoiceRegion");
-  const statusDiv = document.getElementById("invoiceStatus");
+window.downloadInvoiceByDateRange =
+  async function downloadInvoiceByDateRange() {
+    const startDateInput = document.getElementById("invoiceStartDate");
+    const endDateInput = document.getElementById("invoiceEndDate");
+    const regionSelect = document.getElementById("invoiceRegion");
+    const statusDiv = document.getElementById("invoiceStatus");
 
-  const startDate = startDateInput.value;
-  const endDate = endDateInput.value;
-  const selectedRegionFilter = regionSelect.value;
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    const selectedRegionFilter = regionSelect.value;
 
-  if (!startDate || !endDate) {
-    statusDiv.textContent = "❌ Please select both start and end dates";
-    statusDiv.className = "invoice-status error";
-    return;
-  }
-
-  if (new Date(startDate) > new Date(endDate)) {
-    statusDiv.textContent = "❌ Start date must be before end date";
-    statusDiv.className = "invoice-status error";
-    return;
-  }
-
-  statusDiv.textContent = "⏳ Preparing invoice...";
-  statusDiv.className = "invoice-status";
-
-  try {
-    let filteredRecords = await fetchFuelQuantitiesByDateRange(
-      startDate,
-      endDate,
-      selectedRegionFilter
-    );
-
-    if (filteredRecords.length === 0) {
-      statusDiv.textContent = "❌ No records found for selected date range and region";
+    if (!startDate || !endDate) {
+      statusDiv.textContent = "❌ Please select both start and end dates";
       statusDiv.className = "invoice-status error";
       return;
     }
 
-    // Deduplicate records by sitename + date + quantity (keep first occurrence)
-    const deduplicatedRecords = [];
-    const seen = new Set();
+    if (new Date(startDate) > new Date(endDate)) {
+      statusDiv.textContent = "❌ Start date must be before end date";
+      statusDiv.className = "invoice-status error";
+      return;
+    }
 
-    for (const record of filteredRecords) {
-      const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        deduplicatedRecords.push(record);
+    statusDiv.textContent = "⏳ Preparing invoice...";
+    statusDiv.className = "invoice-status";
+
+    try {
+      let filteredRecords = await fetchFuelQuantitiesByDateRange(
+        startDate,
+        endDate,
+        selectedRegionFilter,
+      );
+
+      if (filteredRecords.length === 0) {
+        statusDiv.textContent =
+          "❌ No records found for selected date range and region";
+        statusDiv.className = "invoice-status error";
+        return;
       }
+
+      // Deduplicate records by sitename + date + quantity (keep first occurrence)
+      const deduplicatedRecords = [];
+      const seen = new Set();
+
+      for (const record of filteredRecords) {
+        const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          deduplicatedRecords.push(record);
+        }
+      }
+
+      console.log(
+        `📊 Exporting ${deduplicatedRecords.length} records (deduplicated from ${filteredRecords.length})`,
+      );
+      if (deduplicatedRecords.length < filteredRecords.length) {
+        console.warn(
+          `⚠️  Removed ${filteredRecords.length - deduplicatedRecords.length} duplicate records`,
+        );
+      }
+
+      generateInvoiceExcel(
+        deduplicatedRecords,
+        startDate,
+        endDate,
+        selectedRegionFilter,
+      );
+
+      statusDiv.textContent = `✅ Invoice downloaded (${filteredRecords.length} records)`;
+      statusDiv.className = "invoice-status success";
+    } catch (error) {
+      console.error("Error downloading invoice:", error);
+      statusDiv.textContent = `❌ Error: ${error.message}`;
+      statusDiv.className = "invoice-status error";
     }
+  };
 
-    console.log(`📊 Exporting ${deduplicatedRecords.length} records (deduplicated from ${filteredRecords.length})`);
-    if (deduplicatedRecords.length < filteredRecords.length) {
-      console.warn(`⚠️  Removed ${filteredRecords.length - deduplicatedRecords.length} duplicate records`);
-    }
-
-    generateInvoiceExcel(deduplicatedRecords, startDate, endDate, selectedRegionFilter);
-
-    statusDiv.textContent = `✅ Invoice downloaded (${filteredRecords.length} records)`;
-    statusDiv.className = "invoice-status success";
-  } catch (error) {
-    console.error("Error downloading invoice:", error);
-    statusDiv.textContent = `❌ Error: ${error.message}`;
-    statusDiv.className = "invoice-status error";
-  }
-};
-
-async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter = "") {
+async function fetchFuelQuantitiesByDateRange(
+  startDate,
+  endDate,
+  regionFilter = "",
+) {
   try {
-    console.log(`🔍 Fetching invoice data from backend API: /api/get-invoice-data`);
-    console.log(`   Date range: ${startDate} to ${endDate}, Region: ${regionFilter || 'All'}`);
+    console.log(
+      `🔍 Fetching invoice data from backend API: /api/get-invoice-data`,
+    );
+    console.log(
+      `   Date range: ${startDate} to ${endDate}, Region: ${regionFilter || "All"}`,
+    );
 
     // Call backend endpoint to read directly from database (source of truth)
     const queryParams = new URLSearchParams({
       startDate: startDate,
       endDate: endDate,
-      region: regionFilter || ''
+      region: regionFilter || "",
     });
 
     // Add timeout to fetch
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
-    const response = await fetch(`/api/get-invoice-data?${queryParams.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
+    const response = await fetch(
+      `/api/get-invoice-data?${queryParams.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
       },
-      signal: controller.signal
-    });
+    );
 
     clearTimeout(timeout);
 
@@ -2465,14 +2571,18 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
         console.log(`✅ Loaded ${data.records.length} records from database`);
         console.log(`📋 Sample records:`);
         data.records.slice(0, 5).forEach((record, idx) => {
-          console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+          console.log(
+            `  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`,
+          );
         });
         supabaseAvailable = true;
         return data.records;
       }
     }
 
-    console.warn(`⚠️ Backend API status ${response.status}, attempting fallback...`);
+    console.warn(
+      `⚠️ Backend API status ${response.status}, attempting fallback...`,
+    );
   } catch (err) {
     console.warn(`⚠️ Backend API failed (${err.name}): ${err.message}`);
   }
@@ -2483,10 +2593,12 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
     const cached = localStorage.getItem("fuel_quantities_sample");
     if (cached) {
       const allRecords = JSON.parse(cached);
-      console.log(`⚠️  Using sample cache (${allRecords.length} recent records)`);
+      console.log(
+        `⚠️  Using sample cache (${allRecords.length} recent records)`,
+      );
 
       // Filter by date range and region
-      let filteredRecords = allRecords.filter(record => {
+      let filteredRecords = allRecords.filter((record) => {
         const recordDate = record.refilled_date;
         const dateMatch = recordDate >= startDate && recordDate <= endDate;
 
@@ -2495,7 +2607,10 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
         // Apply region filter if specified
         if (regionFilter && regionFilter.trim() !== "") {
           if (regionFilter === "CER") {
-            return record.region?.toLowerCase().includes("central") || record.region?.toLowerCase().includes("east");
+            return (
+              record.region?.toLowerCase().includes("central") ||
+              record.region?.toLowerCase().includes("east")
+            );
           } else if (regionFilter === "Central") {
             return record.region?.toLowerCase().includes("central");
           } else if (regionFilter === "East") {
@@ -2507,7 +2622,9 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
       });
 
       if (filteredRecords.length > 0) {
-        console.log(`✅ Found ${filteredRecords.length} records in sample cache`);
+        console.log(
+          `✅ Found ${filteredRecords.length} records in sample cache`,
+        );
         return filteredRecords;
       }
     }
@@ -2516,7 +2633,9 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   }
 
   // Fallback 2: Return empty array and show user message
-  console.error("❌ No data available - backend API offline and no cached data");
+  console.error(
+    "❌ No data available - backend API offline and no cached data",
+  );
   return [];
 }
 
@@ -2527,7 +2646,7 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
 function generateInvoiceExcel(records, startDate, endDate, regionFilter = "") {
   const invoiceData = records.map((record) => ({
     "Site Name": record.sitename,
-    "Region": record.region || "",
+    Region: record.region || "",
     "Refilled Date": formatDateDDMMYYYY(record.refilled_date),
     "Refilled Quantity": record.refilled_quantity || "",
   }));
