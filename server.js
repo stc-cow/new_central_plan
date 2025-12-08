@@ -202,6 +202,93 @@ app.post("/api/save-fuel-data", async (req, res) => {
   }
 });
 
+app.get("/api/get-invoice-data", async (req, res) => {
+  try {
+    const { startDate, endDate, region } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        error: "Missing startDate or endDate",
+        received: { startDate, endDate }
+      });
+    }
+
+    console.log(`\n📋 Invoice API: Fetching records from database...`);
+    console.log(`   Date range: ${startDate} to ${endDate}`);
+    console.log(`   Region filter: ${region || 'All'}`);
+
+    const { createClient } = await import("@supabase/supabase-js");
+
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Server: Missing Supabase credentials");
+      return res.status(500).json({ error: "Supabase not configured on server" });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Read all records from database table
+    const { data, error } = await supabase
+      .from("fuel_quantities")
+      .select("sitename, region, refilled_date, refilled_quantity")
+      .gte("refilled_date", startDate)
+      .lte("refilled_date", endDate);
+
+    if (error) {
+      console.error("❌ Database query error:", error.message);
+      return res.status(500).json({
+        error: "Failed to fetch invoice data from database",
+        details: error.message
+      });
+    }
+
+    if (!data) {
+      console.warn("⚠️  Database returned no data");
+      return res.json({ records: [] });
+    }
+
+    console.log(`✅ Fetched ${data.length} records from database (within date range)`);
+
+    // Apply region filter if specified
+    let filteredData = data;
+    if (region && region.trim() !== "" && region !== "All") {
+      filteredData = data.filter((record) => {
+        if (region === "CER") {
+          return record.region?.toLowerCase().includes("central") ||
+                 record.region?.toLowerCase().includes("east");
+        } else if (region === "Central") {
+          return record.region?.toLowerCase().includes("central");
+        } else if (region === "East") {
+          return record.region?.toLowerCase().includes("east");
+        }
+        return true;
+      });
+      console.log(`✅ After region filter (${region}): ${filteredData.length} records`);
+    }
+
+    console.log(`📊 Sample records:`);
+    filteredData.slice(0, 5).forEach((record, idx) => {
+      console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+    });
+
+    res.json({
+      success: true,
+      records: filteredData,
+      count: filteredData.length,
+      total: data.length,
+      filtered: data.length - filteredData.length
+    });
+  } catch (error) {
+    console.error("❌ Error in /api/get-invoice-data:", error.message);
+    res.status(500).json({
+      error: error.message,
+      records: []
+    });
+  }
+});
+
 app.get("*", (req, res) => {
   res.sendFile(join(__dirname, "dist", "index.html"));
 });
