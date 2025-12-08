@@ -1371,6 +1371,9 @@ async function loadDashboard() {
     console.warn("No sites data available after filtering");
   }
 
+  // Save CSV fuel data to Supabase
+  await saveCsvFuelDataToSupabase(rawData);
+
   updateMetrics(sitesData);
   populateDueTable(sitesData);
   addMarkersToMap(sitesData);
