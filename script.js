@@ -1459,7 +1459,7 @@ window.zoomToSite = function zoomToSite(sitename) {
 
 async function loadDashboard() {
   try {
-    console.log("🔄 Starting loadDashboard...");
+    console.log("\n🔄 Starting loadDashboard...");
     const rawData = await fetchCSV();
     console.log("Raw data from CSV:", rawData.length, "rows");
 
@@ -1471,23 +1471,33 @@ async function loadDashboard() {
     }
 
     // Migrate CSV fuel data to Supabase (runs on every load for auto-sync)
-    if (!csvDataMigrated) {
-      console.log("📊 First load - migrating CSV data to Supabase...");
-      await saveCsvFuelDataToSupabase(rawData);
-      csvDataMigrated = true;
-    } else {
-      console.log("🔄 Auto-syncing CSV changes to Supabase...");
-      await saveCsvFuelDataToSupabase(rawData);
+    try {
+      if (!csvDataMigrated) {
+        console.log("📊 First load - migrating CSV data to Supabase...");
+        await saveCsvFuelDataToSupabase(rawData);
+        csvDataMigrated = true;
+      } else {
+        console.log("🔄 Auto-syncing CSV changes to Supabase...");
+        await saveCsvFuelDataToSupabase(rawData);
+      }
+    } catch (migrationErr) {
+      console.error("⚠️ CSV migration error (app will continue with cached data):", migrationErr.message);
+      // Continue with dashboard rendering even if migration fails
     }
 
-    updateMetrics(sitesData);
-    populateDueTable(sitesData);
-    addMarkersToMap(sitesData);
-    updateEventCards(sitesData);
-
-    console.log("✅ Dashboard synced successfully");
+    // Update UI regardless of migration success
+    try {
+      updateMetrics(sitesData);
+      populateDueTable(sitesData);
+      addMarkersToMap(sitesData);
+      updateEventCards(sitesData);
+      console.log("✅ Dashboard rendered successfully");
+    } catch (uiErr) {
+      console.error("❌ Error rendering dashboard:", uiErr.message);
+    }
   } catch (error) {
-    console.error("❌ Error during dashboard sync:", error);
+    console.error("❌ Critical error during dashboard load:", error.message);
+    console.error("Stack:", error.stack);
   }
 }
 
