@@ -850,9 +850,10 @@ function startScheduledSync() {
             .digest("hex");
 
           const { data: existing } = await supabase
-            .from("fuel_quantities")
+            .from("live_fuel_data")
             .select("id")
-            .eq("row_hash", row_hash)
+            .eq("sitename", sitename)
+            .eq("refilled_date", refilled_date)
             .maybeSingle();
 
           if (existing) {
@@ -861,9 +862,9 @@ function startScheduledSync() {
           }
 
           const { error: insertError } = await supabase
-            .from("fuel_quantities")
+            .from("live_fuel_data")
             .insert([
-              { sitename, region, refilled_date, refilled_quantity, row_hash },
+              { sitename, region, refilled_date, refilled_quantity },
             ]);
 
           if (!insertError) {
