@@ -2054,30 +2054,50 @@ async function saveCsvFuelDataToSupabase(rawData) {
     }
 
     // Transform CSV data to fuel_quantities format
+    // Mapping: Column A -> sitename, Column AE -> refilled_date, Column AF -> refilled_quantity
     const fuelRecords = rawData
-      .filter((row) => {
-        // Only include rows with sitename and at least one of the fuel data fields
-        return (
-          row.sitename &&
-          (row.lastfuelingdate || row.lastfuelingqty)
-        );
-      })
       .map((row) => {
-        const refilled_date = row.lastfuelingdate
-          ? parseFuelDate(row.lastfuelingdate)
+        // Get sitename - try different possible column names for column A
+        const sitename = row.sitename ||
+                        row.site_name ||
+                        row['site name'] ||
+                        row['sitename'] ||
+                        '';
+
+        // Get refilled date - try different possible column names for column AE (LastFuelingDate)
+        const refilled_date_raw = row.lastfuelingdate ||
+                                  row['last fueling date'] ||
+                                  row['lastfuelingdate'] ||
+                                  row['refilled_date'] ||
+                                  '';
+
+        // Get refilled quantity - try different possible column names for column AF (LastFuelingQTY)
+        const refilled_qty_raw = row.lastfuelingqty ||
+                                row['last fueling qty'] ||
+                                row['lastfuelingqty'] ||
+                                row['refilled_quantity'] ||
+                                '';
+
+        // Only include rows with sitename
+        if (!sitename || sitename.trim() === '') {
+          return null;
+        }
+
+        const refilled_date = refilled_date_raw
+          ? parseFuelDate(refilled_date_raw)
           : null;
 
         return {
-          sitename: String(row.sitename).trim(),
+          sitename: String(sitename).trim(),
           refilled_date: refilled_date
             ? refilled_date.toISOString().split("T")[0]
             : null,
-          refilled_quantity: row.lastfuelingqty
-            ? parseFloat(row.lastfuelingqty)
+          refilled_quantity: refilled_qty_raw && refilled_qty_raw !== ''
+            ? parseFloat(refilled_qty_raw)
             : null,
         };
       })
-      .filter((record) => record.sitename); // Remove any records without sitename
+      .filter((record) => record !== null); // Remove null records
 
     if (fuelRecords.length === 0) {
       console.log("No fuel records to save from CSV");
@@ -2085,7 +2105,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
     }
 
     console.log(
-      `Saving ${fuelRecords.length} fuel records to Supabase...`
+      `📊 Migrating ${fuelRecords.length} fuel records from CSV to Supabase...`
     );
 
     // Insert records into fuel_quantities table
@@ -2094,11 +2114,12 @@ async function saveCsvFuelDataToSupabase(rawData) {
       .insert(fuelRecords);
 
     if (error) {
-      console.error("Error saving CSV data to Supabase:", error);
+      console.error("❌ Error saving CSV data to Supabase:", error);
     } else {
       console.log(
-        `✓ Successfully saved ${fuelRecords.length} fuel records to Supabase`
+        `✅ Successfully migrated ${fuelRecords.length} fuel records to Supabase`
       );
+      console.log("📍 Data source: Column A (Sitename), Column AE (Refilled Date), Column AF (Refilled Quantity)");
     }
   } catch (err) {
     console.error("Error in saveCsvFuelDataToSupabase:", err);
