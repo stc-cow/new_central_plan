@@ -309,41 +309,67 @@ app.get("/api/get-invoice-data", async (req, res) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Read all records from database table
-    const { data, error } = await supabase
-      .from("fuel_quantities")
+    // Fetch live records within date range
+    console.log("📥 Fetching live_fuel_data records...");
+    const { data: liveData, error: liveError } = await supabase
+      .from("live_fuel_data")
       .select("sitename, region, refilled_date, refilled_quantity")
       .gte("refilled_date", startDate)
       .lte("refilled_date", endDate);
 
-    if (error) {
-      console.error("❌ Database query error:", error.message);
+    if (liveError) {
+      console.error("❌ Live data query error:", liveError.message);
       return res.status(500).json({
-        error: "Failed to fetch invoice data from database",
-        details: error.message,
+        error: "Failed to fetch live invoice data from database",
+        details: liveError.message,
       });
     }
 
-    if (!data) {
-      console.warn("⚠️  Database returned no data");
-      return res.json({ records: [] });
+    console.log(`✅ Fetched ${liveData?.length || 0} records from live_fuel_data`);
+
+    // Fetch history records within date range
+    console.log("📥 Fetching history_fuel_data records...");
+    const { data: historyData, error: historyError } = await supabase
+      .from("history_fuel_data")
+      .select("sitename, region, refilled_date, refilled_quantity")
+      .gte("refilled_date", startDate)
+      .lte("refilled_date", endDate);
+
+    if (historyError) {
+      console.error("❌ History data query error:", historyError.message);
+      return res.status(500).json({
+        error: "Failed to fetch history invoice data from database",
+        details: historyError.message,
+      });
     }
 
-    console.log(
-      `✅ Fetched ${data.length} records from database (within date range)`,
-    );
+    console.log(`✅ Fetched ${historyData?.length || 0} records from history_fuel_data`);
 
-    // Deduplicate records: keep only the latest version of each site+date combination
+    // Combine live and history data
+    const allRecords = [...(liveData || []), ...(historyData || [])];
+
+    if (!allRecords || allRecords.length === 0) {
+      console.warn("⚠️  No records found in live or history tables");
+      return res.json({ records: [], count: 0, total: 0 });
+    }
+
+    console.log(`📊 Total combined records: ${allRecords.length}`);
+
+    // Deduplicate: keep only latest version for each site+date combination
+    // Live data takes precedence over history data for the same site+date
     const deduped = {};
-    for (const record of data) {
+    for (const record of allRecords) {
       const key = `${record.sitename}|${record.refilled_date}`;
-      // Keep the record (if duplicates exist, the last one wins, which is fine for dedup)
-      deduped[key] = record;
+      // Always keep the record, but if same key exists, prefer keeping it
+      // (since live data is processed first, it will naturally be used)
+      if (!deduped[key]) {
+        deduped[key] = record;
+      }
     }
     let filteredData = Object.values(deduped);
-    const dupesRemoved = data.length - filteredData.length;
+    const dupesRemoved = allRecords.length - filteredData.length;
     if (dupesRemoved > 0) {
-      console.log(`🔄 Removed ${dupesRemoved} duplicate records`);
+      console.log(`🔄 Removed ${dupesRemoved} duplicate/conflicting records`);
     }
 
     // Apply region filter if specified
@@ -385,9 +411,13 @@ app.get("/api/get-invoice-data", async (req, res) => {
       success: true,
       records: filteredData,
       count: filteredData.length,
-      total: data.length,
-      filtered: data.length - filteredData.length,
+      total: allRecords.length,
+      filtered: allRecords.length - filteredData.length,
       deduplicated: dupesRemoved,
+      sources: {
+        live: liveData?.length || 0,
+        history: historyData?.length || 0,
+      },
     });
   } catch (error) {
     console.error("❌ Error in /api/get-invoice-data:", error.message);
