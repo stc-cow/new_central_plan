@@ -1936,7 +1936,6 @@ window.openInvoiceModal = function openInvoiceModal() {
   const modal = document.getElementById("invoiceModal");
   if (modal) {
     modal.style.display = "block";
-    loadFuelQuantitiesPreview();
   }
 };
 
