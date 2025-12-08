@@ -712,7 +712,7 @@ function parseCSV(csvText) {
   if (lines.length === 0) return [];
 
   const headers = lines[0].split(",").map((h) => h.trim());
-  console.log("CSV Headers:", headers);
+  console.log("CSV Headers (Full List):", headers);
   console.log("Total headers:", headers.length);
 
   // Check if sitelabel is in headers
@@ -724,6 +724,17 @@ function parseCSV(csvText) {
     sitelabelIndex,
     "Header:",
     headers[sitelabelIndex],
+  );
+
+  // Check for region column
+  const regionIndex = headers.findIndex((h) =>
+    h.toLowerCase().includes("region"),
+  );
+  console.log(
+    "Region column index:",
+    regionIndex,
+    "Header:",
+    headers[regionIndex],
   );
 
   const data = [];
@@ -743,6 +754,9 @@ function parseCSV(csvText) {
   }
 
   console.log("Sample parsed row:", data[0]);
+  if (data.length > 0) {
+    console.log("Column D (Region) sample value:", data[0][headers[3]?.toLowerCase()] || "NOT FOUND");
+  }
   return data;
 }
 
