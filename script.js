@@ -2196,14 +2196,17 @@ async function saveCsvFuelDataToSupabase(rawData) {
             .download('fuel_quantities.json');
 
           if (error) {
-            console.log("ℹ️  File doesn't exist yet (first sync)");
+            console.warn("⚠️  Storage file doesn't exist yet or read error:", error.message);
+            console.log("ℹ️  Starting fresh (first sync or file not created)");
           } else if (data) {
             const text = await data.text();
             allRecords = JSON.parse(text);
-            console.log(`✅ Found ${allRecords.length} existing records in storage`);
+            console.log(`✅ Found ${allRecords.length} existing records in storage - PRESERVING ALL OLD DATA`);
           }
         } catch (readErr) {
-          console.log("ℹ️  No existing data - starting fresh");
+          console.error("❌ CRITICAL: Error reading existing data from storage:", readErr.message);
+          console.warn("⚠️  This could mean old records will be lost!");
+          console.log("ℹ️  Attempting to continue - will start with empty records");
         }
 
         // Add new records with timestamp
