@@ -2405,7 +2405,7 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
     throw new Error("Supabase client not initialized");
   }
 
-  // Use DATE type stored in Supabase for proper comparison
+  // Fetch records filtered by date range
   let query = supabaseClient
     .from("fuel_quantities")
     .select("*")
@@ -2415,12 +2415,13 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   // Apply region filter if specified
   if (regionFilter && regionFilter.trim() !== "") {
     if (regionFilter === "CER") {
-      // For CER, include both Central and East regions
-      query = query.or("region.ilike.%Central%,region.ilike.%East%");
+      // For CER, fetch records where region contains either Central or East
+      // Use filter instead of or to avoid complexity
+      query = query.or(`region.like.%Central%,region.like.%East%`);
     } else if (regionFilter === "Central") {
-      query = query.ilike("region", "%Central%");
+      query = query.like("region", "%Central%");
     } else if (regionFilter === "East") {
-      query = query.ilike("region", "%East%");
+      query = query.like("region", "%East%");
     }
   }
 
@@ -2430,6 +2431,8 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
     console.error("Supabase query error:", error);
     throw new Error(`Database error: ${error.message}`);
   }
+
+  console.log(`📥 Fetched ${data?.length || 0} records from Supabase for date range ${startDate} to ${endDate} with region filter: ${regionFilter || 'None'}`);
 
   return data || [];
 }
