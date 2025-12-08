@@ -181,12 +181,16 @@ app.post("/api/save-fuel-data", async (req, res) => {
       }
     }
 
-    console.log(`Server: Migration complete! Inserted ${insertedCount}/${records.length} records`);
+    console.log(`Server: Migration complete!`);
+    console.log(`  ✅ Inserted to Supabase: ${insertedCount}/${validRecords.length} valid records`);
+    console.log(`  ❌ Excluded (invalid data): ${invalidRecords.length} records`);
 
     return res.json({
       success: insertedCount > 0,
       inserted: insertedCount,
       total: records.length,
+      valid: validRecords.length,
+      invalid: invalidRecords.length,
       batchResults
     });
   } catch (error) {
