@@ -1869,66 +1869,6 @@ function startDashboard() {
 
 // ============================================
 
-window.loadInvoiceDataByDateRange =
-  async function loadInvoiceDataByDateRange() {
-    const startDateInput = document.getElementById("invoiceStartDate");
-    const endDateInput = document.getElementById("invoiceEndDate");
-    const regionSelect = document.getElementById("invoiceRegion");
-    const statusDiv = document.getElementById("invoiceStatus");
-
-    const startDate = startDateInput.value;
-    const endDate = endDateInput.value;
-    const selectedRegionFilter = regionSelect.value;
-
-    if (!startDate || !endDate) {
-      statusDiv.textContent = "ℹ️ Please select both start and end dates";
-      statusDiv.className = "invoice-status info";
-      document.getElementById("invoicePreviewBody").innerHTML =
-        '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Select dates to view records</td></tr>';
-      return;
-    }
-
-    if (new Date(startDate) > new Date(endDate)) {
-      statusDiv.textContent = "❌ Start date must be before end date";
-      statusDiv.className = "invoice-status error";
-      return;
-    }
-
-    statusDiv.textContent = "⏳ Loading records...";
-    statusDiv.className = "invoice-status";
-
-    try {
-      const filteredRecords = await fetchFuelQuantitiesByDateRange(
-        startDate,
-        endDate,
-        selectedRegionFilter,
-      );
-
-      if (filteredRecords.length === 0) {
-        statusDiv.textContent =
-          "ℹ️ No records found for selected date range and region";
-        statusDiv.className = "invoice-status info";
-        document.getElementById("invoicePreviewBody").innerHTML =
-          '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No records in this date range</td></tr>';
-        return;
-      }
-
-      // Keep all records - no deduplication (Option A: append all data with unique timestamps/IDs)
-      console.log(
-        `📊 Loaded ${filteredRecords.length} records (Option A: all records kept, including duplicates by site name)`,
-      );
-
-      fuelQuantitiesData = filteredRecords;
-      updateInvoicePreview();
-
-      statusDiv.textContent = `✅ Loaded ${filteredRecords.length} records`;
-      statusDiv.className = "invoice-status success";
-    } catch (error) {
-      console.error("Error loading invoice data:", error);
-      statusDiv.textContent = `❌ Error: ${error.message}`;
-      statusDiv.className = "invoice-status error";
-    }
-  };
 
 function updateInvoicePreview() {
   const tbody = document.getElementById("invoicePreviewBody");
