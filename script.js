@@ -1955,7 +1955,24 @@ function updateInvoicePreview() {
     return;
   }
 
-  fuelQuantitiesData.forEach((record) => {
+  // Deduplicate records for display
+  const deduplicatedData = [];
+  const seen = new Set();
+
+  for (const record of fuelQuantitiesData) {
+    const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      deduplicatedData.push(record);
+    }
+  }
+
+  // Log deduplication info
+  if (deduplicatedData.length < fuelQuantitiesData.length) {
+    console.warn(`⚠️  Removed ${fuelQuantitiesData.length - deduplicatedData.length} duplicate records from preview`);
+  }
+
+  deduplicatedData.forEach((record) => {
     const tr = document.createElement("tr");
 
     const siteCell = document.createElement("td");
