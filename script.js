@@ -2373,7 +2373,7 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
   statusDiv.className = "invoice-status";
 
   try {
-    const filteredRecords = await fetchFuelQuantitiesByDateRange(
+    let filteredRecords = await fetchFuelQuantitiesByDateRange(
       startDate,
       endDate,
       selectedRegionFilter
@@ -2385,9 +2385,23 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
       return;
     }
 
-    generateInvoiceExcel(filteredRecords, startDate, endDate, selectedRegionFilter);
+    // Deduplicate records based on sitename + refilled_date combination
+    const uniqueRecords = [];
+    const seen = new Set();
 
-    statusDiv.textContent = `✅ Invoice downloaded (${filteredRecords.length} records)`;
+    filteredRecords.forEach((record) => {
+      const key = `${record.sitename}|${record.refilled_date}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueRecords.push(record);
+      }
+    });
+
+    console.log(`📊 Exporting ${filteredRecords.length} records, ${uniqueRecords.length} unique after deduplication`);
+
+    generateInvoiceExcel(uniqueRecords, startDate, endDate, selectedRegionFilter);
+
+    statusDiv.textContent = `✅ Invoice downloaded (${uniqueRecords.length} records)`;
     statusDiv.className = "invoice-status success";
   } catch (error) {
     console.error("Error downloading invoice:", error);
