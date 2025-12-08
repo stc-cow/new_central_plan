@@ -2379,31 +2379,22 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   }
 
   try {
-    console.log(`🔍 Reading from Supabase database table: date range ${startDate} to ${endDate}, region: ${regionFilter || 'All'}`);
+    console.log(`🔍 Reading from Supabase Storage: date range ${startDate} to ${endDate}, region: ${regionFilter || 'All'}`);
 
-    // Read from database table (preserves all historical data including deleted records from CSV)
-    const { data, error } = await supabaseClient
-      .from('fuel_quantities')
-      .select('sitename, region, refilled_date, refilled_quantity')
-      .gte('refilled_date', startDate)
-      .lte('refilled_date', endDate);
+    // Read from storage (includes all historical data)
+    const { data, error } = await supabaseClient.storage
+      .from('fuel_data')
+      .download('fuel_quantities.json');
 
     if (error) {
-      console.error("❌ DATABASE ERROR:", error);
-      console.error("   Code:", error.code);
-      console.error("   Message:", error.message);
-      console.warn("⚠️ Database read failed, falling back to cached data...");
+      console.warn("⚠️ Storage read failed, using cached data:", error.message);
       return filterCachedFuelData(startDate, endDate, regionFilter);
     }
 
-    if (!data) {
-      console.warn("⚠️ Database returned no data");
-      return filterCachedFuelData(startDate, endDate, regionFilter);
-    }
-
-    const allRecords = data || [];
-    console.log(`✅ Loaded ${allRecords.length} records from database table`);
-    console.log(`📋 Sample records from database:`);
+    const text = await data.text();
+    const allRecords = JSON.parse(text);
+    console.log(`✅ Loaded ${allRecords.length} records from storage`);
+    console.log(`📋 Sample records from storage:`);
     allRecords.slice(0, 5).forEach((record, idx) => {
       console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
     });
