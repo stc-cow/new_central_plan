@@ -202,7 +202,7 @@ app.post("/api/save-fuel-data", async (req, res) => {
           );
 
           const { data, error } = await supabase
-            .from("fuel_quantities")
+            .from("live_fuel_data")
             .insert(batch);
 
           if (error) {
