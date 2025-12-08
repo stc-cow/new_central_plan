@@ -2188,13 +2188,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
       if (!supabaseClient) {
         console.warn("⚠️ Supabase client not available - will use localStorage fallback");
         useLocalFallback = true;
-      } else {
-        // Ensure bucket exists
-        const bucketReady = await ensureStorageBucket();
-        if (!bucketReady) {
-          console.warn("⚠️ Storage bucket not ready - will use localStorage fallback");
-          useLocalFallback = true;
-        }
       }
 
       if (useLocalFallback) {
