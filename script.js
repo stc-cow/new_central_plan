@@ -2091,9 +2091,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log(`\n📊 Filtering Summary:`);
+    console.log(`\n📊 CSV Validation Summary:`);
     console.log(`  Total CSV rows processed: ${rawData.length}`);
-    console.log(`  Valid records that match filters: ${fuelRecords.length}`);
+    console.log(`  Valid records extracted: ${fuelRecords.length}`);
     console.log(`  Excluded records (invalid date or quantity ≤ 0): ${rawData.length - fuelRecords.length}`);
 
     // Deduplicate records: Only migrate records that are NEW (not already in Supabase)
