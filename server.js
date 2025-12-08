@@ -12,6 +12,50 @@ const PORT = process.env.PORT || 3000;
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
+// Initialize database table if it doesn't exist
+async function initializeDatabase() {
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn("⚠️  Supabase credentials not configured, skipping table initialization");
+      return;
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Check if table exists
+    const { data: tables, error: listError } = await supabase
+      .from("fuel_quantities")
+      .select("*")
+      .limit(1);
+
+    if (!listError) {
+      console.log("✅ fuel_quantities table already exists");
+      return;
+    }
+
+    // Table doesn't exist, try to create it
+    console.log("📊 Creating fuel_quantities table...");
+
+    // Note: Due to RLS and permission constraints, table creation might need to be done
+    // through Supabase UI or with service role. We'll log a helpful message.
+    console.warn(
+      "ℹ️  If fuel_quantities table doesn't exist, please create it in Supabase dashboard with columns: id, sitename, region, refilled_date, refilled_quantity, row_hash, created_at, updated_at"
+    );
+  } catch (error) {
+    console.warn(
+      "⚠️  Could not check/create table (might not have permissions):",
+      error.message
+    );
+  }
+}
+
+// Initialize on startup
+initializeDatabase().catch(console.error);
+
 // Global state for scheduled sync
 let syncScheduleIntervalId = null;
 let lastSyncTime = null;
