@@ -2042,6 +2042,69 @@ function updateInvoicePreview() {
   });
 }
 
+async function saveCsvFuelDataToSupabase(rawData) {
+  try {
+    if (!supabaseClient) {
+      await initSupabaseClient();
+    }
+
+    if (!supabaseClient || rawData.length === 0) {
+      console.warn("Cannot save CSV data: Supabase not initialized or no data");
+      return;
+    }
+
+    // Transform CSV data to fuel_quantities format
+    const fuelRecords = rawData
+      .filter((row) => {
+        // Only include rows with sitename and at least one of the fuel data fields
+        return (
+          row.sitename &&
+          (row.lastfuelingdate || row.lastfuelingqty)
+        );
+      })
+      .map((row) => {
+        const refilled_date = row.lastfuelingdate
+          ? parseFuelDate(row.lastfuelingdate)
+          : null;
+
+        return {
+          sitename: String(row.sitename).trim(),
+          refilled_date: refilled_date
+            ? refilled_date.toISOString().split("T")[0]
+            : null,
+          refilled_quantity: row.lastfuelingqty
+            ? parseFloat(row.lastfuelingqty)
+            : null,
+        };
+      })
+      .filter((record) => record.sitename); // Remove any records without sitename
+
+    if (fuelRecords.length === 0) {
+      console.log("No fuel records to save from CSV");
+      return;
+    }
+
+    console.log(
+      `Saving ${fuelRecords.length} fuel records to Supabase...`
+    );
+
+    // Insert records into fuel_quantities table
+    const { error } = await supabaseClient
+      .from("fuel_quantities")
+      .insert(fuelRecords);
+
+    if (error) {
+      console.error("Error saving CSV data to Supabase:", error);
+    } else {
+      console.log(
+        `✓ Successfully saved ${fuelRecords.length} fuel records to Supabase`
+      );
+    }
+  } catch (err) {
+    console.error("Error in saveCsvFuelDataToSupabase:", err);
+  }
+}
+
 window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() {
   const startDateInput = document.getElementById("invoiceStartDate");
   const endDateInput = document.getElementById("invoiceEndDate");
