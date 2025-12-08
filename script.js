@@ -2232,47 +2232,60 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log("📖 Reading existing data from storage...");
       let allRecords = [];
       try {
+        console.log("🔄 Downloading fuel_quantities.json...");
         const { data, error } = await supabaseClient.storage
           .from('fuel_data')
           .download('fuel_quantities.json');
 
-        if (!error && data) {
+        if (error) {
+          console.log("ℹ️  File doesn't exist yet (first sync):", error.message);
+        } else if (data) {
           const text = await data.text();
           allRecords = JSON.parse(text);
           console.log(`✅ Found ${allRecords.length} existing records in storage`);
-        } else {
-          console.log("📝 Storage file not found - creating new");
         }
       } catch (readErr) {
-        console.log("📝 No existing data - starting fresh");
+        console.log("ℹ️  No existing data - starting fresh:", readErr.message);
       }
 
       // Add new records with timestamp
       const now = new Date().toISOString();
       const newRecordsWithMeta = recordsToMigrate.map((record, idx) => ({
         ...record,
-        id: allRecords.length + idx + 1, // Simple sequential ID
+        id: (allRecords.length + idx + 1).toString(),
         created_at: now,
         updated_at: now
       }));
 
+      console.log(`📝 Adding ${newRecordsWithMeta.length} new records`);
       allRecords.push(...newRecordsWithMeta);
+      console.log(`📊 Total records after merge: ${allRecords.length}`);
 
       // Save all records back to storage
-      console.log(`💾 Uploading ${allRecords.length} total records to storage...`);
-      const { error: uploadError } = await supabaseClient.storage
+      const jsonContent = JSON.stringify(allRecords, null, 2);
+      const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
+
+      console.log(`💾 Uploading to storage (${(jsonBlob.size / 1024).toFixed(2)} KB)...`);
+
+      const { error: uploadError, data: uploadData } = await supabaseClient.storage
         .from('fuel_data')
-        .update('fuel_quantities.json', new Blob([JSON.stringify(allRecords, null, 2)], { type: 'application/json' }), {
-          upsert: true
+        .upload('fuel_quantities.json', jsonBlob, {
+          upsert: true,
+          contentType: 'application/json'
         });
 
       if (uploadError) {
-        throw uploadError;
+        console.error("❌ Upload failed:", uploadError);
+        console.error("Error message:", uploadError.message);
+        console.error("Error details:", uploadError);
+        throw new Error(`Storage upload failed: ${uploadError.message}`);
       }
 
       console.log(`\n✅ Storage sync successful!`);
       console.log(`📊 Total records in storage: ${allRecords.length}`);
       console.log(`📝 New records added: ${newRecordsWithMeta.length}`);
+      console.log(`📂 File path: fuel_data/fuel_quantities.json`);
+      console.log(`📦 File size: ${(jsonBlob.size / 1024).toFixed(2)} KB`);
       syncSuccess = true;
 
       if (result.inserted === recordsToMigrate.length) {
