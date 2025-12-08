@@ -2686,6 +2686,68 @@ function generateInvoiceExcel(records, startDate, endDate, regionFilter = "") {
   XLSX.writeFile(workbook, fileName);
 }
 
+window.syncCsvToDatabase = async function syncCsvToDatabase() {
+  if (
+    !confirm(
+      "⚠️  This will sync data from your Google Sheets CSV to the Supabase database.\n\nDuplicate entries (same sitename, date, and quantity) will be automatically skipped.\n\nContinue?",
+    )
+  ) {
+    return;
+  }
+
+  const statusDiv = document.getElementById("invoiceStatus");
+  if (!statusDiv) {
+    alert("Could not find status element");
+    return;
+  }
+
+  statusDiv.textContent = "⏳ Syncing CSV data to database...";
+  statusDiv.className = "invoice-status";
+
+  try {
+    console.log("🔄 Sending sync request to backend...");
+
+    const response = await fetch("/api/sync-fuel-sheet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+    console.log("📦 Sync response received:", result);
+
+    if (response.ok && result.status === "success") {
+      console.log("✅ Sync successful:", result);
+      const message = `✅ Sync complete! Inserted: ${result.records.inserted}, Skipped: ${result.records.skipped} (duplicates), Invalid: ${result.records.invalid}`;
+      statusDiv.textContent = message;
+      statusDiv.className = "invoice-status success";
+
+      // Refresh invoice preview if there's data loaded
+      const startDateInput = document.getElementById("invoiceStartDate");
+      const endDateInput = document.getElementById("invoiceEndDate");
+      if (startDateInput?.value && endDateInput?.value) {
+        console.log("🔄 Refreshing invoice preview...");
+        setTimeout(() => {
+          loadInvoiceDataByDateRange();
+        }, 1000);
+      }
+    } else {
+      console.error("❌ Sync failed:", result);
+      let errorMsg = result.error || "Unknown error";
+      if (result.details) {
+        errorMsg += ` (${result.details})`;
+      }
+      statusDiv.textContent = `❌ Sync failed: ${errorMsg}`;
+      statusDiv.className = "invoice-status error";
+    }
+  } catch (error) {
+    console.error("❌ Error during sync:", error);
+    statusDiv.textContent = `❌ Error: ${error.message}`;
+    statusDiv.className = "invoice-status error";
+  }
+};
+
 window.cleanupDuplicates = async function cleanupDuplicates() {
   if (
     !confirm(
