@@ -72,6 +72,7 @@ let dashboardInitialized = false;
 let headerIntervalId = null;
 let refreshIntervalId = null;
 let selectedRegion = "CER";
+let csvDataMigrated = false;
 
 // Load dashboard on page load
 document.addEventListener("DOMContentLoaded", async () => {
