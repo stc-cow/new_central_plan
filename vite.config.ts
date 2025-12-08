@@ -391,6 +391,119 @@ function csvProxyPlugin() {
           }
         });
 
+        server.middlewares.use("/api/cleanup-duplicates", async (req, res, next) => {
+          if (req.method !== "POST") {
+            res.writeHead(405, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Method not allowed - use POST" }));
+            return;
+          }
+
+          try {
+            console.log("\n🧹 Starting database deduplication cleanup...");
+
+            const { createClient } = await import("@supabase/supabase-js");
+
+            const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+            const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE;
+
+            if (!supabaseUrl || !supabaseServiceRole) {
+              res.writeHead(500, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({
+                status: "error",
+                error: "Supabase credentials not configured"
+              }));
+              return;
+            }
+
+            const supabase = createClient(supabaseUrl, supabaseServiceRole);
+
+            // Fetch all records from database
+            const { data: allRecords, error: fetchError } = await supabase
+              .from("fuel_quantities")
+              .select("id, sitename, region, refilled_date, refilled_quantity");
+
+            if (fetchError) {
+              throw new Error(`Failed to fetch records: ${fetchError.message}`);
+            }
+
+            console.log(`📊 Total records in database: ${allRecords.length}`);
+
+            // Find duplicates: same sitename + date + quantity
+            const recordMap = new Map();
+            const duplicateIds = [];
+
+            for (const record of allRecords) {
+              const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
+
+              if (!recordMap.has(key)) {
+                recordMap.set(key, []);
+              }
+              recordMap.get(key).push(record.id);
+            }
+
+            // Identify which IDs to delete (keep first, delete rest)
+            for (const [key, ids] of recordMap.entries()) {
+              if (ids.length > 1) {
+                console.log(`⚠️  Found ${ids.length} duplicates for: ${key}`);
+                // Keep the first ID, mark the rest for deletion
+                duplicateIds.push(...ids.slice(1));
+              }
+            }
+
+            console.log(`🗑️  Total duplicate records to delete: ${duplicateIds.length}`);
+
+            if (duplicateIds.length === 0) {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({
+                status: "success",
+                message: "No duplicates found",
+                deletedCount: 0,
+                totalRecords: allRecords.length
+              }));
+              return;
+            }
+
+            // Delete duplicates in batches
+            const BATCH_SIZE = 100;
+            let totalDeleted = 0;
+
+            for (let i = 0; i < duplicateIds.length; i += BATCH_SIZE) {
+              const batch = duplicateIds.slice(i, i + BATCH_SIZE);
+              const { error: deleteError } = await supabase
+                .from("fuel_quantities")
+                .delete()
+                .in("id", batch);
+
+              if (deleteError) {
+                console.warn(`⚠️  Batch delete error: ${deleteError.message}`);
+              } else {
+                totalDeleted += batch.length;
+                console.log(`✅ Deleted batch: ${batch.length} records (Total: ${totalDeleted})`);
+              }
+            }
+
+            console.log(`\n✅ Cleanup complete!`);
+            console.log(`   🗑️  Deleted: ${totalDeleted} duplicate records`);
+            console.log(`   📊 Remaining: ${allRecords.length - totalDeleted} unique records`);
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({
+              status: "success",
+              message: "Database deduplication completed",
+              deletedCount: totalDeleted,
+              totalRecords: allRecords.length - totalDeleted,
+              originalCount: allRecords.length
+            }));
+          } catch (error) {
+            console.error("❌ Cleanup failed:", error.message);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({
+              status: "error",
+              error: error.message
+            }));
+          }
+        });
+
         server.middlewares.use("/api/get-invoice-data", async (req, res, next) => {
           if (req.method !== "GET") {
             res.writeHead(405, { "Content-Type": "application/json" });
