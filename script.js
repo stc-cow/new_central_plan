@@ -884,6 +884,24 @@ function parseFuelDate(str) {
   return isNaN(d.getTime()) ? null : d;
 }
 
+// Convert DD/MM/YYYY string directly to YYYY-MM-DD format without timezone issues
+function convertDDMMYYYYtoYYYYMMDD(dateStr) {
+  if (!dateStr) return null;
+
+  const ddmmyyyyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+  const match = dateStr.trim().match(ddmmyyyyRegex);
+
+  if (match) {
+    const day = String(match[1]).padStart(2, "0");
+    const month = String(match[2]).padStart(2, "0");
+    const year = match[3];
+
+    return `${year}-${month}-${day}`;
+  }
+
+  return null;
+}
+
 function dayDiff(targetDate) {
   if (!targetDate) return null;
 
