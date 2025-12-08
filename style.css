@@ -828,39 +828,6 @@ body {
 
 
 
-.mdl-modal-content {
-  border-top: 4px solid #ec4899;
-}
-
-.mdl-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #fce7f3;
-}
-
-.mdl-table thead {
-  background-color: #ec4899;
-  color: white;
-}
-
-.mdl-table th {
-  padding: 12px;
-  text-align: left;
-  font-weight: 700;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 1px solid #ddd;
-}
-
-.mdl-table td {
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.mdl-table tbody tr:hover {
-  background-color: #fbcfe8;
-}
 
 .header-date {
   font-size: 13px;
