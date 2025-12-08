@@ -2212,11 +2212,11 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(`\n📍 Sync complete!`);
       console.log(`📊 Supabase records inserted: ${result.inserted}/${recordsToMigrate.length}`);
 
-      if (result.inserted === result.total) {
-        console.log(`✅ All records synced to Supabase!`);
+      if (result.inserted === recordsToMigrate.length) {
+        console.log(`✅ All new records synced to Supabase!`);
         supabaseAvailable = true;
       } else if (result.inserted > 0) {
-        console.log(`⚠️ Partial sync: ${result.inserted} records synced to Supabase`);
+        console.log(`⚠️ Partial sync: ${result.inserted}/${recordsToMigrate.length} records synced`);
         supabaseAvailable = true;
       } else {
         console.log(`⚠️ Supabase sync failed - Using cached data for invoice functionality`);
