@@ -2194,22 +2194,41 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    // Test the connection first
+    // Test the connection first with timeout
     console.log("🧪 Testing Supabase connection...");
-    const { data: testData, error: testError } = await supabaseClient
-      .from("fuel_quantities")
-      .select("count()", { count: "exact", head: true });
+    console.log("   URL:", VITE_SUPABASE_URL);
 
-    if (testError) {
-      console.error("❌ Supabase connection test failed:", testError.message);
-      console.error("This could mean:");
-      console.error("  1. Table 'fuel_quantities' doesn't exist");
-      console.error("  2. Supabase credentials are invalid");
-      console.error("  3. Network is down or Supabase is unreachable");
+    try {
+      const { data: testData, error: testError } = await Promise.race([
+        supabaseClient
+          .from("fuel_quantities")
+          .select("id", { count: "exact", head: true }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Connection timeout after 10 seconds")), 10000)
+        )
+      ]);
+
+      if (testError) {
+        console.error("❌ Supabase connection test failed:", testError.message);
+        console.error("Possible causes:");
+        console.error("  1. Table 'fuel_quantities' doesn't exist");
+        console.error("  2. Supabase credentials are invalid or expired");
+        console.error("  3. Network is down or Supabase is unreachable");
+        console.error("  4. CORS is blocking the request");
+        return;
+      }
+
+      console.log("✅ Supabase connection successful");
+    } catch (connErr) {
+      console.error("❌ Connection test exception:", connErr.message);
+      if (connErr.message.includes("timeout")) {
+        console.error("   → Supabase is taking too long to respond. Try again in a moment.");
+      } else if (connErr.message.includes("Failed to fetch")) {
+        console.error("   → Network error. Check your internet connection.");
+        console.error("   → If you're behind a proxy/firewall, it may be blocking Supabase requests.");
+      }
       return;
     }
-
-    console.log("✅ Supabase connection successful");
 
     console.log("🔍 Extracting data from CSV columns A, D, AE, AF...");
 
