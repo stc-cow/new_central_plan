@@ -511,11 +511,12 @@ app.post("/api/sync-fuel-sheet", async (req, res) => {
           .update(`${sitename}-${region}-${refilled_date}-${refilled_quantity}`)
           .digest("hex");
 
-        // Check if this row already exists (using unique constraint)
+        // Check if this record already exists (by sitename + date)
         const { data: existing, error: checkError } = await supabase
-          .from("fuel_quantities")
-          .select("id")
-          .eq("row_hash", row_hash)
+          .from("live_fuel_data")
+          .select("id, refilled_quantity")
+          .eq("sitename", sitename)
+          .eq("refilled_date", refilled_date)
           .maybeSingle();
 
         if (checkError) {
@@ -525,20 +526,55 @@ app.post("/api/sync-fuel-sheet", async (req, res) => {
         }
 
         if (existing) {
-          skipped++;
+          // If quantity has changed, move old to history and update live
+          if (existing.refilled_quantity !== refilled_quantity) {
+            console.log(
+              `📝 Quantity changed for ${sitename} on ${refilled_date}: ${existing.refilled_quantity} -> ${refilled_quantity}`,
+            );
+            // Archive old record to history
+            const { error: archiveError } = await supabase
+              .from("history_fuel_data")
+              .insert([
+                {
+                  live_data_id: existing.id,
+                  sitename,
+                  region,
+                  refilled_date,
+                  refilled_quantity: existing.refilled_quantity,
+                  original_created_at: new Date().toISOString(),
+                },
+              ]);
+
+            if (!archiveError) {
+              // Update the live record with new quantity
+              const { error: updateError } = await supabase
+                .from("live_fuel_data")
+                .update({
+                  refilled_quantity,
+                  region,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", existing.id);
+
+              if (!updateError) {
+                inserted++;
+              }
+            }
+          } else {
+            skipped++;
+          }
           continue;
         }
 
-        // Insert new record with row_hash
+        // Insert new record to live table
         const { data: insertData, error: insertError } = await supabase
-          .from("fuel_quantities")
+          .from("live_fuel_data")
           .insert([
             {
               sitename,
               region,
               refilled_date,
               refilled_quantity,
-              row_hash,
             },
           ]);
 
