@@ -2232,7 +2232,7 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate) {
 function generateInvoiceExcel(records, startDate, endDate) {
   const invoiceData = records.map((record) => ({
     "Site Name": record.sitename,
-    "Refilled Date": record.refilled_date || "", // Already in DD/MM/YYYY format
+    "Refilled Date": formatDateDDMMYYYY(record.refilled_date),
     "Refilled Quantity": record.refilled_quantity || "",
   }));
 
