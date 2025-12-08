@@ -527,30 +527,34 @@ function csvProxyPlugin() {
               console.log(
                 "📥 Fetching all records from fuel_quantities table...",
               );
-              const { data: allRecords, error: fetchError } = await supabase
+              let { data: allRecords, error: fetchError } = await supabase
                 .from("fuel_quantities")
-                .select("id, sitename, refilled_date, refilled_quantity, region")
-                .order("id", { ascending: true });
+                .select("id, sitename, refilled_date, refilled_quantity, region");
 
               if (fetchError) {
-                console.error("❌ Error fetching records:", fetchError);
                 console.error(
-                  "   Error details:",
-                  JSON.stringify(fetchError, null, 2),
+                  "❌ Error fetching records:",
+                  fetchError?.message || fetchError,
                 );
                 res.writeHead(500, { "Content-Type": "application/json" });
                 res.end(
                   JSON.stringify({
                     status: "error",
-                    error: "Failed to fetch records",
-                    details: fetchError?.message || String(fetchError),
-                    code: fetchError?.code,
+                    error: "Failed to fetch records from database",
+                    details:
+                      fetchError?.message ||
+                      fetchError?.details ||
+                      String(fetchError),
                   }),
                 );
                 return;
               }
 
-              if (!allRecords || allRecords.length === 0) {
+              if (!allRecords) {
+                allRecords = [];
+              }
+
+              if (allRecords.length === 0) {
                 console.log("✅ No records to clean");
                 res.writeHead(200, { "Content-Type": "application/json" });
                 res.end(
@@ -577,18 +581,20 @@ function csvProxyPlugin() {
                 if (!grouped[key]) {
                   grouped[key] = [];
                 }
-                grouped[key].push(record);
+                grouped[key].push(record.id);
               }
 
               // Identify duplicate IDs (keep first, remove rest)
+              let dupeCount = 0;
               for (const key in grouped) {
                 if (grouped[key].length > 1) {
+                  dupeCount++;
                   console.log(
                     `⚠️  Found ${grouped[key].length} duplicates for: ${key}`,
                   );
                   // Keep the first one (lowest ID), mark others for deletion
                   for (let i = 1; i < grouped[key].length; i++) {
-                    duplicateIds.push(grouped[key][i].id);
+                    duplicateIds.push(grouped[key][i]);
                   }
                 }
               }
@@ -609,12 +615,12 @@ function csvProxyPlugin() {
               }
 
               console.log(
-                `🔄 Removing ${duplicateIds.length} duplicate records...`,
+                `🔄 Removing ${duplicateIds.length} duplicate records from ${dupeCount} groups...`,
               );
 
               // Delete duplicates in batches
               let deletedCount = 0;
-              const BATCH_SIZE = 100;
+              const BATCH_SIZE = 50;
 
               for (let i = 0; i < duplicateIds.length; i += BATCH_SIZE) {
                 const batch = duplicateIds.slice(i, i + BATCH_SIZE);
@@ -632,14 +638,14 @@ function csvProxyPlugin() {
                 if (deleteError) {
                   console.error(
                     `❌ Batch ${batchNum} delete failed:`,
-                    deleteError.message,
+                    deleteError?.message || deleteError,
                   );
                   res.writeHead(500, { "Content-Type": "application/json" });
                   res.end(
                     JSON.stringify({
                       status: "error",
                       error: `Failed to delete batch ${batchNum}`,
-                      details: deleteError.message,
+                      details: deleteError?.message || String(deleteError),
                       deletedSoFar: deletedCount,
                     }),
                   );
@@ -669,12 +675,14 @@ function csvProxyPlugin() {
                 }),
               );
             } catch (error) {
-              console.error("❌ Cleanup failed:", error.message);
+              console.error("❌ Cleanup failed:", error);
+              console.error("   Stack:", error?.stack);
               res.writeHead(500, { "Content-Type": "application/json" });
               res.end(
                 JSON.stringify({
                   status: "error",
-                  error: error.message,
+                  error: error?.message || String(error),
+                  type: error?.constructor?.name,
                 }),
               );
             }
