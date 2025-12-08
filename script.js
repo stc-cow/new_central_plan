@@ -2253,7 +2253,13 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log("🔄 Sync will retry in 30 seconds");
     }
   } catch (err) {
-    console.error("❌ Error in saveCsvFuelDataToSupabase:", err);
+    console.error("❌ Error in saveCsvFuelDataToSupabase:", err.message);
+    console.error("Stack trace:", err.stack);
+    console.warn("⚠️ CSV migration encountered an error");
+    console.log("✅ App will continue with cached data");
+    console.log("🔄 Next auto-sync in 30 seconds");
+    // Don't re-throw - let app continue with cached data
+    return;
   }
 }
 
