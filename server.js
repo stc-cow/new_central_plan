@@ -746,7 +746,7 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
       console.log(`   Deleting batch ${batchNum} (${batch.length} records)...`);
 
       const { error: deleteError } = await supabase
-        .from("fuel_quantities")
+        .from("live_fuel_data")
         .delete()
         .in("id", batch);
 
