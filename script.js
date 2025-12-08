@@ -2089,7 +2089,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
     }
 
     // Transform CSV data to fuel_quantities format
-    // Mapping: Column A -> sitename, Column AE -> refilled_date, Column AF -> refilled_quantity
+    // Mapping: Column A -> sitename, Column AE -> refilled_date (DD/MM/YYYY), Column AF -> refilled_quantity
     const fuelRecords = rawData
       .map((row) => {
         // Get sitename - try different possible column names for column A
@@ -2118,15 +2118,18 @@ async function saveCsvFuelDataToSupabase(rawData) {
           return null;
         }
 
-        // Store date in DD/MM/YYYY format (same as CSV format)
-        let refilled_date_formatted = null;
+        // Parse DD/MM/YYYY date and convert to YYYY-MM-DD for DATE storage
+        let refilled_date_iso = null;
         if (refilled_date_raw && refilled_date_raw.trim() !== '') {
-          refilled_date_formatted = refilled_date_raw.trim();
+          const parsedDate = parseFuelDate(refilled_date_raw);
+          if (parsedDate) {
+            refilled_date_iso = parsedDate.toISOString().split("T")[0];
+          }
         }
 
         return {
           sitename: String(sitename).trim(),
-          refilled_date: refilled_date_formatted,
+          refilled_date: refilled_date_iso,
           refilled_quantity: refilled_qty_raw && refilled_qty_raw !== ''
             ? parseFloat(refilled_qty_raw)
             : null,
