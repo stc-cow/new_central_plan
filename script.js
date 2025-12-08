@@ -1953,34 +1953,56 @@ window.addEventListener("click", (event) => {
   }
 });
 
-async function loadFuelQuantitiesPreview() {
-  try {
-    if (!supabaseClient) {
-      await initSupabaseClient();
-    }
+window.loadInvoiceDataByDateRange = async function loadInvoiceDataByDateRange() {
+  const startDateInput = document.getElementById("invoiceStartDate");
+  const endDateInput = document.getElementById("invoiceEndDate");
+  const statusDiv = document.getElementById("invoiceStatus");
 
-    if (!supabaseClient) {
-      console.warn("Supabase client not available");
-      return;
-    }
+  const startDate = startDateInput.value;
+  const endDate = endDateInput.value;
 
-    const { data, error } = await supabaseClient
-      .from("fuel_quantities")
-      .select("*")
-      .order("refilled_date", { ascending: false })
-      .limit(100);
-
-    if (error) {
-      console.error("Error loading fuel quantities:", error);
-      return;
-    }
-
-    fuelQuantitiesData = data || [];
-    updateInvoicePreview();
-  } catch (err) {
-    console.error("Error loading fuel quantities preview:", err);
+  if (!startDate || !endDate) {
+    statusDiv.textContent = "ℹ️ Please select both start and end dates";
+    statusDiv.className = "invoice-status info";
+    document.getElementById("invoicePreviewBody").innerHTML =
+      '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">Select dates to view records</td></tr>';
+    return;
   }
-}
+
+  if (new Date(startDate) > new Date(endDate)) {
+    statusDiv.textContent = "❌ Start date must be before end date";
+    statusDiv.className = "invoice-status error";
+    return;
+  }
+
+  statusDiv.textContent = "⏳ Loading records...";
+  statusDiv.className = "invoice-status";
+
+  try {
+    const filteredRecords = await fetchFuelQuantitiesByDateRange(
+      startDate,
+      endDate
+    );
+
+    if (filteredRecords.length === 0) {
+      statusDiv.textContent = "ℹ️ No records found for selected date range";
+      statusDiv.className = "invoice-status info";
+      document.getElementById("invoicePreviewBody").innerHTML =
+        '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">No records in this date range</td></tr>';
+      return;
+    }
+
+    fuelQuantitiesData = filteredRecords;
+    updateInvoicePreview();
+
+    statusDiv.textContent = `✅ Loaded ${filteredRecords.length} records`;
+    statusDiv.className = "invoice-status success";
+  } catch (error) {
+    console.error("Error loading invoice data:", error);
+    statusDiv.textContent = `❌ Error: ${error.message}`;
+    statusDiv.className = "invoice-status error";
+  }
+};
 
 function updateInvoicePreview() {
   const tbody = document.getElementById("invoicePreviewBody");
@@ -1990,11 +2012,11 @@ function updateInvoicePreview() {
 
   if (fuelQuantitiesData.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">No records imported yet</td></tr>';
+      '<tr><td colspan="3" style="text-align: center; padding: 20px; color: #999;">No records to display</td></tr>';
     return;
   }
 
-  fuelQuantitiesData.slice(0, 20).forEach((record) => {
+  fuelQuantitiesData.forEach((record) => {
     const tr = document.createElement("tr");
 
     const siteCell = document.createElement("td");
@@ -2015,140 +2037,6 @@ function updateInvoicePreview() {
     tr.appendChild(qtyCell);
     tbody.appendChild(tr);
   });
-}
-
-window.uploadFuelQuantities = async function uploadFuelQuantities() {
-  const fileInput = document.getElementById("fuelQuantityFile");
-  const statusDiv = document.getElementById("uploadStatus");
-
-  if (!fileInput.files || fileInput.files.length === 0) {
-    statusDiv.textContent = "❌ Please select a file";
-    statusDiv.className = "upload-status error";
-    return;
-  }
-
-  const file = fileInput.files[0];
-  statusDiv.textContent = "⏳ Processing file...";
-  statusDiv.className = "upload-status";
-
-  try {
-    const data = await readExcelFile(file);
-    const records = parseExcelToFuelQuantities(data);
-
-    if (records.length === 0) {
-      statusDiv.textContent = "❌ No valid records found in file";
-      statusDiv.className = "upload-status error";
-      return;
-    }
-
-    await saveFuelQuantitiesToSupabase(records);
-
-    statusDiv.textContent = `✅ Successfully imported ${records.length} records`;
-    statusDiv.className = "upload-status success";
-
-    fileInput.value = "";
-    await loadFuelQuantitiesPreview();
-  } catch (error) {
-    console.error("Error uploading fuel quantities:", error);
-    statusDiv.textContent = `❌ Error: ${error.message}`;
-    statusDiv.className = "upload-status error";
-  }
-};
-
-function readExcelFile(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-      try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        resolve(jsonData);
-      } catch (error) {
-        reject(new Error("Failed to read Excel file: " + error.message));
-      }
-    };
-
-    reader.onerror = function () {
-      reject(new Error("Failed to read file"));
-    };
-
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-function parseExcelToFuelQuantities(excelData) {
-  const records = [];
-
-  if (!excelData || excelData.length === 0) {
-    return records;
-  }
-
-  // Excel columns: A (0) = sitename, AE (30) = refilled_date, AF (31) = refilled_quantity
-  excelData.forEach((row, index) => {
-    if (index === 0) return; // Skip header
-
-    const sitename = row[0];
-    const refilled_date = row[30]; // Column AE (0-indexed: 30)
-    const refilled_quantity = row[31]; // Column AF (0-indexed: 31)
-
-    if (sitename && (refilled_date || refilled_quantity)) {
-      const dateObj = parseExcelDate(refilled_date);
-
-      records.push({
-        sitename: String(sitename).trim(),
-        refilled_date: dateObj ? dateObj.toISOString().split("T")[0] : null,
-        refilled_quantity: refilled_quantity
-          ? parseFloat(refilled_quantity)
-          : null,
-      });
-    }
-  });
-
-  return records;
-}
-
-function parseExcelDate(excelDateValue) {
-  if (!excelDateValue) return null;
-
-  // If it's already a Date object
-  if (excelDateValue instanceof Date) {
-    return excelDateValue;
-  }
-
-  // If it's a number (Excel serial date)
-  if (typeof excelDateValue === "number") {
-    const date = new Date((excelDateValue - 25569) * 86400 * 1000);
-    return isNaN(date.getTime()) ? null : date;
-  }
-
-  // If it's a string, try to parse it
-  if (typeof excelDateValue === "string") {
-    const date = new Date(excelDateValue);
-    return isNaN(date.getTime()) ? null : date;
-  }
-
-  return null;
-}
-
-async function saveFuelQuantitiesToSupabase(records) {
-  if (!supabaseClient) {
-    await initSupabaseClient();
-  }
-
-  if (!supabaseClient) {
-    throw new Error("Supabase client not initialized");
-  }
-
-  const { error } = await supabaseClient
-    .from("fuel_quantities")
-    .insert(records);
-
-  if (error) {
-    throw new Error(`Database error: ${error.message}`);
-  }
 }
 
 window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() {
