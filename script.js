@@ -2412,43 +2412,70 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
 
 async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter = "") {
   if (!supabaseClient) {
+    console.log("🔌 Initializing Supabase client for query...");
     await initSupabaseClient();
   }
 
   if (!supabaseClient) {
-    throw new Error("Supabase client not initialized");
+    throw new Error("❌ Supabase client not initialized. Check your credentials.");
   }
 
-  // Fetch records filtered by date range
-  let query = supabaseClient
-    .from("fuel_quantities")
-    .select("*")
-    .gte("refilled_date", startDate)
-    .lte("refilled_date", endDate);
+  try {
+    console.log(`🔍 Querying Supabase: date range ${startDate} to ${endDate}, region: ${regionFilter || 'All'}`);
 
-  // Apply region filter if specified
-  if (regionFilter && regionFilter.trim() !== "") {
-    if (regionFilter === "CER") {
-      // For CER, fetch records where region contains either Central or East
-      // Use filter instead of or to avoid complexity
-      query = query.or(`region.like.%Central%,region.like.%East%`);
-    } else if (regionFilter === "Central") {
-      query = query.like("region", "%Central%");
-    } else if (regionFilter === "East") {
-      query = query.like("region", "%East%");
+    // Fetch records filtered by date range
+    let query = supabaseClient
+      .from("fuel_quantities")
+      .select("*")
+      .gte("refilled_date", startDate)
+      .lte("refilled_date", endDate);
+
+    // Apply region filter if specified
+    if (regionFilter && regionFilter.trim() !== "") {
+      if (regionFilter === "CER") {
+        // For CER, fetch records where region contains either Central or East
+        query = query.or(`region.like.%Central%,region.like.%East%`);
+      } else if (regionFilter === "Central") {
+        query = query.like("region", "%Central%");
+      } else if (regionFilter === "East") {
+        query = query.like("region", "%East%");
+      }
     }
+
+    const { data, error } = await query.order("refilled_date", { ascending: true });
+
+    if (error) {
+      console.error("❌ Supabase query error:", error);
+      console.error("Error details:", {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        hint: error.hint
+      });
+
+      // Better error message
+      if (error.message.includes("Failed to fetch")) {
+        throw new Error(`Network Error: Cannot reach Supabase. Check your internet connection and Supabase URL: ${VITE_SUPABASE_URL}`);
+      } else {
+        throw new Error(`Database error: ${error.message}`);
+      }
+    }
+
+    console.log(`✅ Fetched ${data?.length || 0} records from Supabase`);
+    return data || [];
+  } catch (err) {
+    console.error("❌ Exception in fetchFuelQuantitiesByDateRange:", err);
+
+    // Provide helpful debugging info
+    if (err.message.includes("Failed to fetch")) {
+      console.error("🔧 Debugging info:");
+      console.error("  - Supabase URL:", VITE_SUPABASE_URL);
+      console.error("  - Client initialized:", !!supabaseClient);
+      console.error("  - This could be a CORS issue or network connectivity problem");
+    }
+
+    throw err;
   }
-
-  const { data, error } = await query.order("refilled_date", { ascending: true });
-
-  if (error) {
-    console.error("Supabase query error:", error);
-    throw new Error(`Database error: ${error.message}`);
-  }
-
-  console.log(`📥 Fetched ${data?.length || 0} records from Supabase for date range ${startDate} to ${endDate} with region filter: ${regionFilter || 'None'}`);
-
-  return data || [];
 }
 
 function generateInvoiceExcel(records, startDate, endDate, regionFilter = "") {
