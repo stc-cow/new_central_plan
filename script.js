@@ -884,21 +884,60 @@ function parseFuelDate(str) {
   return isNaN(d.getTime()) ? null : d;
 }
 
-// Convert DD/MM/YYYY string directly to YYYY-MM-DD format without timezone issues
-function convertDDMMYYYYtoYYYYMMDD(dateStr) {
-  if (!dateStr) return null;
+// Convert date string to YYYY-MM-DD format
+// Handle multiple possible formats from CSV
+function convertDateToISO(dateStr) {
+  if (!dateStr || dateStr.trim() === "") return null;
 
+  dateStr = dateStr.trim();
+
+  // Try DD/MM/YYYY format
   const ddmmyyyyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-  const match = dateStr.trim().match(ddmmyyyyRegex);
+  let match = dateStr.match(ddmmyyyyRegex);
 
   if (match) {
-    const day = String(match[1]).padStart(2, "0");
-    const month = String(match[2]).padStart(2, "0");
-    const year = match[3];
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
 
-    return `${year}-${month}-${day}`;
+    // Validate month and day
+    if (month < 1 || month > 12 || day < 1 || day > 31) {
+      console.warn(`Invalid date values: ${dateStr} (day=${day}, month=${month})`);
+      return null;
+    }
+
+    // Format as YYYY-MM-DD
+    const monthStr = String(month).padStart(2, "0");
+    const dayStr = String(day).padStart(2, "0");
+
+    return `${year}-${monthStr}-${dayStr}`;
   }
 
+  // Try YYYY-MM-DD format (already correct)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return dateStr;
+  }
+
+  // Try MM/DD/YYYY format
+  const mmddyyyyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+  match = dateStr.match(mmddyyyyRegex);
+  if (match) {
+    const month = parseInt(match[1], 10);
+    const day = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+
+    if (month < 1 || month > 12 || day < 1 || day > 31) {
+      console.warn(`Invalid date values (MM/DD/YYYY): ${dateStr} (month=${month}, day=${day})`);
+      return null;
+    }
+
+    const monthStr = String(month).padStart(2, "0");
+    const dayStr = String(day).padStart(2, "0");
+
+    return `${year}-${monthStr}-${dayStr}`;
+  }
+
+  console.warn(`Could not parse date: ${dateStr}`);
   return null;
 }
 
