@@ -750,19 +750,6 @@ body {
   color: var(--aces-primary);
 }
 
-.camel-festival-logo {
-  height: 60px;
-  width: auto;
-  margin-right: 15px;
-  object-fit: contain;
-}
-
-.mdl-beast-logo {
-  height: 60px;
-  width: auto;
-  margin-right: 15px;
-  object-fit: contain;
-}
 
 .stc-logo {
   height: 60px;
