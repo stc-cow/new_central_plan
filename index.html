@@ -359,6 +359,13 @@
                   📥 Download Invoice
                 </button>
                 <button
+                  class="sync-csv-btn"
+                  onclick="syncCsvToDatabase()"
+                  title="Sync CSV data from Google Sheets to Supabase database"
+                >
+                  🔄 Sync CSV Data
+                </button>
+                <button
                   class="cleanup-duplicates-btn"
                   onclick="cleanupDuplicates()"
                   title="Remove duplicate fuel records from the database"
