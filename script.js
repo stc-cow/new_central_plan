@@ -2175,15 +2175,20 @@ async function saveCsvFuelDataToSupabase(rawData) {
           return null;
         }
 
-        // Convert DD/MM/YYYY date directly to YYYY-MM-DD for DATE storage
-        let refilled_date_yyyymmdd = null;
+        // Convert date to YYYY-MM-DD format for DATE storage
+        let refilled_date_iso = null;
         if (refilled_date_raw && refilled_date_raw.trim() !== '') {
-          refilled_date_yyyymmdd = convertDDMMYYYYtoYYYYMMDD(refilled_date_raw);
+          refilled_date_iso = convertDateToISO(refilled_date_raw);
+
+          // Log the conversion for debugging
+          if (!refilled_date_iso) {
+            console.warn(`Failed to parse date for site ${sitename}: "${refilled_date_raw}"`);
+          }
         }
 
         return {
           sitename: String(sitename).trim(),
-          refilled_date: refilled_date_yyyymmdd,
+          refilled_date: refilled_date_iso,
           refilled_quantity: refilled_qty_raw && refilled_qty_raw !== ''
             ? parseFloat(refilled_qty_raw)
             : null,
