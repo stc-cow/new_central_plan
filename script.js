@@ -2179,9 +2179,26 @@ async function saveCsvFuelDataToSupabase(rawData) {
       .map((row) => {
         const rowHeaders = Object.keys(row);
 
-        // Extract sitename - use the actual site name, not the ID
-        // The "sitename" field contains the site display name (e.g., "COW779")
-        const sitename = row.sitename || '';
+        // Extract sitename - look for the actual site name (not ID)
+        // Try different possible column names for the site name
+        let sitename = row.sitename ||
+                       row['site name'] ||
+                       row['site_name'] ||
+                       row['sitelabel'] ||
+                       row['site label'] ||
+                       row['site_label'] ||
+                       '';
+
+        // If still empty, try to find any column that looks like a site name
+        if (!sitename) {
+          const siteKey = Object.keys(row).find(key =>
+            key.toLowerCase().includes('site') &&
+            !key.toLowerCase().includes('id') &&
+            row[key] &&
+            String(row[key]).trim() !== ''
+          );
+          sitename = siteKey ? row[siteKey] : '';
+        }
 
         // Column D (index 3) = region
         const region = (rowHeaders[3] && row[rowHeaders[3]]) ? String(row[rowHeaders[3]]).trim() : '';
