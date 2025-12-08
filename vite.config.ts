@@ -502,6 +502,13 @@ function csvProxyPlugin() {
               const supabaseUrl = process.env.VITE_SUPABASE_URL;
               const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
+              console.log(
+                `📋 Supabase URL: ${supabaseUrl ? "✓ Set" : "✗ Missing"}`,
+              );
+              console.log(
+                `🔑 Supabase Key: ${supabaseKey ? "✓ Set" : "✗ Missing"}`,
+              );
+
               if (!supabaseUrl || !supabaseKey) {
                 console.error("Dev Server: Missing Supabase credentials");
                 res.writeHead(500, { "Content-Type": "application/json" });
@@ -526,16 +533,18 @@ function csvProxyPlugin() {
                 .order("id", { ascending: true });
 
               if (fetchError) {
+                console.error("❌ Error fetching records:", fetchError);
                 console.error(
-                  "❌ Error fetching records:",
-                  fetchError.message,
+                  "   Error details:",
+                  JSON.stringify(fetchError, null, 2),
                 );
                 res.writeHead(500, { "Content-Type": "application/json" });
                 res.end(
                   JSON.stringify({
                     status: "error",
                     error: "Failed to fetch records",
-                    details: fetchError.message,
+                    details: fetchError?.message || String(fetchError),
+                    code: fetchError?.code,
                   }),
                 );
                 return;
