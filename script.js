@@ -578,6 +578,7 @@ window.handleLogout = function handleLogout() {
 
   // Reset dashboard state
   dashboardInitialized = false;
+  csvDataMigrated = false;
 
   // Clear markers and map
   if (map) {
