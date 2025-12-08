@@ -1458,32 +1458,37 @@ window.zoomToSite = function zoomToSite(sitename) {
 };
 
 async function loadDashboard() {
-  console.log("Starting loadDashboard...");
-  const rawData = await fetchCSV();
-  console.log("Raw data from CSV:", rawData.length, "rows");
+  try {
+    console.log("🔄 Starting loadDashboard...");
+    const rawData = await fetchCSV();
+    console.log("Raw data from CSV:", rawData.length, "rows");
 
-  sitesData = filterAndValidateSites(rawData);
-  console.log("Filtered sites data:", sitesData.length, "sites");
+    sitesData = filterAndValidateSites(rawData);
+    console.log("Filtered sites data:", sitesData.length, "sites");
 
-  if (sitesData.length === 0) {
-    console.warn("No sites data available after filtering");
+    if (sitesData.length === 0) {
+      console.warn("No sites data available after filtering");
+    }
+
+    // Migrate CSV fuel data to Supabase (runs on every load for auto-sync)
+    if (!csvDataMigrated) {
+      console.log("📊 First load - migrating CSV data to Supabase...");
+      await saveCsvFuelDataToSupabase(rawData);
+      csvDataMigrated = true;
+    } else {
+      console.log("🔄 Auto-syncing CSV changes to Supabase...");
+      await saveCsvFuelDataToSupabase(rawData);
+    }
+
+    updateMetrics(sitesData);
+    populateDueTable(sitesData);
+    addMarkersToMap(sitesData);
+    updateEventCards(sitesData);
+
+    console.log("✅ Dashboard synced successfully");
+  } catch (error) {
+    console.error("❌ Error during dashboard sync:", error);
   }
-
-  // Save CSV fuel data to Supabase only once per session to prevent duplicates
-  if (!csvDataMigrated) {
-    console.log("📊 First load - migrating CSV data to Supabase...");
-    await saveCsvFuelDataToSupabase(rawData);
-    csvDataMigrated = true;
-  } else {
-    console.log("✅ CSV data already migrated in this session - skipping migration");
-  }
-
-  updateMetrics(sitesData);
-  populateDueTable(sitesData);
-  addMarkersToMap(sitesData);
-  updateEventCards(sitesData);
-
-  console.log("Dashboard loaded successfully");
 }
 
 function formatFuelDate(fuelDate) {
