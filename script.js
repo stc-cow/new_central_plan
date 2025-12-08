@@ -2288,7 +2288,7 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
   }
 };
 
-async function fetchFuelQuantitiesByDateRange(startDate, endDate) {
+async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter = "") {
   if (!supabaseClient) {
     await initSupabaseClient();
   }
@@ -2298,12 +2298,24 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate) {
   }
 
   // Use DATE type stored in Supabase for proper comparison
-  const { data, error } = await supabaseClient
+  let query = supabaseClient
     .from("fuel_quantities")
     .select("*")
     .gte("refilled_date", startDate)
-    .lte("refilled_date", endDate)
-    .order("refilled_date", { ascending: true });
+    .lte("refilled_date", endDate);
+
+  // Apply region filter if specified
+  if (regionFilter && regionFilter.trim() !== "") {
+    if (regionFilter === "CER") {
+      // For CER, include both Central and East regions
+      query = query.or(`region.ilike.%Central%,region.ilike.%East%`);
+    } else {
+      // For specific regions (Central or East)
+      query = query.ilike("region", `%${regionFilter}%`);
+    }
+  }
+
+  const { data, error } = await query.order("refilled_date", { ascending: true });
 
   if (error) {
     throw new Error(`Database error: ${error.message}`);
