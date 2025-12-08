@@ -1928,24 +1928,13 @@ window.loadInvoiceDataByDateRange = async function loadInvoiceDataByDateRange() 
       return;
     }
 
-    // Deduplicate records based on sitename + refilled_date combination
-    const uniqueRecords = [];
-    const seen = new Set();
+    // Keep all records - no deduplication (Option A: append all data with unique timestamps/IDs)
+    console.log(`📊 Loaded ${filteredRecords.length} records (Option A: all records kept, including duplicates by site name)`);
 
-    filteredRecords.forEach((record) => {
-      const key = `${record.sitename}|${record.refilled_date}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        uniqueRecords.push(record);
-      }
-    });
-
-    console.log(`📊 Loaded ${filteredRecords.length} records, ${uniqueRecords.length} unique after deduplication`);
-
-    fuelQuantitiesData = uniqueRecords;
+    fuelQuantitiesData = filteredRecords;
     updateInvoicePreview();
 
-    statusDiv.textContent = `✅ Loaded ${uniqueRecords.length} records`;
+    statusDiv.textContent = `✅ Loaded ${filteredRecords.length} records`;
     statusDiv.className = "invoice-status success";
   } catch (error) {
     console.error("Error loading invoice data:", error);
@@ -2357,23 +2346,12 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
       return;
     }
 
-    // Deduplicate records based on sitename + refilled_date combination
-    const uniqueRecords = [];
-    const seen = new Set();
+    // Keep all records - no deduplication (Option A: append all data with unique timestamps/IDs)
+    console.log(`📊 Exporting ${filteredRecords.length} records (Option A: all records kept, including duplicates by site name)`);
 
-    filteredRecords.forEach((record) => {
-      const key = `${record.sitename}|${record.refilled_date}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        uniqueRecords.push(record);
-      }
-    });
+    generateInvoiceExcel(filteredRecords, startDate, endDate, selectedRegionFilter);
 
-    console.log(`📊 Exporting ${filteredRecords.length} records, ${uniqueRecords.length} unique after deduplication`);
-
-    generateInvoiceExcel(uniqueRecords, startDate, endDate, selectedRegionFilter);
-
-    statusDiv.textContent = `✅ Invoice downloaded (${uniqueRecords.length} records)`;
+    statusDiv.textContent = `✅ Invoice downloaded (${filteredRecords.length} records)`;
     statusDiv.className = "invoice-status success";
   } catch (error) {
     console.error("Error downloading invoice:", error);
