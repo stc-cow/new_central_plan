@@ -2205,6 +2205,12 @@ async function saveCsvFuelDataToSupabase(rawData) {
       `📊 Migrating ${fuelRecords.length} fuel records from CSV to Supabase...`
     );
 
+    // Log first 5 records for debugging date format
+    console.log("📋 Sample records to be migrated:");
+    fuelRecords.slice(0, 5).forEach((record, idx) => {
+      console.log(`  [${idx + 1}] Site: ${record.sitename}, Date: ${record.refilled_date}, Qty: ${record.refilled_quantity}`);
+    });
+
     // Insert records into fuel_quantities table
     const { error } = await supabaseClient
       .from("fuel_quantities")
@@ -2216,7 +2222,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(
         `✅ Successfully migrated ${fuelRecords.length} fuel records to Supabase`
       );
-      console.log("📍 Data source: Column A (Sitename), Column AE (Refilled Date DD/MM/YYYY), Column AF (Refilled Quantity)");
+      console.log("📍 Data source: Column A (Sitename), Column AE (Refilled Date), Column AF (Refilled Quantity)");
     }
   } catch (err) {
     console.error("Error in saveCsvFuelDataToSupabase:", err);
