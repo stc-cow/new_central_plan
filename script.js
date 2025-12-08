@@ -1955,7 +1955,22 @@ function updateInvoicePreview() {
     return;
   }
 
-  fuelQuantitiesData.forEach((record) => {
+  // Client-side deduplication as final safety measure
+  const seen = new Set();
+  const uniqueRecords = [];
+  for (const record of fuelQuantitiesData) {
+    const key = `${record.sitename}|${record.refilled_date}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueRecords.push(record);
+    }
+  }
+
+  if (uniqueRecords.length < fuelQuantitiesData.length) {
+    console.log(`🔄 Client-side dedup: Removed ${fuelQuantitiesData.length - uniqueRecords.length} duplicates`);
+  }
+
+  uniqueRecords.forEach((record) => {
     const tr = document.createElement("tr");
 
     const siteCell = document.createElement("td");
