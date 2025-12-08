@@ -20,7 +20,9 @@ async function initializeDatabase() {
     const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      console.warn("⚠️  Supabase credentials not configured, skipping table initialization");
+      console.warn(
+        "⚠️  Supabase credentials not configured, skipping table initialization",
+      );
       return;
     }
 
@@ -35,7 +37,9 @@ async function initializeDatabase() {
     if (!liveError) {
       console.log("✅ live_fuel_data table already exists");
     } else {
-      console.warn("⚠️  live_fuel_data table not found, please create it in Supabase dashboard");
+      console.warn(
+        "⚠️  live_fuel_data table not found, please create it in Supabase dashboard",
+      );
     }
 
     // Check if history_fuel_data table exists
@@ -47,12 +51,14 @@ async function initializeDatabase() {
     if (!historyError) {
       console.log("✅ history_fuel_data table already exists");
     } else {
-      console.warn("⚠️  history_fuel_data table not found, please create it in Supabase dashboard");
+      console.warn(
+        "⚠️  history_fuel_data table not found, please create it in Supabase dashboard",
+      );
     }
   } catch (error) {
     console.warn(
       "⚠️  Could not check/create tables (might not have permissions):",
-      error.message
+      error.message,
     );
   }
 }
@@ -325,7 +331,9 @@ app.get("/api/get-invoice-data", async (req, res) => {
       });
     }
 
-    console.log(`✅ Fetched ${liveData?.length || 0} records from live_fuel_data`);
+    console.log(
+      `✅ Fetched ${liveData?.length || 0} records from live_fuel_data`,
+    );
 
     // Fetch history records within date range
     console.log("📥 Fetching history_fuel_data records...");
@@ -343,7 +351,9 @@ app.get("/api/get-invoice-data", async (req, res) => {
       });
     }
 
-    console.log(`✅ Fetched ${historyData?.length || 0} records from history_fuel_data`);
+    console.log(
+      `✅ Fetched ${historyData?.length || 0} records from history_fuel_data`,
+    );
 
     // Combine live and history data
     const allRecords = [...(liveData || []), ...(historyData || [])];
@@ -669,11 +679,15 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
       .select("id, sitename, refilled_date, refilled_quantity, region");
 
     if (fetchError) {
-      console.error("❌ Error fetching records:", fetchError?.message || fetchError);
+      console.error(
+        "❌ Error fetching records:",
+        fetchError?.message || fetchError,
+      );
       return res.status(500).json({
         status: "error",
         error: "Failed to fetch records from database",
-        details: fetchError?.message || fetchError?.details || String(fetchError),
+        details:
+          fetchError?.message || fetchError?.details || String(fetchError),
       });
     }
 
@@ -751,7 +765,10 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
         .in("id", batch);
 
       if (deleteError) {
-        console.error(`❌ Batch ${batchNum} delete failed:`, deleteError?.message || deleteError);
+        console.error(
+          `❌ Batch ${batchNum} delete failed:`,
+          deleteError?.message || deleteError,
+        );
         return res.status(500).json({
           status: "error",
           error: `Failed to delete batch ${batchNum}`,
@@ -863,9 +880,7 @@ function startScheduledSync() {
 
           const { error: insertError } = await supabase
             .from("live_fuel_data")
-            .insert([
-              { sitename, region, refilled_date, refilled_quantity },
-            ]);
+            .insert([{ sitename, region, refilled_date, refilled_quantity }]);
 
           if (!insertError) {
             syncInserted++;

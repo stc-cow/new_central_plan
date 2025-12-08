@@ -1869,7 +1869,6 @@ function startDashboard() {
 
 // ============================================
 
-
 function updateInvoicePreview() {
   const tbody = document.getElementById("invoicePreviewBody");
   if (!tbody) return;

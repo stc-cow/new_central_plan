@@ -529,7 +529,9 @@ function csvProxyPlugin() {
               );
               let { data: allRecords, error: fetchError } = await supabase
                 .from("live_fuel_data")
-                .select("id, sitename, refilled_date, refilled_quantity, region");
+                .select(
+                  "id, sitename, refilled_date, refilled_quantity, region",
+                );
 
               if (fetchError) {
                 console.error(
@@ -761,7 +763,9 @@ function csvProxyPlugin() {
                 return;
               }
 
-              console.log(`✅ Fetched ${liveData?.length || 0} records from live_fuel_data`);
+              console.log(
+                `✅ Fetched ${liveData?.length || 0} records from live_fuel_data`,
+              );
 
               // Fetch history records within date range
               console.log("📥 Fetching history_fuel_data records...");
@@ -772,7 +776,10 @@ function csvProxyPlugin() {
                 .lte("refilled_date", endDate);
 
               if (historyError) {
-                console.error("❌ History data query error:", historyError.message);
+                console.error(
+                  "❌ History data query error:",
+                  historyError.message,
+                );
                 res.writeHead(500, { "Content-Type": "application/json" });
                 res.end(
                   JSON.stringify({
@@ -783,7 +790,9 @@ function csvProxyPlugin() {
                 return;
               }
 
-              console.log(`✅ Fetched ${historyData?.length || 0} records from history_fuel_data`);
+              console.log(
+                `✅ Fetched ${historyData?.length || 0} records from history_fuel_data`,
+              );
 
               // Combine live and history data
               const data = [...(liveData || []), ...(historyData || [])];
