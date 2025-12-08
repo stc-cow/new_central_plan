@@ -2237,8 +2237,17 @@ async function saveCsvFuelDataToSupabase(rawData) {
       }
       console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
     } catch (fetchErr) {
-      console.warn("⚠️ Cannot reach backend API for Supabase sync:", fetchErr.message);
+      console.error("❌ Backend API fetch failed:", fetchErr.message);
+      console.error("Error details:", {
+        name: fetchErr.name,
+        message: fetchErr.message,
+        stack: fetchErr.stack
+      });
+      console.warn("\n⚠️ Cannot reach backend API for Supabase sync");
       console.log("📌 Using cached data for invoice functionality");
+      console.log("ℹ️  App is in offline mode - data cached locally");
+      console.log("✅ Invoice export will use local cache");
+      console.log("🔄 Sync will retry in 30 seconds");
     }
   } catch (err) {
     console.error("❌ Error in saveCsvFuelDataToSupabase:", err);
