@@ -2472,8 +2472,45 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
     supabaseAvailable = true;
     return filteredRecords;
   } catch (err) {
-    console.warn("⚠️ Cannot read from storage (network issue), using cached data");
+    console.warn("⚠️ Cannot read from storage (network issue)");
     console.log("   Error:", err.message);
+
+    // Try localStorage fallback
+    try {
+      console.log("📖 Trying localStorage fallback...");
+      const cached = localStorage.getItem("fuel_quantities_storage");
+      if (cached) {
+        const allRecords = JSON.parse(cached);
+        console.log(`✅ Loaded ${allRecords.length} records from localStorage`);
+
+        // Filter by date range and region
+        let filteredRecords = allRecords.filter(record => {
+          const recordDate = record.refilled_date;
+          const dateMatch = recordDate >= startDate && recordDate <= endDate;
+
+          if (!dateMatch) return false;
+
+          // Apply region filter if specified
+          if (regionFilter && regionFilter.trim() !== "") {
+            if (regionFilter === "CER") {
+              return record.region?.toLowerCase().includes("central") || record.region?.toLowerCase().includes("east");
+            } else if (regionFilter === "Central") {
+              return record.region?.toLowerCase().includes("central");
+            } else if (regionFilter === "East") {
+              return record.region?.toLowerCase().includes("east");
+            }
+          }
+
+          return true;
+        });
+
+        console.log(`✅ Filtered ${filteredRecords.length} records from localStorage`);
+        return filteredRecords;
+      }
+    } catch (localErr) {
+      console.warn("⚠️ localStorage fallback failed:", localErr.message);
+    }
+
     return filterCachedFuelData(startDate, endDate, regionFilter);
   }
 }
