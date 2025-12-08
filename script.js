@@ -2204,29 +2204,35 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log(`\n📤 Sending ${recordsToMigrate.length} new records to backend for Supabase sync...`);
+    console.log(`\n📤 Attempting to sync ${recordsToMigrate.length} records to Supabase...`);
+
+    // Try to use backend API if available
+    let syncSuccess = false;
     try {
-      console.log(`📌 API endpoint: /api/save-fuel-data`);
-      const response = await fetch("/api/save-fuel-data", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ records: recordsToMigrate }),
-        timeout: 30000 // 30 second timeout
-      });
+      console.log(`📌 Trying API endpoint: /api/save-fuel-data`);
+      const response = await Promise.race([
+        fetch("/api/save-fuel-data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ records: recordsToMigrate }),
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("API timeout")), 10000)
+        )
+      ]);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.warn(`⚠️ Backend API error (${response.status}): ${errorData.error || response.statusText}`);
-        console.log("📌 Using cached data for invoice functionality");
-        console.log("ℹ️  Supabase sync will retry in 30 seconds");
-        return;
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const result = await response.json();
-      console.log(`\n📍 Sync complete!`);
+      console.log(`\n✅ Sync via API successful!`);
       console.log(`📊 Supabase records inserted: ${result.inserted}/${recordsToMigrate.length}`);
+      syncSuccess = true;
 
       if (result.inserted === recordsToMigrate.length) {
         console.log(`✅ All new records synced to Supabase!`);
