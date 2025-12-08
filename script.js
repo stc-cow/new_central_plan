@@ -2426,7 +2426,12 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
     console.log(`   Date range: ${startDate} to ${endDate}, Region: ${regionFilter || 'All'}`);
 
     // Call backend endpoint to read directly from database (source of truth)
-    const response = await fetch('/api/get-invoice-data', {
+    const queryParams = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate,
+      region: regionFilter || ''
+    });
+    const response = await fetch(`/api/get-invoice-data?${queryParams.toString()}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
