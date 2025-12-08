@@ -2221,11 +2221,29 @@ async function saveCsvFuelDataToSupabase(rawData) {
     console.log(`\n📤 Saving ${recordsToMigrate.length} records to Supabase Storage...`);
 
     let syncSuccess = false;
+    let useLocalFallback = false;
+
     try {
-      // Ensure bucket exists
-      const bucketReady = await ensureStorageBucket();
-      if (!bucketReady || !supabaseClient) {
-        throw new Error("Storage bucket not available");
+      // Initialize Supabase if needed
+      if (!supabaseClient) {
+        console.log("🔌 Initializing Supabase client...");
+        await initSupabaseClient();
+      }
+
+      if (!supabaseClient) {
+        console.warn("⚠️ Supabase client not available - will use localStorage fallback");
+        useLocalFallback = true;
+      } else {
+        // Ensure bucket exists
+        const bucketReady = await ensureStorageBucket();
+        if (!bucketReady) {
+          console.warn("⚠️ Storage bucket not ready - will use localStorage fallback");
+          useLocalFallback = true;
+        }
+      }
+
+      if (useLocalFallback) {
+        throw new Error("Using localStorage fallback");
       }
 
       // Read existing data from storage
