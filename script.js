@@ -2206,34 +2206,61 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log(`\n📤 Attempting to sync ${recordsToMigrate.length} records to Supabase...`);
+    console.log(`\n📤 Saving ${recordsToMigrate.length} records to Supabase Storage...`);
 
-    // Try to use backend API if available
     let syncSuccess = false;
     try {
-      console.log(`📌 Trying API endpoint: /api/save-fuel-data`);
-      const response = await Promise.race([
-        fetch("/api/save-fuel-data", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ records: recordsToMigrate }),
-        }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("API timeout")), 10000)
-        )
-      ]);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.warn(`⚠️ Backend API error (${response.status}): ${errorData.error || response.statusText}`);
-        throw new Error(`HTTP ${response.status}`);
+      // Ensure bucket exists
+      const bucketReady = await ensureStorageBucket();
+      if (!bucketReady || !supabaseClient) {
+        throw new Error("Storage bucket not available");
       }
 
-      const result = await response.json();
-      console.log(`\n✅ Sync via API successful!`);
-      console.log(`📊 Supabase records inserted: ${result.inserted}/${recordsToMigrate.length}`);
+      // Read existing data from storage
+      console.log("📖 Reading existing data from storage...");
+      let allRecords = [];
+      try {
+        const { data, error } = await supabaseClient.storage
+          .from('fuel_data')
+          .download('fuel_quantities.json');
+
+        if (!error && data) {
+          const text = await data.text();
+          allRecords = JSON.parse(text);
+          console.log(`✅ Found ${allRecords.length} existing records in storage`);
+        } else {
+          console.log("📝 Storage file not found - creating new");
+        }
+      } catch (readErr) {
+        console.log("📝 No existing data - starting fresh");
+      }
+
+      // Add new records with timestamp
+      const now = new Date().toISOString();
+      const newRecordsWithMeta = recordsToMigrate.map((record, idx) => ({
+        ...record,
+        id: allRecords.length + idx + 1, // Simple sequential ID
+        created_at: now,
+        updated_at: now
+      }));
+
+      allRecords.push(...newRecordsWithMeta);
+
+      // Save all records back to storage
+      console.log(`💾 Uploading ${allRecords.length} total records to storage...`);
+      const { error: uploadError } = await supabaseClient.storage
+        .from('fuel_data')
+        .update('fuel_quantities.json', new Blob([JSON.stringify(allRecords, null, 2)], { type: 'application/json' }), {
+          upsert: true
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      console.log(`\n✅ Storage sync successful!`);
+      console.log(`📊 Total records in storage: ${allRecords.length}`);
+      console.log(`📝 New records added: ${newRecordsWithMeta.length}`);
       syncSuccess = true;
 
       if (result.inserted === recordsToMigrate.length) {
