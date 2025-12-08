@@ -2181,24 +2181,10 @@ function formatDateDDMMYYYY(dateStr) {
 
 async function saveCsvFuelDataToSupabase(rawData) {
   try {
-    if (!supabaseClient) {
-      console.log("🔌 Supabase client not initialized - initializing...");
-      await initSupabaseClient();
-    }
-
-    if (!supabaseClient) {
-      console.error("❌ Failed to initialize Supabase client");
-      return;
-    }
-
     if (rawData.length === 0) {
       console.warn("⚠️ No CSV data to migrate");
       return;
     }
-
-    // Skip connection test and proceed - Supabase will be accessed on-demand
-    // This allows the app to work even if network is temporarily unavailable
-    console.log("✅ Supabase initialized (connection test skipped)");
 
     console.log("🔍 Extracting data from CSV columns A, D, AE, AF...");
 
@@ -2278,68 +2264,58 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date || 'NULL'} | Qty: ${record.refilled_quantity || 'NULL'}`);
     });
 
-    // Cache data locally IMMEDIATELY before attempting Supabase
+    // Cache data locally IMMEDIATELY before attempting backend sync
     cachedFuelData = fuelRecords;
     localStorage.setItem("cachedFuelData", JSON.stringify(fuelRecords));
     console.log(`✅ Data cached locally (${fuelRecords.length} records) - invoice filtering will work offline`);
 
-    // Try to insert to Supabase (non-blocking)
-    const BATCH_SIZE = 50;
-    let insertedCount = 0;
-    const MAX_RETRIES = 3;
+    // Send to backend API for Supabase insertion
+    console.log("📤 Sending fuel records to backend for Supabase sync...");
+    try {
+      const response = await fetch("/api/save-fuel-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ records: fuelRecords }),
+      });
 
-    for (let i = 0; i < fuelRecords.length; i += BATCH_SIZE) {
-      const batch = fuelRecords.slice(i, i + BATCH_SIZE);
-      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
-      let inserted = false;
-      let retryCount = 0;
-
-      while (!inserted && retryCount < MAX_RETRIES) {
-        try {
-          console.log(`📤 Inserting batch ${batchNum} (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
-          const { data, error } = await supabaseClient
-            .from("fuel_quantities")
-            .insert(batch);
-
-          if (error) {
-            retryCount++;
-            if (retryCount < MAX_RETRIES) {
-              console.warn(`⚠️ Batch ${batchNum} failed (attempt ${retryCount}): ${error.message}`);
-              console.log(`⏳ Waiting 2 seconds before retry...`);
-              await new Promise(resolve => setTimeout(resolve, 2000));
-            } else {
-              console.error(`❌ Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${error.message}`);
-            }
-          } else {
-            insertedCount += batch.length;
-            console.log(`✅ Batch ${batchNum} inserted: ${batch.length} records (Total: ${insertedCount})`);
-            inserted = true;
-          }
-        } catch (err) {
-          retryCount++;
-          if (retryCount < MAX_RETRIES) {
-            console.warn(`⚠️ Batch ${batchNum} exception (attempt ${retryCount}): ${err.message}`);
-            console.log(`⏳ Waiting 2 seconds before retry...`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-          } else {
-            console.error(`❌ Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${err.message}`);
-          }
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.warn(`⚠️ Backend API error (${response.status}): ${errorData.error || response.statusText}`);
+        console.log("📌 Using cached data for invoice functionality");
+        return;
       }
-    }
 
-    console.log(`\n📍 Migration complete!`);
-    console.log(`📊 Supabase records inserted: ${insertedCount}/${fuelRecords.length}`);
-    if (insertedCount === fuelRecords.length) {
-      console.log(`✅ All records synced to Supabase!`);
-      supabaseAvailable = true;
-    } else if (insertedCount > 0) {
-      console.log(`⚠️ Partial sync: ${insertedCount} records synced to Supabase`);
-      supabaseAvailable = true;
-    } else {
-      console.log(`⚠️ Supabase sync failed - Using cached data for invoice functionality`);
+      const result = await response.json();
+      console.log(`\n📍 Migration complete!`);
+      console.log(`📊 Supabase records inserted: ${result.inserted}/${result.total}`);
+
+      if (result.inserted === result.total) {
+        console.log(`✅ All records synced to Supabase!`);
+        supabaseAvailable = true;
+      } else if (result.inserted > 0) {
+        console.log(`⚠️ Partial sync: ${result.inserted} records synced to Supabase`);
+        supabaseAvailable = true;
+      } else {
+        console.log(`⚠️ Supabase sync failed - Using cached data for invoice functionality`);
+      }
+
+      if (result.batchResults && result.batchResults.length > 0) {
+        console.log("📋 Batch details:");
+        result.batchResults.forEach(batch => {
+          if (batch.status === "success") {
+            console.log(`  ✅ Batch ${batch.batch}: ${batch.count} records inserted`);
+          } else {
+            console.log(`  ❌ Batch ${batch.batch}: Failed - ${batch.error}`);
+          }
+        });
+      }
+      console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
+    } catch (fetchErr) {
+      console.warn("⚠️ Cannot reach backend API for Supabase sync:", fetchErr.message);
+      console.log("📌 Using cached data for invoice functionality");
     }
-    console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
   } catch (err) {
     console.error("❌ Error in saveCsvFuelDataToSupabase:", err);
   }
