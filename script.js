@@ -2166,13 +2166,36 @@ function formatDateDDMMYYYY(dateStr) {
 async function saveCsvFuelDataToSupabase(rawData) {
   try {
     if (!supabaseClient) {
+      console.log("🔌 Supabase client not initialized - initializing...");
       await initSupabaseClient();
     }
 
-    if (!supabaseClient || rawData.length === 0) {
-      console.warn("Cannot save CSV data: Supabase not initialized or no data");
+    if (!supabaseClient) {
+      console.error("❌ Failed to initialize Supabase client");
       return;
     }
+
+    if (rawData.length === 0) {
+      console.warn("⚠️ No CSV data to migrate");
+      return;
+    }
+
+    // Test the connection first
+    console.log("🧪 Testing Supabase connection...");
+    const { data: testData, error: testError } = await supabaseClient
+      .from("fuel_quantities")
+      .select("count()", { count: "exact", head: true });
+
+    if (testError) {
+      console.error("❌ Supabase connection test failed:", testError.message);
+      console.error("This could mean:");
+      console.error("  1. Table 'fuel_quantities' doesn't exist");
+      console.error("  2. Supabase credentials are invalid");
+      console.error("  3. Network is down or Supabase is unreachable");
+      return;
+    }
+
+    console.log("✅ Supabase connection successful");
 
     console.log("🔍 Extracting data from CSV columns A, D, AE, AF...");
 
