@@ -2045,27 +2045,37 @@ async function saveCsvFuelDataToSupabase(rawData) {
           return null;
         }
 
-        // EXCLUDE rows where BOTH date (AE) and quantity (AF) are empty
-        if ((!refilled_date_raw || refilled_date_raw === '') && (!refilled_qty_raw || refilled_qty_raw === '')) {
-          console.warn(`Excluding row for site ${sitename}: both refilled_date (AE) and refilled_quantity (AF) are empty`);
-          return null;
-        }
-
-        // Convert date to YYYY-MM-DD format for DATE storage
+        // Validate and convert date to YYYY-MM-DD format
         let refilled_date_iso = null;
         if (refilled_date_raw && refilled_date_raw !== '') {
           refilled_date_iso = convertDateToISO(refilled_date_raw);
-
           if (!refilled_date_iso) {
-            console.warn(`Failed to parse date for site ${sitename}: "${refilled_date_raw}"`);
+            console.warn(`Excluding row for site ${sitename}: invalid date in column AE "${refilled_date_raw}"`);
+            return null;
           }
+        } else {
+          console.warn(`Excluding row for site ${sitename}: column AE (refilled_date) is empty`);
+          return null;
+        }
+
+        // Validate quantity is a number greater than zero
+        let refilled_quantity_num = null;
+        if (refilled_qty_raw && refilled_qty_raw !== '') {
+          refilled_quantity_num = parseFloat(refilled_qty_raw);
+          if (isNaN(refilled_quantity_num) || refilled_quantity_num <= 0) {
+            console.warn(`Excluding row for site ${sitename}: column AF (refilled_quantity) is not a valid number > 0 (got: "${refilled_qty_raw}")`);
+            return null;
+          }
+        } else {
+          console.warn(`Excluding row for site ${sitename}: column AF (refilled_quantity) is empty`);
+          return null;
         }
 
         return {
           sitename: String(sitename).trim(),
           region: region && region !== '' ? region : null,
           refilled_date: refilled_date_iso,
-          refilled_quantity: refilled_qty_raw && refilled_qty_raw !== '' ? parseFloat(refilled_qty_raw) : null,
+          refilled_quantity: refilled_quantity_num,
         };
       })
       .filter((record) => record !== null);
