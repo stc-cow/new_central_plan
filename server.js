@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
-// Initialize database table if it doesn't exist
+// Initialize database tables if they don't exist
 async function initializeDatabase() {
   try {
     const { createClient } = await import("@supabase/supabase-js");
@@ -26,28 +26,32 @@ async function initializeDatabase() {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check if table exists
-    const { data: tables, error: listError } = await supabase
-      .from("fuel_quantities")
+    // Check if live_fuel_data table exists
+    const { data: liveData, error: liveError } = await supabase
+      .from("live_fuel_data")
       .select("*")
       .limit(1);
 
-    if (!listError) {
-      console.log("✅ fuel_quantities table already exists");
-      return;
+    if (!liveError) {
+      console.log("✅ live_fuel_data table already exists");
+    } else {
+      console.warn("⚠️  live_fuel_data table not found, please create it in Supabase dashboard");
     }
 
-    // Table doesn't exist, try to create it
-    console.log("📊 Creating fuel_quantities table...");
+    // Check if history_fuel_data table exists
+    const { data: historyData, error: historyError } = await supabase
+      .from("history_fuel_data")
+      .select("*")
+      .limit(1);
 
-    // Note: Due to RLS and permission constraints, table creation might need to be done
-    // through Supabase UI or with service role. We'll log a helpful message.
-    console.warn(
-      "ℹ️  If fuel_quantities table doesn't exist, please create it in Supabase dashboard with columns: id, sitename, region, refilled_date, refilled_quantity, row_hash, created_at, updated_at"
-    );
+    if (!historyError) {
+      console.log("✅ history_fuel_data table already exists");
+    } else {
+      console.warn("⚠️  history_fuel_data table not found, please create it in Supabase dashboard");
+    }
   } catch (error) {
     console.warn(
-      "⚠️  Could not check/create table (might not have permissions):",
+      "⚠️  Could not check/create tables (might not have permissions):",
       error.message
     );
   }
