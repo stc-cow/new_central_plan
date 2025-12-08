@@ -2209,8 +2209,8 @@ async function saveCsvFuelDataToSupabase(rawData) {
       }
 
       const result = await response.json();
-      console.log(`\n📍 Migration complete!`);
-      console.log(`📊 Supabase records inserted: ${result.inserted}/${result.total}`);
+      console.log(`\n📍 Sync complete!`);
+      console.log(`📊 Supabase records inserted: ${result.inserted}/${recordsToMigrate.length}`);
 
       if (result.inserted === result.total) {
         console.log(`✅ All records synced to Supabase!`);
