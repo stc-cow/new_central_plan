@@ -176,7 +176,7 @@ function csvProxyPlugin() {
                       );
 
                       const { data, error } = await supabase
-                        .from("fuel_quantities")
+                        .from("live_fuel_data")
                         .insert(batch);
 
                       if (error) {
@@ -388,11 +388,12 @@ function csvProxyPlugin() {
                     )
                     .digest("hex");
 
-                  // Check if this row already exists (using unique constraint)
+                  // Check if this record already exists (by sitename + date)
                   const { data: existing, error: checkError } = await supabase
-                    .from("fuel_quantities")
+                    .from("live_fuel_data")
                     .select("id")
-                    .eq("row_hash", row_hash)
+                    .eq("sitename", sitename)
+                    .eq("refilled_date", refilled_date)
                     .maybeSingle();
 
                   if (checkError) {
@@ -406,15 +407,14 @@ function csvProxyPlugin() {
                     continue;
                   }
 
-                  // Insert new record with row_hash
+                  // Insert new record to live table
                   const { data: insertData, error: insertError } =
-                    await supabase.from("fuel_quantities").insert([
+                    await supabase.from("live_fuel_data").insert([
                       {
                         sitename,
                         region,
                         refilled_date,
                         refilled_quantity,
-                        row_hash,
                       },
                     ]);
 
@@ -525,10 +525,10 @@ function csvProxyPlugin() {
 
               // Fetch all records from the database
               console.log(
-                "📥 Fetching all records from fuel_quantities table...",
+                "📥 Fetching all records from live_fuel_data table...",
               );
               let { data: allRecords, error: fetchError } = await supabase
-                .from("fuel_quantities")
+                .from("live_fuel_data")
                 .select("id, sitename, refilled_date, refilled_quantity, region");
 
               if (fetchError) {
@@ -631,7 +631,7 @@ function csvProxyPlugin() {
                 );
 
                 const { error: deleteError } = await supabase
-                  .from("fuel_quantities")
+                  .from("live_fuel_data")
                   .delete()
                   .in("id", batch);
 
@@ -741,12 +741,53 @@ function csvProxyPlugin() {
 
               const supabase = createClient(supabaseUrl, supabaseKey);
 
-              // Read all records from database table
-              const { data, error } = await supabase
-                .from("fuel_quantities")
+              // Fetch live records within date range
+              console.log("📥 Fetching live_fuel_data records...");
+              const { data: liveData, error: liveError } = await supabase
+                .from("live_fuel_data")
                 .select("sitename, region, refilled_date, refilled_quantity")
                 .gte("refilled_date", startDate)
                 .lte("refilled_date", endDate);
+
+              if (liveError) {
+                console.error("❌ Live data query error:", liveError.message);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(
+                  JSON.stringify({
+                    error: "Failed to fetch live invoice data from database",
+                    details: liveError.message,
+                  }),
+                );
+                return;
+              }
+
+              console.log(`✅ Fetched ${liveData?.length || 0} records from live_fuel_data`);
+
+              // Fetch history records within date range
+              console.log("📥 Fetching history_fuel_data records...");
+              const { data: historyData, error: historyError } = await supabase
+                .from("history_fuel_data")
+                .select("sitename, region, refilled_date, refilled_quantity")
+                .gte("refilled_date", startDate)
+                .lte("refilled_date", endDate);
+
+              if (historyError) {
+                console.error("❌ History data query error:", historyError.message);
+                res.writeHead(500, { "Content-Type": "application/json" });
+                res.end(
+                  JSON.stringify({
+                    error: "Failed to fetch history invoice data from database",
+                    details: historyError.message,
+                  }),
+                );
+                return;
+              }
+
+              console.log(`✅ Fetched ${historyData?.length || 0} records from history_fuel_data`);
+
+              // Combine live and history data
+              const data = [...(liveData || []), ...(historyData || [])];
+              const error = null;
 
               if (error) {
                 console.error("❌ Database query error:", error.message);
