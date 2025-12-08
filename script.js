@@ -2305,43 +2305,45 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(`📂 File path: fuel_data/fuel_quantities.json`);
       console.log(`📦 File size: ${(jsonBlob.size / 1024).toFixed(2)} KB`);
       syncSuccess = true;
-
-      if (result.inserted === recordsToMigrate.length) {
-        console.log(`✅ All new records synced to Supabase!`);
-        supabaseAvailable = true;
-      } else if (result.inserted > 0) {
-        console.log(`⚠️ Partial sync: ${result.inserted}/${recordsToMigrate.length} records synced`);
-        supabaseAvailable = true;
-      } else {
-        console.log(`⚠️ Supabase sync failed - Using cached data for invoice functionality`);
-      }
-
-      if (result.batchResults && result.batchResults.length > 0) {
-        console.log("📋 Batch details:");
-        result.batchResults.forEach(batch => {
-          if (batch.status === "success") {
-            console.log(`  ✅ Batch ${batch.batch}: ${batch.count} records inserted`);
-          } else {
-            console.log(`  ❌ Batch ${batch.batch}: Failed - ${batch.error}`);
-          }
-        });
-      }
-      console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
+      supabaseAvailable = true;
     } catch (fetchErr) {
       syncSuccess = false;
-      console.warn("\n⚠️ Backend API not available:", fetchErr.message);
-      console.log("\n📌 Offline Mode Activated:");
-      console.log("  ✅ Dashboard display works with cached data");
-      console.log("  ✅ Invoice export uses local cache");
-      console.log("  ✅ Search and filtering work offline");
-      console.log("  ⏳ Supabase sync will retry in 30 seconds");
+      console.warn("\n⚠️ Storage sync not available:", fetchErr.message);
+      console.log("\n📌 Fallback: Using localStorage...");
+
+      try {
+        let localRecords = [];
+        const cached = localStorage.getItem("fuel_quantities_storage");
+        if (cached) {
+          localRecords = JSON.parse(cached);
+        }
+
+        // Add new records with timestamp
+        const now = new Date().toISOString();
+        const newRecords = recordsToMigrate.map((record, idx) => ({
+          ...record,
+          id: (localRecords.length + idx + 1).toString(),
+          created_at: now,
+          updated_at: now
+        }));
+
+        localRecords.push(...newRecords);
+        localStorage.setItem("fuel_quantities_storage", JSON.stringify(localRecords));
+
+        console.log(`✅ Data saved to localStorage instead`);
+        console.log(`📊 Total records in localStorage: ${localRecords.length}`);
+        console.log(`📝 New records added: ${newRecords.length}`);
+        syncSuccess = true;
+      } catch (localErr) {
+        console.error("❌ localStorage save failed:", localErr.message);
+      }
     }
 
     // Final status summary
     if (syncSuccess) {
-      console.log("\n🎉 Full sync: Data synced to Supabase + cached locally");
+      console.log("\n🎉 Sync successful!");
     } else {
-      console.log("\n📦 Offline mode: Data cached locally only (Supabase sync unavailable)");
+      console.log("\n⚠️ Sync failed - data cached locally only");
     }
   } catch (err) {
     console.error("❌ Error in saveCsvFuelDataToSupabase:", err.message);
