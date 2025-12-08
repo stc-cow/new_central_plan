@@ -2248,24 +2248,26 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
   const startDateInput = document.getElementById("invoiceStartDate");
   const endDateInput = document.getElementById("invoiceEndDate");
   const regionSelect = document.getElementById("invoiceRegion");
-  const statusDiv = document.getElementById("uploadStatus");
+  const statusDiv = document.getElementById("invoiceStatus");
 
   const startDate = startDateInput.value;
   const endDate = endDateInput.value;
   const selectedRegionFilter = regionSelect.value;
 
   if (!startDate || !endDate) {
-    alert("Please select both start and end dates");
+    statusDiv.textContent = "❌ Please select both start and end dates";
+    statusDiv.className = "invoice-status error";
     return;
   }
 
   if (new Date(startDate) > new Date(endDate)) {
-    alert("Start date must be before end date");
+    statusDiv.textContent = "❌ Start date must be before end date";
+    statusDiv.className = "invoice-status error";
     return;
   }
 
   statusDiv.textContent = "⏳ Preparing invoice...";
-  statusDiv.className = "upload-status";
+  statusDiv.className = "invoice-status";
 
   try {
     const filteredRecords = await fetchFuelQuantitiesByDateRange(
@@ -2276,18 +2278,18 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
 
     if (filteredRecords.length === 0) {
       statusDiv.textContent = "❌ No records found for selected date range and region";
-      statusDiv.className = "upload-status error";
+      statusDiv.className = "invoice-status error";
       return;
     }
 
     generateInvoiceExcel(filteredRecords, startDate, endDate, selectedRegionFilter);
 
     statusDiv.textContent = `✅ Invoice downloaded (${filteredRecords.length} records)`;
-    statusDiv.className = "upload-status success";
+    statusDiv.className = "invoice-status success";
   } catch (error) {
     console.error("Error downloading invoice:", error);
     statusDiv.textContent = `❌ Error: ${error.message}`;
-    statusDiv.className = "upload-status error";
+    statusDiv.className = "invoice-status error";
   }
 };
 
