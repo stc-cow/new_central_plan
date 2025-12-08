@@ -2275,31 +2275,58 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date || 'NULL'} | Qty: ${record.refilled_quantity || 'NULL'}`);
     });
 
-    // Insert records in batches (no upsert needed since migration runs only once per session)
-    const BATCH_SIZE = 100;
+    // Insert records in batches with retry logic
+    const BATCH_SIZE = 50;
     let insertedCount = 0;
+    const MAX_RETRIES = 3;
 
     for (let i = 0; i < fuelRecords.length; i += BATCH_SIZE) {
       const batch = fuelRecords.slice(i, i + BATCH_SIZE);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      let inserted = false;
+      let retryCount = 0;
 
-      try {
-        const { data, error } = await supabaseClient
-          .from("fuel_quantities")
-          .insert(batch);
+      while (!inserted && retryCount < MAX_RETRIES) {
+        try {
+          console.log(`📤 Inserting batch ${batchNum} (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+          const { data, error } = await supabaseClient
+            .from("fuel_quantities")
+            .insert(batch);
 
-        if (error) {
-          console.error(`❌ Error saving batch ${Math.floor(i / BATCH_SIZE) + 1}:`, error.message);
-        } else {
-          insertedCount += batch.length;
-          console.log(`✅ Inserted batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} records`);
+          if (error) {
+            retryCount++;
+            if (retryCount < MAX_RETRIES) {
+              console.warn(`⚠️ Batch ${batchNum} failed (attempt ${retryCount}): ${error.message}`);
+              console.log(`⏳ Waiting 2 seconds before retry...`);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } else {
+              console.error(`❌ Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${error.message}`);
+            }
+          } else {
+            insertedCount += batch.length;
+            console.log(`✅ Batch ${batchNum} inserted: ${batch.length} records (Total: ${insertedCount})`);
+            inserted = true;
+          }
+        } catch (err) {
+          retryCount++;
+          if (retryCount < MAX_RETRIES) {
+            console.warn(`⚠️ Batch ${batchNum} exception (attempt ${retryCount}): ${err.message}`);
+            console.log(`⏳ Waiting 2 seconds before retry...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          } else {
+            console.error(`❌ Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${err.message}`);
+          }
         }
-      } catch (err) {
-        console.error(`❌ Exception in batch ${Math.floor(i / BATCH_SIZE) + 1}:`, err.message);
       }
     }
 
-    console.log(`📍 Migration complete! Total records inserted: ${insertedCount}/${fuelRecords.length}`);
-    console.log("📌 Single insert per session prevents duplicates");
+    console.log(`\n📍 Migration complete!`);
+    console.log(`📊 Total records inserted: ${insertedCount}/${fuelRecords.length}`);
+    if (insertedCount === fuelRecords.length) {
+      console.log(`✅ All records inserted successfully!`);
+    } else {
+      console.warn(`⚠️ Some records were not inserted. Expected: ${fuelRecords.length}, Inserted: ${insertedCount}`);
+    }
     console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
   } catch (err) {
     console.error("❌ Error in saveCsvFuelDataToSupabase:", err);
