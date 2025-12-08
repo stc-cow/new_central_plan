@@ -196,22 +196,6 @@ body {
   font-weight: 600;
 }
 
-.login-motto {
-  font-size: 15px;
-  color: rgba(204, 224, 255, 0.9);
-  margin: 0;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  line-height: 1.6;
-}
-
-.login-message {
-  font-size: 14px;
-  color: #b0c4ff;
-  line-height: 1.6;
-  margin: 0;
-}
-
 .login-section {
   flex: 1;
   display: flex;
