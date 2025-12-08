@@ -13,6 +13,8 @@ const CSV_URL =
 
 app.use(express.static(join(__dirname, "dist")));
 
+app.use(express.json());
+
 app.get("/api/fetch-csv", async (req, res) => {
   try {
     console.log("Server: Fetching CSV from Google Sheets...");
@@ -43,6 +45,108 @@ app.get("/api/fetch-csv", async (req, res) => {
   } catch (error) {
     console.error("Server: Error fetching CSV:", error.message);
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/save-fuel-data", async (req, res) => {
+  try {
+    const { records } = req.body;
+
+    if (!records || !Array.isArray(records)) {
+      return res.status(400).json({ error: "Invalid records format" });
+    }
+
+    console.log(`Server: Received ${records.length} fuel records to save`);
+
+    // Import Supabase client
+    const { createClient } = await import("@supabase/supabase-js");
+
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Server: Missing Supabase credentials");
+      return res.status(500).json({
+        error: "Supabase not configured on server",
+        inserted: 0
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const BATCH_SIZE = 50;
+    let insertedCount = 0;
+    const MAX_RETRIES = 3;
+    const batchResults = [];
+
+    for (let i = 0; i < records.length; i += BATCH_SIZE) {
+      const batch = records.slice(i, i + BATCH_SIZE);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      let inserted = false;
+      let retryCount = 0;
+
+      while (!inserted && retryCount < MAX_RETRIES) {
+        try {
+          console.log(`Server: Inserting batch ${batchNum} (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+
+          const { data, error } = await supabase
+            .from("fuel_quantities")
+            .insert(batch);
+
+          if (error) {
+            retryCount++;
+            if (retryCount < MAX_RETRIES) {
+              console.warn(`Server: Batch ${batchNum} failed (attempt ${retryCount}): ${error.message}`);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } else {
+              console.error(`Server: Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${error.message}`);
+              batchResults.push({
+                batch: batchNum,
+                status: "failed",
+                error: error.message
+              });
+            }
+          } else {
+            insertedCount += batch.length;
+            console.log(`Server: Batch ${batchNum} inserted: ${batch.length} records (Total: ${insertedCount})`);
+            batchResults.push({
+              batch: batchNum,
+              status: "success",
+              count: batch.length
+            });
+            inserted = true;
+          }
+        } catch (err) {
+          retryCount++;
+          if (retryCount < MAX_RETRIES) {
+            console.warn(`Server: Batch ${batchNum} exception (attempt ${retryCount}): ${err.message}`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          } else {
+            console.error(`Server: Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${err.message}`);
+            batchResults.push({
+              batch: batchNum,
+              status: "failed",
+              error: err.message
+            });
+          }
+        }
+      }
+    }
+
+    console.log(`Server: Migration complete! Inserted ${insertedCount}/${records.length} records`);
+
+    return res.json({
+      success: insertedCount > 0,
+      inserted: insertedCount,
+      total: records.length,
+      batchResults
+    });
+  } catch (error) {
+    console.error("Server: Error in /api/save-fuel-data:", error.message);
+    return res.status(500).json({
+      error: error.message,
+      inserted: 0
+    });
   }
 });
 
