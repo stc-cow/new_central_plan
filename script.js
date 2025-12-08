@@ -2252,32 +2252,31 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date || 'NULL'} | Qty: ${record.refilled_quantity || 'NULL'}`);
     });
 
-    // Use upsert to avoid duplicate records on refresh
-    // This will update existing records or insert new ones based on sitename + refilled_date
+    // Insert records in batches (no upsert needed since migration runs only once per session)
     const BATCH_SIZE = 100;
     let insertedCount = 0;
-    let updatedCount = 0;
 
     for (let i = 0; i < fuelRecords.length; i += BATCH_SIZE) {
       const batch = fuelRecords.slice(i, i + BATCH_SIZE);
-      const { data, error } = await supabaseClient
-        .from("fuel_quantities")
-        .upsert(batch, {
-          onConflict: "sitename,refilled_date",
-          ignoreDuplicates: false
-        });
 
-      if (error) {
-        console.error(`❌ Error saving batch ${Math.floor(i / BATCH_SIZE) + 1}:`, error);
-        console.error("Error message:", error.message);
-      } else {
-        insertedCount += batch.length;
-        console.log(`✅ Upserted batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} records`);
+      try {
+        const { data, error } = await supabaseClient
+          .from("fuel_quantities")
+          .insert(batch);
+
+        if (error) {
+          console.error(`❌ Error saving batch ${Math.floor(i / BATCH_SIZE) + 1}:`, error.message);
+        } else {
+          insertedCount += batch.length;
+          console.log(`✅ Inserted batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} records`);
+        }
+      } catch (err) {
+        console.error(`❌ Exception in batch ${Math.floor(i / BATCH_SIZE) + 1}:`, err.message);
       }
     }
 
-    console.log(`📍 Migration complete! Total records processed: ${insertedCount}/${fuelRecords.length}`);
-    console.log("📌 Using UPSERT to prevent duplicates on refresh");
+    console.log(`📍 Migration complete! Total records inserted: ${insertedCount}/${fuelRecords.length}`);
+    console.log("📌 Single insert per session prevents duplicates");
     console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
   } catch (err) {
     console.error("❌ Error in saveCsvFuelDataToSupabase:", err);
