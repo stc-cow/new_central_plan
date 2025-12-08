@@ -20,9 +20,9 @@ const VVVIP_SITES_LIST = [
 ];
 
 // Supabase configuration for active users tracking
-const VITE_SUPABASE_URL = "https://qpnpqudrrrzgvfwdkljo.supabase.co";
+const VITE_SUPABASE_URL = "https://gefviwqyjlqhoduvyeiy.supabase.co";
 const VITE_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbnBxdWRycnJ6Z3Zmd2RrbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NDQ1MjcsImV4cCI6MjA3NDEyMDUyN30.v4MAx44YMTq7hYufn5IlIWCu_SGrKulZIHXwCY999WE";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZnZpd3F5amxxaG9kdXZ5ZWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNjc3NTMsImV4cCI6MjA3OTY0Mzc1M30.XHlwz3P0A_VvTmpYRRGfHVNfNGQfW9kRJwW3UX0mWg0";
 
 let supabaseClient = null;
 let currentSessionId = null;
