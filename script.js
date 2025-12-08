@@ -858,8 +858,30 @@ function filterAndValidateSites(rawData) {
 
 function parseFuelDate(str) {
   if (!str || str.includes("#") || str.trim() === "") return null;
+
+  // Handle DD/MM/YYYY format from CSV Column AE
+  const ddmmyyyyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+  const match = str.trim().match(ddmmyyyyRegex);
+
+  if (match) {
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const year = parseInt(match[3], 10);
+
+    // Create date object (month is 0-indexed in JS)
+    const d = new Date(year, month - 1, day);
+
+    // Validate the date
+    if (isNaN(d.getTime())) {
+      return null;
+    }
+
+    return d;
+  }
+
+  // Fallback: try parsing as standard date format
   const d = new Date(str);
-  return isNaN(d) ? null : d;
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function dayDiff(targetDate) {
