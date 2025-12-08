@@ -2422,22 +2422,25 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   }
 
   try {
-    console.log(`🔍 Reading from Supabase Storage: date range ${startDate} to ${endDate}, region: ${regionFilter || 'All'}`);
+    console.log(`🔍 Reading from backend API: /api/get-invoice-data`);
+    console.log(`   Date range: ${startDate} to ${endDate}, Region: ${regionFilter || 'All'}`);
 
-    // Read from storage (includes all historical data)
-    const { data, error } = await supabaseClient.storage
-      .from('fuel_data')
-      .download('fuel_quantities.json');
+    // Call backend endpoint to read directly from database (source of truth)
+    const response = await fetch('/api/get-invoice-data', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(res => res.json());
 
-    if (error) {
-      console.warn("⚠️ Storage read failed, using cached data:", error.message);
+    if (!response.success || !response.records) {
+      console.warn("⚠️ Backend API call failed, falling back to cached data:", response.error);
       return filterCachedFuelData(startDate, endDate, regionFilter);
     }
 
-    const text = await data.text();
-    const allRecords = JSON.parse(text);
-    console.log(`✅ Loaded ${allRecords.length} records from storage`);
-    console.log(`📋 Sample records from storage:`);
+    const allRecords = response.records || [];
+    console.log(`✅ Loaded ${allRecords.length} records from database (via backend)`);
+    console.log(`📋 Sample records:`);
     allRecords.slice(0, 5).forEach((record, idx) => {
       console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
     });
