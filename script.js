@@ -2272,13 +2272,18 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log(`📊 Preparing to migrate ${fuelRecords.length} fuel records to Supabase...`);
+    console.log(`📊 Preparing to migrate ${fuelRecords.length} fuel records...`);
     console.log("📋 Sample records (first 3):");
     fuelRecords.slice(0, 3).forEach((record, idx) => {
       console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date || 'NULL'} | Qty: ${record.refilled_quantity || 'NULL'}`);
     });
 
-    // Insert records in batches with retry logic
+    // Cache data locally IMMEDIATELY before attempting Supabase
+    cachedFuelData = fuelRecords;
+    localStorage.setItem("cachedFuelData", JSON.stringify(fuelRecords));
+    console.log(`✅ Data cached locally (${fuelRecords.length} records) - invoice filtering will work offline`);
+
+    // Try to insert to Supabase (non-blocking)
     const BATCH_SIZE = 50;
     let insertedCount = 0;
     const MAX_RETRIES = 3;
