@@ -2185,15 +2185,20 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log(`✅ All ${fuelRecords.length} records validated - safe to send to Supabase`);
     }
 
-    // Send to backend API for Supabase insertion
-    console.log("\n📤 Sending fuel records to backend for Supabase sync...");
+    // Send only NEW records to backend API for Supabase insertion
+    if (recordsToMigrate.length === 0) {
+      console.log("✅ No new records to sync - Supabase is up to date");
+      return;
+    }
+
+    console.log(`\n📤 Sending ${recordsToMigrate.length} new records to backend for Supabase sync...`);
     try {
       const response = await fetch("/api/save-fuel-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ records: fuelRecords }),
+        body: JSON.stringify({ records: recordsToMigrate }),
       });
 
       if (!response.ok) {
