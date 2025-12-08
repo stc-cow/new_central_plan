@@ -2194,66 +2194,81 @@ async function saveCsvFuelDataToSupabase(rawData) {
         throw new Error("Using localStorage fallback");
       }
 
-      // Read existing data from storage
-      console.log("📖 Reading existing data from storage...");
-      let allRecords = [];
-      try {
-        console.log("🔄 Downloading fuel_quantities.json...");
-        const { data, error } = await supabaseClient.storage
-          .from('fuel_data')
-          .download('fuel_quantities.json');
+      // Try to use Supabase Storage with timeout
+      console.log("📖 Attempting Supabase Storage sync...");
 
-        if (error) {
-          console.log("ℹ️  File doesn't exist yet (first sync):", error.message);
-        } else if (data) {
-          const text = await data.text();
-          allRecords = JSON.parse(text);
-          console.log(`✅ Found ${allRecords.length} existing records in storage`);
+      // Use Promise.race with timeout to fail fast
+      const storagePromise = (async () => {
+        let allRecords = [];
+        try {
+          console.log("🔄 Downloading fuel_quantities.json...");
+          const { data, error } = await supabaseClient.storage
+            .from('fuel_data')
+            .download('fuel_quantities.json');
+
+          if (error) {
+            console.log("ℹ️  File doesn't exist yet (first sync)");
+          } else if (data) {
+            const text = await data.text();
+            allRecords = JSON.parse(text);
+            console.log(`✅ Found ${allRecords.length} existing records in storage`);
+          }
+        } catch (readErr) {
+          console.log("ℹ️  No existing data - starting fresh");
         }
-      } catch (readErr) {
-        console.log("ℹ️  No existing data - starting fresh:", readErr.message);
+
+        // Add new records with timestamp
+        const now = new Date().toISOString();
+        const newRecordsWithMeta = recordsToMigrate.map((record, idx) => ({
+          ...record,
+          id: (allRecords.length + idx + 1).toString(),
+          created_at: now,
+          updated_at: now
+        }));
+
+        console.log(`📝 Adding ${newRecordsWithMeta.length} new records`);
+        allRecords.push(...newRecordsWithMeta);
+        console.log(`📊 Total records after merge: ${allRecords.length}`);
+
+        // Save all records back to storage
+        const jsonContent = JSON.stringify(allRecords, null, 2);
+        const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
+
+        console.log(`💾 Uploading to storage (${(jsonBlob.size / 1024).toFixed(2)} KB)...`);
+
+        const { error: uploadError } = await supabaseClient.storage
+          .from('fuel_data')
+          .upload('fuel_quantities.json', jsonBlob, {
+            upsert: true,
+            contentType: 'application/json'
+          });
+
+        if (uploadError) {
+          throw new Error(`Storage upload failed: ${uploadError.message}`);
+        }
+
+        console.log(`\n✅ Storage sync successful!`);
+        console.log(`📊 Total records in storage: ${allRecords.length}`);
+        console.log(`📝 New records added: ${newRecordsWithMeta.length}`);
+        console.log(`📂 File path: fuel_data/fuel_quantities.json`);
+        console.log(`📦 File size: ${(jsonBlob.size / 1024).toFixed(2)} KB`);
+
+        return { success: true, allRecords };
+      })();
+
+      // Timeout after 5 seconds - fail fast if no response
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Storage timeout - falling back to localStorage")), 5000)
+      );
+
+      try {
+        const result = await Promise.race([storagePromise, timeoutPromise]);
+        syncSuccess = true;
+        supabaseAvailable = true;
+      } catch (timeoutErr) {
+        // Timeout or storage error - fall through to localStorage fallback
+        throw timeoutErr;
       }
-
-      // Add new records with timestamp
-      const now = new Date().toISOString();
-      const newRecordsWithMeta = recordsToMigrate.map((record, idx) => ({
-        ...record,
-        id: (allRecords.length + idx + 1).toString(),
-        created_at: now,
-        updated_at: now
-      }));
-
-      console.log(`📝 Adding ${newRecordsWithMeta.length} new records`);
-      allRecords.push(...newRecordsWithMeta);
-      console.log(`📊 Total records after merge: ${allRecords.length}`);
-
-      // Save all records back to storage
-      const jsonContent = JSON.stringify(allRecords, null, 2);
-      const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
-
-      console.log(`💾 Uploading to storage (${(jsonBlob.size / 1024).toFixed(2)} KB)...`);
-
-      const { error: uploadError, data: uploadData } = await supabaseClient.storage
-        .from('fuel_data')
-        .upload('fuel_quantities.json', jsonBlob, {
-          upsert: true,
-          contentType: 'application/json'
-        });
-
-      if (uploadError) {
-        console.error("❌ Upload failed:", uploadError);
-        console.error("Error message:", uploadError.message);
-        console.error("Error details:", uploadError);
-        throw new Error(`Storage upload failed: ${uploadError.message}`);
-      }
-
-      console.log(`\n✅ Storage sync successful!`);
-      console.log(`📊 Total records in storage: ${allRecords.length}`);
-      console.log(`📝 New records added: ${newRecordsWithMeta.length}`);
-      console.log(`📂 File path: fuel_data/fuel_quantities.json`);
-      console.log(`📦 File size: ${(jsonBlob.size / 1024).toFixed(2)} KB`);
-      syncSuccess = true;
-      supabaseAvailable = true;
     } catch (fetchErr) {
       syncSuccess = false;
       console.warn("\n⚠️ Storage sync not available:", fetchErr.message);
