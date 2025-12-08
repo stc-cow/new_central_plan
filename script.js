@@ -2045,6 +2045,12 @@ async function saveCsvFuelDataToSupabase(rawData) {
           return null;
         }
 
+        // EXCLUDE rows where BOTH date (AE) and quantity (AF) are empty
+        if ((!refilled_date_raw || refilled_date_raw === '') && (!refilled_qty_raw || refilled_qty_raw === '')) {
+          console.warn(`Excluding row for site ${sitename}: both refilled_date (AE) and refilled_quantity (AF) are empty`);
+          return null;
+        }
+
         // Convert date to YYYY-MM-DD format for DATE storage
         let refilled_date_iso = null;
         if (refilled_date_raw && refilled_date_raw !== '') {
