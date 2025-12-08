@@ -2166,34 +2166,24 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log("🔍 Extracting data by COLUMN POSITION (A=0, D=3, AE=30, AF=31)...");
+    console.log("🔍 Extracting data from CSV columns A, D, AE, AF...");
 
     // Get column headers from first row (lowercase keys)
     const sampleRow = rawData[0];
     const headers = Object.keys(sampleRow);
 
-    console.log("CSV Headers count:", headers.length);
-    console.log("Column A (0):", headers[0], "=", sampleRow[headers[0]]);
-    console.log("Column D (3):", headers[3], "=", sampleRow[headers[3]]);
-    console.log("Column AE (30):", headers[30], "=", sampleRow[headers[30]]);
-    console.log("Column AF (31):", headers[31], "=", sampleRow[headers[31]]);
+    console.log("CSV total headers:", headers.length);
+    console.log("All headers:", headers.join(" | "));
 
     const fuelRecords = rawData
       .map((row) => {
-        const headers = Object.keys(row);
+        const rowHeaders = Object.keys(row);
 
-        // Extract by COLUMN POSITION (not header name)
-        // Column A (index 0) = sitename
-        const sitename = headers[0] ? String(row[headers[0]]).trim() : '';
-
-        // Column D (index 3) = region
-        const region = headers[3] ? String(row[headers[3]]).trim() : '';
-
-        // Column AE (index 30) = refilled_date (DD/MM/YYYY format)
-        const refilled_date_raw = headers[30] ? String(row[headers[30]]).trim() : '';
-
-        // Column AF (index 31) = refilled_quantity
-        const refilled_qty_raw = headers[31] ? String(row[headers[31]]).trim() : '';
+        // Extract by COLUMN POSITION - use safe access
+        const sitename = (rowHeaders[0] && row[rowHeaders[0]]) ? String(row[rowHeaders[0]]).trim() : '';
+        const region = (rowHeaders[3] && row[rowHeaders[3]]) ? String(row[rowHeaders[3]]).trim() : '';
+        const refilled_date_raw = (rowHeaders[30] && row[rowHeaders[30]]) ? String(row[rowHeaders[30]]).trim() : '';
+        const refilled_qty_raw = (rowHeaders[31] && row[rowHeaders[31]]) ? String(row[rowHeaders[31]]).trim() : '';
 
         // Only include rows with sitename
         if (!sitename || sitename === '') {
@@ -2214,38 +2204,45 @@ async function saveCsvFuelDataToSupabase(rawData) {
           sitename: sitename,
           region: region && region !== '' ? region : null,
           refilled_date: refilled_date_iso,
-          refilled_quantity: refilled_qty_raw && refilled_qty_raw !== ''
-            ? parseFloat(refilled_qty_raw)
-            : null,
+          refilled_quantity: refilled_qty_raw && refilled_qty_raw !== '' ? parseFloat(refilled_qty_raw) : null,
         };
       })
       .filter((record) => record !== null);
 
     if (fuelRecords.length === 0) {
-      console.log("No fuel records to save from CSV");
+      console.log("⚠️ No fuel records extracted from CSV");
       return;
     }
 
-    console.log(`📊 Migrating ${fuelRecords.length} fuel records from CSV to Supabase...`);
-
-    console.log("📋 Sample records (first 5):");
-    fuelRecords.slice(0, 5).forEach((record, idx) => {
-      console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+    console.log(`📊 Preparing to migrate ${fuelRecords.length} fuel records to Supabase...`);
+    console.log("📋 Sample records (first 3):");
+    fuelRecords.slice(0, 3).forEach((record, idx) => {
+      console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date || 'NULL'} | Qty: ${record.refilled_quantity || 'NULL'}`);
     });
 
-    const { error } = await supabaseClient
-      .from("fuel_quantities")
-      .insert(fuelRecords);
+    // Insert in batches to avoid timeout
+    const BATCH_SIZE = 100;
+    let insertedCount = 0;
 
-    if (error) {
-      console.error("❌ Error saving CSV data to Supabase:", error);
-      console.error("Error details:", error.details, error.message);
-    } else {
-      console.log(`✅ Successfully migrated ${fuelRecords.length} fuel records to Supabase`);
-      console.log("📍 Column Mapping: A→sitename, D→region, AE→refilled_date, AF→refilled_quantity");
+    for (let i = 0; i < fuelRecords.length; i += BATCH_SIZE) {
+      const batch = fuelRecords.slice(i, i + BATCH_SIZE);
+      const { data, error } = await supabaseClient
+        .from("fuel_quantities")
+        .insert(batch);
+
+      if (error) {
+        console.error(`❌ Error saving batch ${Math.floor(i / BATCH_SIZE) + 1}:`, error);
+        console.error("Error message:", error.message);
+      } else {
+        insertedCount += batch.length;
+        console.log(`✅ Inserted batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batch.length} records`);
+      }
     }
+
+    console.log(`📍 Migration complete! Total records inserted: ${insertedCount}/${fuelRecords.length}`);
+    console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
   } catch (err) {
-    console.error("Error in saveCsvFuelDataToSupabase:", err);
+    console.error("❌ Error in saveCsvFuelDataToSupabase:", err);
   }
 }
 
