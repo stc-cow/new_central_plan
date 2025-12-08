@@ -191,13 +191,17 @@ function csvProxyPlugin() {
                 }
               }
 
-              console.log(`Dev Server: Migration complete! Inserted ${insertedCount}/${records.length} records`);
+              console.log(`Dev Server: Migration complete!`);
+              console.log(`  ✅ Inserted to Supabase: ${insertedCount}/${validRecords.length} valid records`);
+              console.log(`  ❌ Excluded (invalid data): ${invalidRecords.length} records`);
 
               res.writeHead(200, { "Content-Type": "application/json" });
               res.end(JSON.stringify({
                 success: insertedCount > 0,
                 inserted: insertedCount,
                 total: records.length,
+                valid: validRecords.length,
+                invalid: invalidRecords.length,
                 batchResults
               }));
             } catch (error) {
