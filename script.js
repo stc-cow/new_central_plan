@@ -2685,3 +2685,59 @@ function generateInvoiceExcel(records, startDate, endDate, regionFilter = "") {
   const fileName = `Fuel_Invoice${regionSuffix}_${startDate}_to_${endDate}_${new Date().toISOString().split("T")[0]}.xlsx`;
   XLSX.writeFile(workbook, fileName);
 }
+
+window.cleanupDuplicates = async function cleanupDuplicates() {
+  if (
+    !confirm(
+      "⚠️  This will remove all duplicate records from the database, keeping only the first occurrence of each site+date combination.\n\nContinue?",
+    )
+  ) {
+    return;
+  }
+
+  const statusDiv = document.getElementById("invoiceStatus");
+  if (!statusDiv) {
+    alert("Could not find status element");
+    return;
+  }
+
+  statusDiv.textContent = "⏳ Cleaning duplicates...";
+  statusDiv.className = "invoice-status";
+
+  try {
+    console.log("🧹 Sending cleanup request to backend...");
+
+    const response = await fetch("/api/cleanup-duplicates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.status === "success") {
+      console.log("✅ Cleanup successful:", result);
+      statusDiv.textContent = `✅ Cleanup complete! Removed ${result.duplicatesRemoved} duplicates. Kept ${result.recordsKept} unique records.`;
+      statusDiv.className = "invoice-status success";
+
+      // Refresh invoice preview if there's data loaded
+      const startDateInput = document.getElementById("invoiceStartDate");
+      const endDateInput = document.getElementById("invoiceEndDate");
+      if (startDateInput?.value && endDateInput?.value) {
+        console.log("🔄 Refreshing invoice preview...");
+        setTimeout(() => {
+          loadInvoicePreview();
+        }, 1000);
+      }
+    } else {
+      console.error("❌ Cleanup failed:", result);
+      statusDiv.textContent = `❌ Cleanup failed: ${result.error || "Unknown error"}`;
+      statusDiv.className = "invoice-status error";
+    }
+  } catch (error) {
+    console.error("❌ Error during cleanup:", error);
+    statusDiv.textContent = `❌ Error: ${error.message}`;
+    statusDiv.className = "invoice-status error";
+  }
+};
