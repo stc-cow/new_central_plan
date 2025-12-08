@@ -663,9 +663,9 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Fetch all records from the database
-    console.log("📥 Fetching all records from fuel_quantities table...");
+    console.log("📥 Fetching all records from live_fuel_data table...");
     let { data: allRecords, error: fetchError } = await supabase
-      .from("fuel_quantities")
+      .from("live_fuel_data")
       .select("id, sitename, refilled_date, refilled_quantity, region");
 
     if (fetchError) {
