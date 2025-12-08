@@ -224,8 +224,7 @@ app.get("/api/get-invoice-data", async (req, res) => {
 
     const { createClient } = await import("@supabase/supabase-js");
 
-    // Use new Supabase project with deduplication, fallback to old if not available
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
     const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
