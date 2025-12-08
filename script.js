@@ -2715,6 +2715,7 @@ window.cleanupDuplicates = async function cleanupDuplicates() {
     });
 
     const result = await response.json();
+    console.log("📦 Response received:", result);
 
     if (response.ok && result.status === "success") {
       console.log("✅ Cleanup successful:", result);
@@ -2732,7 +2733,11 @@ window.cleanupDuplicates = async function cleanupDuplicates() {
       }
     } else {
       console.error("❌ Cleanup failed:", result);
-      statusDiv.textContent = `❌ Cleanup failed: ${result.error || "Unknown error"}`;
+      let errorMsg = result.error || "Unknown error";
+      if (result.details) {
+        errorMsg += ` (${result.details})`;
+      }
+      statusDiv.textContent = `❌ Cleanup failed: ${errorMsg}`;
       statusDiv.className = "invoice-status error";
     }
   } catch (error) {
