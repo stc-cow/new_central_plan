@@ -2006,6 +2006,46 @@ function formatDateDDMMYYYY(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
+async function ensureStorageBucket() {
+  if (!supabaseClient) {
+    await initSupabaseClient();
+  }
+
+  if (!supabaseClient) {
+    console.warn("⚠️ Supabase client not available");
+    return false;
+  }
+
+  try {
+    // Try to access bucket - if it doesn't exist, create it
+    const { data, error } = await supabaseClient.storage.listBuckets();
+
+    if (error) {
+      console.warn("⚠️ Cannot access storage:", error.message);
+      return false;
+    }
+
+    const bucketExists = data?.some(b => b.name === 'fuel_data');
+
+    if (!bucketExists) {
+      console.log("📦 Creating 'fuel_data' storage bucket...");
+      const { data: bucket, error: createError } = await supabaseClient.storage.createBucket('fuel_data', {
+        public: false
+      });
+
+      if (createError) {
+        console.warn("⚠️ Could not create bucket:", createError.message);
+        return false;
+      }
+      console.log("✅ Bucket created successfully");
+    }
+    return true;
+  } catch (err) {
+    console.warn("⚠️ Error with storage bucket:", err.message);
+    return false;
+  }
+}
+
 async function saveCsvFuelDataToSupabase(rawData) {
   try {
     if (rawData.length === 0) {
@@ -2013,7 +2053,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log("🔄 Starting CSV to Supabase migration...");
+    console.log("🔄 Starting CSV to Supabase Storage migration...");
     console.log(`📊 Processing ${rawData.length} CSV rows`);
 
     console.log("🔍 Extracting data from CSV columns A, D, AE, AF...");
