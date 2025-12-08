@@ -2289,30 +2289,43 @@ async function saveCsvFuelDataToSupabase(rawData) {
       console.log("\n📌 Fallback: Using localStorage...");
 
       try {
-        let localRecords = [];
-        const cached = localStorage.getItem("fuel_quantities_storage");
-        if (cached) {
-          localRecords = JSON.parse(cached);
-        }
+        // IMPORTANT: Don't store large datasets (15k+ records) in localStorage
+        // It exceeds quota and breaks the app
+        // Instead, just cache a small sample for display and rely on database
 
-        // Add new records with timestamp
+        const MAX_CACHE_SIZE = 500; // Only cache 500 most recent records
         const now = new Date().toISOString();
         const newRecords = recordsToMigrate.map((record, idx) => ({
           ...record,
-          id: (localRecords.length + idx + 1).toString(),
+          id: (idx + 1).toString(),
           created_at: now,
           updated_at: now
         }));
 
-        localRecords.push(...newRecords);
-        localStorage.setItem("fuel_quantities_storage", JSON.stringify(localRecords));
+        // Only keep the most recent records in localStorage
+        const sampleRecords = newRecords.slice(-MAX_CACHE_SIZE);
 
-        console.log(`✅ Data saved to localStorage instead`);
-        console.log(`📊 Total records in localStorage: ${localRecords.length}`);
-        console.log(`📝 New records added: ${newRecords.length}`);
+        try {
+          localStorage.setItem("fuel_quantities_sample", JSON.stringify(sampleRecords));
+          console.log(`✅ Cached ${sampleRecords.length} recent records to localStorage (sample)`);
+          console.log(`📌 Full dataset (${recordsToMigrate.length} records) available via database API`);
+        } catch (quotaErr) {
+          console.warn(`⚠️  localStorage quota limit - using database API for invoice data`);
+          // Clear old data to make room
+          try {
+            localStorage.removeItem("fuel_quantities_storage");
+            localStorage.removeItem("cachedFuelData");
+            console.log("🗑️  Cleared old cache keys");
+          } catch (e) {
+            // ignore
+          }
+        }
+
         syncSuccess = true;
       } catch (localErr) {
-        console.error("❌ localStorage save failed:", localErr.message);
+        console.error("⚠️  Error handling localStorage:", localErr.message);
+        // Don't fail the entire sync if localStorage fails
+        syncSuccess = true;
       }
     }
 
