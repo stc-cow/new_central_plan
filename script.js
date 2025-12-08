@@ -2158,8 +2158,8 @@ async function saveCsvFuelDataToSupabase(rawData) {
     console.log(`\n✅ Data cached locally (${fuelRecords.length} records) - invoice filtering will work offline`);
 
     // Final validation before sending to Supabase
-    console.log("\n🔍 Final validation before Supabase sync...");
-    const invalidRecords = fuelRecords.filter(record => {
+    console.log(`\n🔍 Final validation for ${recordsToMigrate.length} records...`);
+    const invalidMigrateRecords = recordsToMigrate.filter(record => {
       // Verify date exists and is valid
       if (!record.refilled_date) {
         console.warn(`  ❌ ${record.sitename}: Missing valid date`);
@@ -2173,16 +2173,16 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return false;
     });
 
-    if (invalidRecords.length > 0) {
-      console.error(`❌ CRITICAL: Found ${invalidRecords.length} invalid record(s) that should have been filtered!`);
-      console.error(`⛔ These records will NOT be sent to Supabase:`, invalidRecords);
+    if (invalidMigrateRecords.length > 0) {
+      console.error(`❌ CRITICAL: Found ${invalidMigrateRecords.length} invalid record(s) that should have been filtered!`);
+      console.error(`⛔ These records will NOT be sent to Supabase:`, invalidMigrateRecords);
       // Remove invalid records to ensure Supabase only gets valid data
-      const validRecords = fuelRecords.filter(record => record.refilled_date && record.refilled_quantity > 0);
-      fuelRecords.length = 0;
-      fuelRecords.push(...validRecords);
-      console.log(`✅ Cleaned records: ${validRecords.length} valid records remaining for Supabase`);
+      const validMigrateRecords = recordsToMigrate.filter(record => record.refilled_date && record.refilled_quantity > 0);
+      recordsToMigrate.length = 0;
+      recordsToMigrate.push(...validMigrateRecords);
+      console.log(`✅ Cleaned records: ${validMigrateRecords.length} valid records remaining for Supabase`);
     } else {
-      console.log(`✅ All ${fuelRecords.length} records validated - safe to send to Supabase`);
+      console.log(`✅ All ${recordsToMigrate.length} records validated - safe to send to Supabase`);
     }
 
     // Send only NEW records to backend API for Supabase insertion
