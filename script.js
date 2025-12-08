@@ -2085,16 +2085,24 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log(`📊 Preparing to migrate ${fuelRecords.length} fuel records...`);
-    console.log("📋 Sample records (first 3):");
-    fuelRecords.slice(0, 3).forEach((record, idx) => {
-      console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date || 'NULL'} | Qty: ${record.refilled_quantity || 'NULL'}`);
-    });
+    console.log(`\n📊 Filtering Summary:`);
+    console.log(`  Total CSV rows processed: ${rawData.length}`);
+    console.log(`  Valid records that match filters: ${fuelRecords.length}`);
+    console.log(`  Excluded records (invalid date or quantity ≤ 0): ${rawData.length - fuelRecords.length}`);
+
+    if (fuelRecords.length > 0) {
+      console.log("\n📋 Sample of valid records (first 3):");
+      fuelRecords.slice(0, 3).forEach((record, idx) => {
+        console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+      });
+    } else {
+      console.warn(`⚠️ No records matched the filters (valid date in AE + quantity > 0 in AF)`);
+    }
 
     // Cache data locally IMMEDIATELY before attempting backend sync
     cachedFuelData = fuelRecords;
     localStorage.setItem("cachedFuelData", JSON.stringify(fuelRecords));
-    console.log(`✅ Data cached locally (${fuelRecords.length} records) - invoice filtering will work offline`);
+    console.log(`\n✅ Data cached locally (${fuelRecords.length} records) - invoice filtering will work offline`);
 
     // Send to backend API for Supabase insertion
     console.log("📤 Sending fuel records to backend for Supabase sync...");
