@@ -2193,18 +2193,21 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
     console.log(`\n📤 Sending ${recordsToMigrate.length} new records to backend for Supabase sync...`);
     try {
+      console.log(`📌 API endpoint: /api/save-fuel-data`);
       const response = await fetch("/api/save-fuel-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ records: recordsToMigrate }),
+        timeout: 30000 // 30 second timeout
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.warn(`⚠️ Backend API error (${response.status}): ${errorData.error || response.statusText}`);
         console.log("📌 Using cached data for invoice functionality");
+        console.log("ℹ️  Supabase sync will retry in 30 seconds");
         return;
       }
 
