@@ -2189,9 +2189,8 @@ async function saveCsvFuelDataToSupabase(rawData) {
       // Use Promise.race with timeout to fail fast
       const storagePromise = (async () => {
         let allRecords = [];
-        let dbRecords = [];
 
-        // Step 1: Try to load existing records from Storage
+        // Load existing records from Storage
         try {
           console.log("🔄 Downloading fuel_quantities.json from Storage...");
           const { data, error } = await supabaseClient.storage
@@ -2209,48 +2208,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
           console.log("ℹ️  Storage read failed:", readErr.message);
         }
 
-        // Step 2: ALWAYS try to load from database table (to preserve historical data)
-        console.log("\n🔄 Loading historical data from database table...");
-        try {
-          const { data: dbData, error: dbError } = await supabaseClient
-            .from('fuel_quantities')
-            .select('sitename, region, refilled_date, refilled_quantity');
-
-          if (dbError) {
-            console.warn("⚠️  Database read failed:", dbError.message);
-            console.log("   Continuing with storage data only");
-          } else if (dbData && dbData.length > 0) {
-            dbRecords = dbData;
-            console.log(`✅ Loaded ${dbRecords.length} records from database table (PERMANENT VAULT)`);
-
-            // Merge: database records take precedence (they're the source of truth)
-            // Create a map of existing storage records by (sitename, refilled_date)
-            const storageMap = new Map();
-            allRecords.forEach((record) => {
-              const key = `${record.sitename}|${record.refilled_date}`;
-              storageMap.set(key, record);
-            });
-
-            // Add any database records not yet in storage
-            dbRecords.forEach((dbRecord) => {
-              const key = `${dbRecord.sitename}|${dbRecord.refilled_date}`;
-              if (!storageMap.has(key)) {
-                allRecords.push({
-                  sitename: dbRecord.sitename,
-                  region: dbRecord.region,
-                  refilled_date: dbRecord.refilled_date,
-                  refilled_quantity: dbRecord.refilled_quantity,
-                  source: 'database' // Mark where it came from
-                });
-              }
-            });
-
-            console.log(`📊 After merging database records: ${allRecords.length} total records in vault`);
-          }
-        } catch (dbErr) {
-          console.warn("⚠️  Database table access failed:", dbErr.message);
-          console.log("   Using storage data only");
-        }
+        console.log("📌 Note: Historical data is queried server-side via /api/get-invoice-data when needed");
 
         // Add new records with timestamp
         const now = new Date().toISOString();
