@@ -2256,17 +2256,20 @@ async function saveCsvFuelDataToSupabase(rawData) {
       }
       console.log("📌 Column mapping: A(0)→sitename, D(3)→region, AE(30)→refilled_date, AF(31)→refilled_quantity");
     } catch (fetchErr) {
-      console.error("❌ Backend API fetch failed:", fetchErr.message);
-      console.error("Error details:", {
-        name: fetchErr.name,
-        message: fetchErr.message,
-        stack: fetchErr.stack
-      });
-      console.warn("\n⚠️ Cannot reach backend API for Supabase sync");
-      console.log("📌 Using cached data for invoice functionality");
-      console.log("ℹ️  App is in offline mode - data cached locally");
-      console.log("✅ Invoice export will use local cache");
-      console.log("🔄 Sync will retry in 30 seconds");
+      syncSuccess = false;
+      console.warn("\n⚠️ Backend API not available:", fetchErr.message);
+      console.log("\n📌 Offline Mode Activated:");
+      console.log("  ✅ Dashboard display works with cached data");
+      console.log("  ✅ Invoice export uses local cache");
+      console.log("  ✅ Search and filtering work offline");
+      console.log("  ⏳ Supabase sync will retry in 30 seconds");
+    }
+
+    // Final status summary
+    if (syncSuccess) {
+      console.log("\n🎉 Full sync: Data synced to Supabase + cached locally");
+    } else {
+      console.log("\n📦 Offline mode: Data cached locally only (Supabase sync unavailable)");
     }
   } catch (err) {
     console.error("❌ Error in saveCsvFuelDataToSupabase:", err.message);
