@@ -2450,25 +2450,10 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
       console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
     });
 
-    // Filter by region if specified (date filtering already done in query)
-    let filteredRecords = allRecords.filter(record => {
-      // Apply region filter if specified
-      if (regionFilter && regionFilter.trim() !== "") {
-        if (regionFilter === "CER") {
-          return record.region?.toLowerCase().includes("central") || record.region?.toLowerCase().includes("east");
-        } else if (regionFilter === "Central") {
-          return record.region?.toLowerCase().includes("central");
-        } else if (regionFilter === "East") {
-          return record.region?.toLowerCase().includes("east");
-        }
-      }
-
-      return true;
-    });
-
-    console.log(`✅ Filtered ${filteredRecords.length} records by region`);
+    // Records are already filtered by backend API (no need for client-side filtering)
+    console.log(`✅ Records ready for invoice (backend pre-filtered by date range and region)`);
     supabaseAvailable = true;
-    return filteredRecords;
+    return allRecords;
   } catch (err) {
     console.warn("⚠️ Cannot read from storage (network issue)");
     console.log("   Error:", err.message);
