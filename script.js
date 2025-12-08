@@ -2412,7 +2412,8 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
   }
 
   if (!supabaseClient) {
-    throw new Error("❌ Supabase client not initialized. Check your credentials.");
+    console.warn("⚠️ Supabase client not available - using cached data");
+    return filterCachedFuelData(startDate, endDate, regionFilter);
   }
 
   try {
@@ -2428,7 +2429,6 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
     // Apply region filter if specified
     if (regionFilter && regionFilter.trim() !== "") {
       if (regionFilter === "CER") {
-        // For CER, fetch records where region contains either Central or East
         query = query.or(`region.like.%Central%,region.like.%East%`);
       } else if (regionFilter === "Central") {
         query = query.like("region", "%Central%");
@@ -2440,37 +2440,57 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
     const { data, error } = await query.order("refilled_date", { ascending: true });
 
     if (error) {
-      console.error("❌ Supabase query error:", error);
-      console.error("Error details:", {
-        message: error.message,
-        code: error.code,
-        status: error.status,
-        hint: error.hint
-      });
-
-      // Better error message
-      if (error.message.includes("Failed to fetch")) {
-        throw new Error(`Network Error: Cannot reach Supabase. Check your internet connection and Supabase URL: ${VITE_SUPABASE_URL}`);
-      } else {
-        throw new Error(`Database error: ${error.message}`);
-      }
+      console.warn("⚠️ Supabase query failed, using cached data:", error.message);
+      return filterCachedFuelData(startDate, endDate, regionFilter);
     }
 
     console.log(`✅ Fetched ${data?.length || 0} records from Supabase`);
+    supabaseAvailable = true;
     return data || [];
   } catch (err) {
-    console.error("❌ Exception in fetchFuelQuantitiesByDateRange:", err);
-
-    // Provide helpful debugging info
-    if (err.message.includes("Failed to fetch")) {
-      console.error("🔧 Debugging info:");
-      console.error("  - Supabase URL:", VITE_SUPABASE_URL);
-      console.error("  - Client initialized:", !!supabaseClient);
-      console.error("  - This could be a CORS issue or network connectivity problem");
-    }
-
-    throw err;
+    console.warn("⚠️ Cannot reach Supabase (network issue), using cached data");
+    console.log("   Error:", err.message);
+    return filterCachedFuelData(startDate, endDate, regionFilter);
   }
+}
+
+function filterCachedFuelData(startDate, endDate, regionFilter = "") {
+  // Load from cache if not already in memory
+  if (cachedFuelData.length === 0) {
+    const cached = localStorage.getItem("cachedFuelData");
+    if (cached) {
+      cachedFuelData = JSON.parse(cached);
+      console.log(`📦 Loaded ${cachedFuelData.length} records from local cache`);
+    }
+  }
+
+  if (cachedFuelData.length === 0) {
+    console.warn("⚠️ No cached data available");
+    return [];
+  }
+
+  // Filter by date range
+  let filtered = cachedFuelData.filter(record => {
+    const recordDate = record.refilled_date;
+    return recordDate >= startDate && recordDate <= endDate;
+  });
+
+  // Filter by region if specified
+  if (regionFilter && regionFilter.trim() !== "") {
+    filtered = filtered.filter(record => {
+      if (regionFilter === "CER") {
+        return record.region?.toLowerCase().includes("central") || record.region?.toLowerCase().includes("east");
+      } else if (regionFilter === "Central") {
+        return record.region?.toLowerCase().includes("central");
+      } else if (regionFilter === "East") {
+        return record.region?.toLowerCase().includes("east");
+      }
+      return true;
+    });
+  }
+
+  console.log(`📦 Using cached data: ${filtered.length} records match filters`);
+  return filtered;
 }
 
 function generateInvoiceExcel(records, startDate, endDate, regionFilter = "") {
