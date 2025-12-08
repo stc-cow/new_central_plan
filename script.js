@@ -2105,12 +2105,12 @@ async function saveCsvFuelDataToSupabase(rawData) {
     console.log(`  Valid records extracted: ${fuelRecords.length}`);
     console.log(`  Excluded records (invalid date or quantity ≤ 0): ${rawData.length - fuelRecords.length}`);
 
-    // Always migrate all CSV records (allow duplicate site names with different timestamps and IDs)
-    console.log("\n📝 Preparing all records for migration...");
+    // Prepare records for INSERT-ONLY sync (append all, never replace)
+    console.log("\n📝 Preparing all records for INSERT-ONLY migration...");
     const recordsToMigrate = [...fuelRecords];
 
     console.log(`  ✅ Records to migrate: ${recordsToMigrate.length}`);
-    console.log(`  📌 Note: Duplicate site names allowed - each record gets unique ID + timestamp`);
+    console.log(`  📌 INSERT-ONLY: Every sync appends new records, never updates existing ones`);
 
     if (recordsToMigrate.length > 0) {
       console.log("\n📋 Sample of records to migrate (first 3):");
