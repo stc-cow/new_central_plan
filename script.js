@@ -2189,56 +2189,67 @@ async function saveCsvFuelDataToSupabase(rawData) {
       // Use Promise.race with timeout to fail fast
       const storagePromise = (async () => {
         let allRecords = [];
+        let dbRecords = [];
+
+        // Step 1: Try to load existing records from Storage
         try {
           console.log("🔄 Downloading fuel_quantities.json from Storage...");
           const { data, error } = await supabaseClient.storage
             .from('fuel_data')
             .download('fuel_quantities.json');
 
-          if (error) {
-            console.warn("⚠️  Storage file doesn't exist yet:", error.message);
-            console.log("🔄 Attempting to load existing data from Supabase database table as fallback...");
-
-            // Try to load from database table as fallback
-            try {
-              const { data: dbData, error: dbError } = await supabaseClient
-                .from('fuel_quantities')
-                .select('sitename, region, refilled_date, refilled_quantity');
-
-              if (dbError) {
-                console.warn("⚠️  Database read also failed:", dbError.message);
-                console.log("ℹ️  Starting fresh (no existing data found)");
-              } else if (dbData && dbData.length > 0) {
-                allRecords = dbData;
-                console.log(`✅ Loaded ${allRecords.length} existing records from database table`);
-              } else {
-                console.log("ℹ️  Database is empty - starting fresh");
-              }
-            } catch (dbErr) {
-              console.warn("⚠️  Database fallback failed:", dbErr.message);
-              console.log("ℹ️  Starting fresh");
-            }
-          } else if (data) {
+          if (!error && data) {
             const text = await data.text();
             allRecords = JSON.parse(text);
-            console.log(`✅ Found ${allRecords.length} existing records in storage - PRESERVING ALL OLD DATA`);
+            console.log(`✅ Found ${allRecords.length} existing records in storage`);
+          } else {
+            console.log("ℹ️  Storage file doesn't exist yet - starting fresh");
           }
         } catch (readErr) {
-          console.error("❌ Error reading existing data from storage:", readErr.message);
-          console.warn("⚠️  Attempting database table as fallback...");
+          console.log("ℹ️  Storage read failed:", readErr.message);
+        }
 
-          try {
-            const { data: dbData, error: dbError } = await supabaseClient
-              .from('fuel_quantities')
-              .select('sitename, region, refilled_date, refilled_quantity');
+        // Step 2: ALWAYS try to load from database table (to preserve historical data)
+        console.log("\n🔄 Loading historical data from database table...");
+        try {
+          const { data: dbData, error: dbError } = await supabaseClient
+            .from('fuel_quantities')
+            .select('sitename, region, refilled_date, refilled_quantity');
 
-            if (!dbError && dbData) {
-              allRecords = dbData;
-              console.log(`✅ Loaded ${allRecords.length} records from database table`);
-            }
-          } catch (dbErr) {
-            console.log("ℹ️  Both storage and database reads failed - starting fresh");
+          if (dbError) {
+            console.warn("⚠️  Database read failed:", dbError.message);
+            console.log("   Continuing with storage data only");
+          } else if (dbData && dbData.length > 0) {
+            dbRecords = dbData;
+            console.log(`✅ Loaded ${dbRecords.length} records from database table (PERMANENT VAULT)`);
+
+            // Merge: database records take precedence (they're the source of truth)
+            // Create a map of existing storage records by (sitename, refilled_date)
+            const storageMap = new Map();
+            allRecords.forEach((record) => {
+              const key = `${record.sitename}|${record.refilled_date}`;
+              storageMap.set(key, record);
+            });
+
+            // Add any database records not yet in storage
+            dbRecords.forEach((dbRecord) => {
+              const key = `${dbRecord.sitename}|${dbRecord.refilled_date}`;
+              if (!storageMap.has(key)) {
+                allRecords.push({
+                  sitename: dbRecord.sitename,
+                  region: dbRecord.region,
+                  refilled_date: dbRecord.refilled_date,
+                  refilled_quantity: dbRecord.refilled_quantity,
+                  source: 'database' // Mark where it came from
+                });
+              }
+            });
+
+            console.log(`📊 After merging database records: ${allRecords.length} total records in vault`);
           }
+        } catch (dbErr) {
+          console.warn("⚠️  Database table access failed:", dbErr.message);
+          console.log("   Using storage data only");
         }
 
         // Add new records with timestamp
