@@ -2166,117 +2166,83 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log("🔍 Starting region data extraction from raw CSV...");
-    console.log("Raw data sample - first row keys:", rawData.length > 0 ? Object.keys(rawData[0]) : "No data");
+    console.log("🔍 Extracting data by COLUMN POSITION (A=0, D=3, AE=30, AF=31)...");
 
-    // Transform CSV data to fuel_quantities format
-    // Mapping: Column A -> sitename, Column D -> region, Column AE -> refilled_date (DD/MM/YYYY), Column AF -> refilled_quantity
+    // Get column headers from first row (lowercase keys)
+    const sampleRow = rawData[0];
+    const headers = Object.keys(sampleRow);
+
+    console.log("CSV Headers count:", headers.length);
+    console.log("Column A (0):", headers[0], "=", sampleRow[headers[0]]);
+    console.log("Column D (3):", headers[3], "=", sampleRow[headers[3]]);
+    console.log("Column AE (30):", headers[30], "=", sampleRow[headers[30]]);
+    console.log("Column AF (31):", headers[31], "=", sampleRow[headers[31]]);
+
     const fuelRecords = rawData
       .map((row) => {
-        // Get sitename - try different possible column names for column A
-        const sitename = row.sitename ||
-                        row.site_name ||
-                        row['site name'] ||
-                        row['sitename'] ||
-                        '';
+        const headers = Object.keys(row);
 
-        // Get region - try MANY possible column name variations
-        let region = row.regionname ||
-                     row.region ||
-                     row['region name'] ||
-                     row['regionname'] ||
-                     row['Region Name'] ||
-                     row['region'] ||
-                     row['Region'] ||
-                     row['RegionName'] ||
-                     '';
+        // Extract by COLUMN POSITION (not header name)
+        // Column A (index 0) = sitename
+        const sitename = headers[0] ? String(row[headers[0]]).trim() : '';
 
-        // If still not found, try to get it by checking all keys for "region"
-        if (!region) {
-          const regionKey = Object.keys(row).find(key =>
-            key.toLowerCase().includes('region')
-          );
-          if (regionKey) {
-            region = row[regionKey];
-          }
-        }
+        // Column D (index 3) = region
+        const region = headers[3] ? String(row[headers[3]]).trim() : '';
 
-        // Get refilled date - try different possible column names for column AE (LastFuelingDate)
-        const refilled_date_raw = row.lastfuelingdate ||
-                                  row['last fueling date'] ||
-                                  row['lastfuelingdate'] ||
-                                  row['refilled_date'] ||
-                                  '';
+        // Column AE (index 30) = refilled_date (DD/MM/YYYY format)
+        const refilled_date_raw = headers[30] ? String(row[headers[30]]).trim() : '';
 
-        // Get refilled quantity - try different possible column names for column AF (LastFuelingQTY)
-        const refilled_qty_raw = row.lastfuelingqty ||
-                                row['last fueling qty'] ||
-                                row['lastfuelingqty'] ||
-                                row['refilled_quantity'] ||
-                                '';
+        // Column AF (index 31) = refilled_quantity
+        const refilled_qty_raw = headers[31] ? String(row[headers[31]]).trim() : '';
 
         // Only include rows with sitename
-        if (!sitename || sitename.trim() === '') {
+        if (!sitename || sitename === '') {
           return null;
         }
 
         // Convert date to YYYY-MM-DD format for DATE storage
         let refilled_date_iso = null;
-        if (refilled_date_raw && refilled_date_raw.trim() !== '') {
+        if (refilled_date_raw && refilled_date_raw !== '') {
           refilled_date_iso = convertDateToISO(refilled_date_raw);
 
-          // Log the conversion for debugging
           if (!refilled_date_iso) {
             console.warn(`Failed to parse date for site ${sitename}: "${refilled_date_raw}"`);
           }
         }
 
         return {
-          sitename: String(sitename).trim(),
-          region: region && region.trim() !== '' ? String(region).trim() : null,
+          sitename: sitename,
+          region: region && region !== '' ? region : null,
           refilled_date: refilled_date_iso,
           refilled_quantity: refilled_qty_raw && refilled_qty_raw !== ''
             ? parseFloat(refilled_qty_raw)
             : null,
         };
       })
-      .filter((record) => record !== null); // Remove null records
+      .filter((record) => record !== null);
 
     if (fuelRecords.length === 0) {
       console.log("No fuel records to save from CSV");
       return;
     }
 
-    console.log(
-      `📊 Migrating ${fuelRecords.length} fuel records from CSV to Supabase...`
-    );
+    console.log(`📊 Migrating ${fuelRecords.length} fuel records from CSV to Supabase...`);
 
-    // Log first 5 records for debugging date format
-    console.log("📋 Sample records to be migrated:");
+    console.log("📋 Sample records (first 5):");
     fuelRecords.slice(0, 5).forEach((record, idx) => {
-      console.log(`  [${idx + 1}] Site: ${record.sitename}, Region: "${record.region}" (null: ${record.region === null}), Date: ${record.refilled_date}, Qty: ${record.refilled_quantity}`);
+      console.log(`  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || 'NULL'} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
     });
 
-    // Log sample raw data to check region extraction
-    console.log("📊 Raw CSV data (first 3 rows) - checking region extraction:");
-    rawData.slice(0, 3).forEach((row, idx) => {
-      console.log(`  [${idx + 1}] All row keys:`, Object.keys(row).join(", "));
-      const regionKey = Object.keys(row).find(k => k.toLowerCase().includes('region'));
-      console.log(`       Found region key: "${regionKey}" = "${regionKey ? row[regionKey] : 'NOT FOUND'}"`);
-    });
-
-    // Insert records into fuel_quantities table
     const { error } = await supabaseClient
       .from("fuel_quantities")
       .insert(fuelRecords);
 
     if (error) {
       console.error("❌ Error saving CSV data to Supabase:", error);
+      console.error("Error details:", error.details, error.message);
     } else {
-      console.log(
-        `✅ Successfully migrated ${fuelRecords.length} fuel records to Supabase`
-      );
-      console.log("📍 Data source: Column A (Sitename), Column D (Region), Column AE (Refilled Date), Column AF (Refilled Quantity)");
+      console.log(`✅ Successfully migrated ${fuelRecords.length} fuel records to Supabase`);
+      console.log("📍 Column Mapping: A→sitename, D→region, AE→refilled_date, AF→refilled_quantity");
     }
   } catch (err) {
     console.error("Error in saveCsvFuelDataToSupabase:", err);
