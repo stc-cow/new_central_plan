@@ -2179,14 +2179,21 @@ async function saveCsvFuelDataToSupabase(rawData) {
       .map((row) => {
         const rowHeaders = Object.keys(row);
 
-        // Extract by COLUMN POSITION - use safe access
-        const sitename = (rowHeaders[0] && row[rowHeaders[0]]) ? String(row[rowHeaders[0]]).trim() : '';
+        // Extract sitename - use the actual site name, not the ID
+        // The "sitename" field contains the site display name (e.g., "COW779")
+        const sitename = row.sitename || '';
+
+        // Column D (index 3) = region
         const region = (rowHeaders[3] && row[rowHeaders[3]]) ? String(row[rowHeaders[3]]).trim() : '';
+
+        // Column AE (index 30) = refilled_date (DD/MM/YYYY format)
         const refilled_date_raw = (rowHeaders[30] && row[rowHeaders[30]]) ? String(row[rowHeaders[30]]).trim() : '';
+
+        // Column AF (index 31) = refilled_quantity
         const refilled_qty_raw = (rowHeaders[31] && row[rowHeaders[31]]) ? String(row[rowHeaders[31]]).trim() : '';
 
         // Only include rows with sitename
-        if (!sitename || sitename === '') {
+        if (!sitename || sitename.trim() === '') {
           return null;
         }
 
@@ -2201,7 +2208,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
         }
 
         return {
-          sitename: sitename,
+          sitename: String(sitename).trim(),
           region: region && region !== '' ? region : null,
           refilled_date: refilled_date_iso,
           refilled_quantity: refilled_qty_raw && refilled_qty_raw !== '' ? parseFloat(refilled_qty_raw) : null,
