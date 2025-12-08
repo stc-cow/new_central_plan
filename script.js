@@ -1465,8 +1465,14 @@ async function loadDashboard() {
     console.warn("No sites data available after filtering");
   }
 
-  // Save CSV fuel data to Supabase
-  await saveCsvFuelDataToSupabase(rawData);
+  // Save CSV fuel data to Supabase only once per session to prevent duplicates
+  if (!csvDataMigrated) {
+    console.log("📊 First load - migrating CSV data to Supabase...");
+    await saveCsvFuelDataToSupabase(rawData);
+    csvDataMigrated = true;
+  } else {
+    console.log("✅ CSV data already migrated in this session - skipping migration");
+  }
 
   updateMetrics(sitesData);
   populateDueTable(sitesData);
