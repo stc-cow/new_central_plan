@@ -2003,6 +2003,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
+    console.log("🔄 Starting CSV to Supabase migration...");
+    console.log(`📊 Processing ${rawData.length} CSV rows`);
+
     console.log("🔍 Extracting data from CSV columns A, D, AE, AF...");
 
     // Get column headers from first row (lowercase keys)
