@@ -2389,12 +2389,24 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
       .lte('refilled_date', endDate);
 
     if (error) {
-      console.warn("⚠️ Database read failed, using cached data:", error.message);
+      console.error("❌ DATABASE ERROR:", error);
+      console.error("   Code:", error.code);
+      console.error("   Message:", error.message);
+      console.warn("⚠️ Database read failed, falling back to cached data...");
+      return filterCachedFuelData(startDate, endDate, regionFilter);
+    }
+
+    if (!data) {
+      console.warn("⚠️ Database returned no data");
       return filterCachedFuelData(startDate, endDate, regionFilter);
     }
 
     const allRecords = data || [];
-    console.log(`✅ Loaded ${allRecords.length} records from database table (includes historical data)`);
+    console.log(`✅ Loaded ${allRecords.length} records from database table`);
+    console.log(`📋 Sample records from database:`);
+    allRecords.slice(0, 5).forEach((record, idx) => {
+      console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+    });
 
     // Filter by region if specified (date filtering already done in query)
     let filteredRecords = allRecords.filter(record => {
