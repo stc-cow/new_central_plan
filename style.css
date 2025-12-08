@@ -145,8 +145,8 @@ body {
 }
 
 .login-logo {
-  width: 280px;
-  height: 280px;
+  width: 200px;
+  height: 200px;
   margin-bottom: 40px;
   filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3));
   transition: transform 0.3s ease;
@@ -177,10 +177,15 @@ body {
 }
 
 .login-title {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: bold;
-  margin: 0 0 10px 0;
+  margin: 0 0 20px 0;
   color: white;
+  text-align: center;
+}
+
+.login-title p {
+  margin: 0;
 }
 
 .login-subtitle {
@@ -191,13 +196,12 @@ body {
 }
 
 .login-motto {
-  font-size: 13px;
-  color: rgba(204, 224, 255, 0.8);
+  font-size: 15px;
+  color: rgba(204, 224, 255, 0.9);
   margin: 0;
   font-weight: 500;
-  font-style: italic;
   letter-spacing: 0.3px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .login-message {
@@ -207,28 +211,13 @@ body {
   margin: 0;
 }
 
-.login-right {
+.login-section {
   flex: 1;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 30px,
-      rgba(18, 55, 102, 0.02) 30px,
-      rgba(18, 55, 102, 0.02) 31px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 30px,
-      rgba(18, 55, 102, 0.02) 30px,
-      rgba(18, 55, 102, 0.02) 31px
-    ),
-    white;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 40px;
+  padding: 40px 20px 60px;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
   position: relative;
 }
 
