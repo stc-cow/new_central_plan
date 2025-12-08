@@ -550,23 +550,24 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
 
     // Fetch all records from the database
     console.log("📥 Fetching all records from fuel_quantities table...");
-    const { data: allRecords, error: fetchError } = await supabase
+    let { data: allRecords, error: fetchError } = await supabase
       .from("fuel_quantities")
-      .select("id, sitename, refilled_date, refilled_quantity, region")
-      .order("id", { ascending: true });
+      .select("id, sitename, refilled_date, refilled_quantity, region");
 
     if (fetchError) {
-      console.error("❌ Error fetching records:", fetchError);
-      console.error("   Error details:", JSON.stringify(fetchError, null, 2));
+      console.error("❌ Error fetching records:", fetchError?.message || fetchError);
       return res.status(500).json({
         status: "error",
-        error: "Failed to fetch records",
-        details: fetchError?.message || String(fetchError),
-        code: fetchError?.code,
+        error: "Failed to fetch records from database",
+        details: fetchError?.message || fetchError?.details || String(fetchError),
       });
     }
 
-    if (!allRecords || allRecords.length === 0) {
+    if (!allRecords) {
+      allRecords = [];
+    }
+
+    if (allRecords.length === 0) {
       console.log("✅ No records to clean");
       return res.json({
         status: "success",
@@ -589,18 +590,18 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
       if (!grouped[key]) {
         grouped[key] = [];
       }
-      grouped[key].push(record);
+      grouped[key].push(record.id);
     }
 
     // Identify duplicate IDs (keep first, remove rest)
+    let dupeCount = 0;
     for (const key in grouped) {
       if (grouped[key].length > 1) {
-        console.log(
-          `⚠️  Found ${grouped[key].length} duplicates for: ${key}`,
-        );
+        dupeCount++;
+        console.log(`⚠️  Found ${grouped[key].length} duplicates for: ${key}`);
         // Keep the first one (lowest ID), mark others for deletion
         for (let i = 1; i < grouped[key].length; i++) {
-          duplicateIds.push(grouped[key][i].id);
+          duplicateIds.push(grouped[key][i]);
         }
       }
     }
@@ -616,19 +617,19 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
       });
     }
 
-    console.log(`🔄 Removing ${duplicateIds.length} duplicate records...`);
+    console.log(
+      `🔄 Removing ${duplicateIds.length} duplicate records from ${dupeCount} groups...`,
+    );
 
     // Delete duplicates in batches
     let deletedCount = 0;
-    const BATCH_SIZE = 100;
+    const BATCH_SIZE = 50;
 
     for (let i = 0; i < duplicateIds.length; i += BATCH_SIZE) {
       const batch = duplicateIds.slice(i, i + BATCH_SIZE);
       const batchNum = Math.floor(i / BATCH_SIZE) + 1;
 
-      console.log(
-        `   Deleting batch ${batchNum} (${batch.length} records)...`,
-      );
+      console.log(`   Deleting batch ${batchNum} (${batch.length} records)...`);
 
       const { error: deleteError } = await supabase
         .from("fuel_quantities")
@@ -636,11 +637,11 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
         .in("id", batch);
 
       if (deleteError) {
-        console.error(`❌ Batch ${batchNum} delete failed:`, deleteError.message);
+        console.error(`❌ Batch ${batchNum} delete failed:`, deleteError?.message || deleteError);
         return res.status(500).json({
           status: "error",
           error: `Failed to delete batch ${batchNum}`,
-          details: deleteError.message,
+          details: deleteError?.message || String(deleteError),
           deletedSoFar: deletedCount,
         });
       }
@@ -661,10 +662,12 @@ app.post("/api/cleanup-duplicates", async (req, res) => {
       totalBefore: allRecords.length,
     });
   } catch (error) {
-    console.error("❌ Cleanup failed:", error.message);
+    console.error("❌ Cleanup failed:", error);
+    console.error("   Stack:", error?.stack);
     res.status(500).json({
       status: "error",
-      error: error.message,
+      error: error?.message || String(error),
+      type: error?.constructor?.name,
     });
   }
 });
