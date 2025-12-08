@@ -2354,10 +2354,24 @@ window.downloadInvoiceByDateRange = async function downloadInvoiceByDateRange() 
       return;
     }
 
-    // Keep all records - no deduplication (Option A: append all data with unique timestamps/IDs)
-    console.log(`📊 Exporting ${filteredRecords.length} records (Option A: all records kept, including duplicates by site name)`);
+    // Deduplicate records by sitename + date + quantity (keep first occurrence)
+    const deduplicatedRecords = [];
+    const seen = new Set();
 
-    generateInvoiceExcel(filteredRecords, startDate, endDate, selectedRegionFilter);
+    for (const record of filteredRecords) {
+      const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduplicatedRecords.push(record);
+      }
+    }
+
+    console.log(`📊 Exporting ${deduplicatedRecords.length} records (deduplicated from ${filteredRecords.length})`);
+    if (deduplicatedRecords.length < filteredRecords.length) {
+      console.warn(`⚠️  Removed ${filteredRecords.length - deduplicatedRecords.length} duplicate records`);
+    }
+
+    generateInvoiceExcel(deduplicatedRecords, startDate, endDate, selectedRegionFilter);
 
     statusDiv.textContent = `✅ Invoice downloaded (${filteredRecords.length} records)`;
     statusDiv.className = "invoice-status success";
