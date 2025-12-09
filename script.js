@@ -2215,14 +2215,23 @@ async function saveCsvFuelDataToSupabase(rawData) {
             .download('fuel_quantities.json');
 
           if (!error && data) {
-            const text = await data.text();
-            allRecords = JSON.parse(text);
-            console.log(`✅ Found ${allRecords.length} existing records in storage`);
-          } else {
+            try {
+              const text = await data.text();
+              allRecords = JSON.parse(text);
+              console.log(`✅ Found ${allRecords.length} existing records in storage`);
+            } catch (parseErr) {
+              console.warn("⚠️ Could not parse Storage data:", parseErr.message);
+            }
+          } else if (error && error.message && error.message.includes("not found")) {
             console.log("ℹ️  Storage file doesn't exist yet - starting fresh");
+          } else if (error) {
+            throw new Error(`Storage read error: ${error.message || 'Unknown error'}`);
           }
         } catch (readErr) {
           console.log("ℹ️  Storage read failed:", readErr.message);
+          if (readErr.message && readErr.message.includes("Failed to fetch")) {
+            console.log("   (Network issue or bucket doesn't exist)");
+          }
         }
 
         console.log("📌 Note: Historical data is queried server-side via /api/get-invoice-data when needed");
