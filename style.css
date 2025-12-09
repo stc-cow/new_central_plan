@@ -2156,21 +2156,21 @@ body {
 
 .download-invoice-btn {
   padding: 12px 20px;
-  border: 2px solid #7c3aed;
+  border: 2px solid var(--aces-primary);
   border-radius: 20px;
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, var(--aces-primary) 0%, #1a1f4f 100%);
   color: white;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);
+  box-shadow: 0 2px 8px rgba(32, 43, 109, 0.06);
 }
 
 .download-invoice-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.12);
+  box-shadow: 0 4px 16px rgba(32, 43, 109, 0.12);
 }
 
 .export-invoice-btn {
