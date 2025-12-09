@@ -2257,11 +2257,89 @@ async function saveCsvFuelDataToSupabase(rawData) {
     console.error("Stack trace:", err.stack);
     console.warn("⚠️ CSV migration encountered an error");
     console.log("✅ App will continue with cached data");
-    console.log("🔄 Next auto-sync in 30 seconds");
+    console.log("🔄 Next auto-sync in 1 minute");
     // Don't re-throw - let app continue with cached data
     return;
   }
 }
 
+async function backgroundSyncData() {
+  try {
+    // Silently fetch latest CSV data
+    const rawData = await fetchCSV();
+    if (rawData.length === 0) {
+      console.warn("⚠️ Background sync: No CSV data available");
+      return;
+    }
+
+    // Silently sync to Supabase without logging verbose details
+    try {
+      await saveCsvFuelDataToSupabase(rawData);
+    } catch (syncErr) {
+      console.warn("⚠️ Background sync: Supabase sync failed (continuing)", syncErr.message);
+    }
+
+    // Filter and validate sites
+    const newSitesData = filterAndValidateSites(rawData);
+
+    // Check if data has changed compared to current sitesData
+    const dataChanged = hasDataChanged(sitesData, newSitesData);
+
+    if (dataChanged) {
+      console.log("✅ Background sync: Data changed, updating UI...");
+      sitesData = newSitesData;
+
+      // Soft update: only update metrics and tables, not the map
+      try {
+        updateMetrics(sitesData);
+        populateDueTable(sitesData);
+        updateEventCards(sitesData);
+        console.log("✅ Background sync: UI updated successfully");
+      } catch (uiErr) {
+        console.error("❌ Background sync: Error updating UI:", uiErr.message);
+      }
+    } else {
+      console.log("ℹ️ Background sync: No changes detected, skipping UI update");
+    }
+  } catch (error) {
+    console.error("❌ Background sync failed:", error.message);
+  }
+}
+
+function hasDataChanged(oldData, newData) {
+  // Check if the number of sites changed
+  if (oldData.length !== newData.length) {
+    return true;
+  }
+
+  // Check if any critical fields changed (status, fuel date, etc)
+  for (let i = 0; i < oldData.length; i++) {
+    const oldSite = oldData[i];
+    const newSite = newData.find(s => s.sitename === oldSite.sitename);
+
+    if (!newSite) {
+      return true; // Site was removed
+    }
+
+    // Check if critical fields changed
+    if (
+      oldSite.status !== newSite.status ||
+      oldSite.days !== newSite.days ||
+      oldSite.nextfuelingplan !== newSite.nextfuelingplan ||
+      oldSite.lastfuelingdate !== newSite.lastfuelingdate
+    ) {
+      return true; // Critical data changed
+    }
+  }
+
+  // Check for new sites
+  for (const newSite of newData) {
+    if (!oldData.find(s => s.sitename === newSite.sitename)) {
+      return true; // New site added
+    }
+  }
+
+  return false; // No changes detected
+}
 
 export {};
