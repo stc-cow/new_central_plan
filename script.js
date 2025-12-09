@@ -94,14 +94,12 @@ function showLoginPage() {
   loginPage.classList.add("show");
   document.getElementById("dashboardPage").style.display = "none";
   document.getElementById("analyticsPage").style.display = "none";
-  document.getElementById("invoicingPage").style.display = "none";
 }
 
 function showDashboard() {
   document.getElementById("loginPage").classList.remove("show");
   document.getElementById("dashboardPage").style.display = "grid";
   document.getElementById("analyticsPage").style.display = "none";
-  document.getElementById("invoicingPage").style.display = "none";
 }
 
 function setupLoginForm() {
