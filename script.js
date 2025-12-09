@@ -1,5 +1,6 @@
 const API_BASE = window.location.origin;
 const CSV_API_URL = `${API_BASE}/api/fetch-csv`;
+const INVOICE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1289106706&single=true&output=csv";
 
 const ACES_ACCESS_CODE = "ACES2025";
 
