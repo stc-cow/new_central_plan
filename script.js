@@ -1502,27 +1502,9 @@ function updateEventCards(sites) {
   const sitesWithVVVIP = sites.filter(
     (s) => s.sitelabel && s.sitelabel.toUpperCase().includes("VVVIP"),
   );
-  console.log(
-    "Sites with VVVIP label:",
-    sitesWithVVVIP.map((s) => ({
-      name: s.sitename,
-      label: s.sitelabel,
-      region: s.regionname,
-      status: s.cowstatus,
-    })),
-  );
 
   const vvvipSites = sites.filter((s) => isVVVIPSite(s));
 
-  console.log("Final VVVIP sites (after criteria filter):", vvvipSites.length);
-  console.log("VVVIP criteria check details:");
-  if (sitesWithVVVIP.length > 0) {
-    sitesWithVVVIP.forEach((s) => {
-      console.log(
-        `  ${s.sitename}: Region=${s.regionname}, Status=${s.cowstatus}, Pass=${isVVVIPSite(s)}`,
-      );
-    });
-  }
 
   document.getElementById("vvvipCount").textContent = vvvipSites.length;
 }
