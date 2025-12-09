@@ -81,7 +81,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initializeApp();
 });
 
-
 // Clean up active user when page is closed or navigated away
 window.addEventListener("beforeunload", () => {
   removeActiveUser();
@@ -256,7 +255,6 @@ async function fallbackCountActiveUsers() {
   }
 }
 
-
 async function removeActiveUser() {
   // Skip if Supabase not available or no session
   if (!supabaseClient || !currentSessionId || !supabaseAvailable) {
@@ -276,7 +274,6 @@ async function removeActiveUser() {
     // Silently fail on logout
   }
 }
-
 
 async function initializeApp() {
   // Initialize Supabase client
@@ -348,7 +345,7 @@ async function handleLogin() {
       document.getElementById("username").value = "";
       document.getElementById("password").value = "";
     } catch (error) {
-        loginError.textContent =
+      loginError.textContent =
         "An error occurred during login. Please try again.";
       loginError.style.display = "block";
 
@@ -397,8 +394,7 @@ async function startDashboardAsync() {
         closeSearchModal();
       }
     });
-  } catch (error) {
-  }
+  } catch (error) {}
 }
 
 window.handleLogout = function handleLogout() {
@@ -450,7 +446,6 @@ async function fetchCSV() {
 
   // Try API endpoint first (for servers with backend like Fly.dev)
   try {
-
     const response = await fetch("/api/fetch-csv", {
       method: "GET",
       headers: {
@@ -479,7 +474,6 @@ async function fetchCSV() {
       } else {
         proxyUrl = CORS_PROXIES[i] + encodeURIComponent(CSV_URL);
       }
-
 
       const response = await fetch(proxyUrl, {
         method: "GET",
@@ -516,8 +510,7 @@ async function fetchCSV() {
         return parsed;
       }
     }
-  } catch (error) {
-  }
+  } catch (error) {}
 
   return [];
 }
@@ -693,7 +686,12 @@ function convertDateToISO(dateStr) {
   dateStr = dateStr.trim();
 
   // Silently skip Excel error codes and invalid values
-  if (dateStr === "#N/A" || dateStr === "#REF!" || dateStr === "#VALUE!" || dateStr === "#ERROR!") {
+  if (
+    dateStr === "#N/A" ||
+    dateStr === "#REF!" ||
+    dateStr === "#VALUE!" ||
+    dateStr === "#ERROR!"
+  ) {
     return null;
   }
 
@@ -1269,10 +1267,8 @@ async function loadDashboard() {
       populateDueTable(sitesData);
       addMarkersToMap(sitesData);
       updateEventCards(sitesData);
-    } catch (uiErr) {
-    }
-  } catch (error) {
-  }
+    } catch (uiErr) {}
+  } catch (error) {}
 }
 
 function formatFuelDate(fuelDate) {
@@ -1498,7 +1494,6 @@ function updateEventCards(sites) {
 
   const vvvipSites = sites.filter((s) => isVVVIPSite(s));
 
-
   document.getElementById("vvvipCount").textContent = vvvipSites.length;
 }
 
@@ -1606,9 +1601,6 @@ function isInSelectedRegion(site) {
 function startDashboard() {
   startDashboardAsync();
 }
-
-
-
 
 async function saveCsvFuelDataToSupabase(rawData) {
   try {
@@ -1748,7 +1740,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-
     let syncSuccess = false;
 
     try {
@@ -1769,20 +1760,23 @@ async function saveCsvFuelDataToSupabase(rawData) {
       const MAX_RETRIES = 3;
 
       while (retries < MAX_RETRIES) {
-        const result = await supabaseClient
-          .from("live_fuel_data")
-          .select("*");
+        const result = await supabaseClient.from("live_fuel_data").select("*");
 
         if (result.error) {
           fetchError = result.error;
-          if (fetchError.message.includes("schema cache") || fetchError.message.includes("not found")) {
+          if (
+            fetchError.message.includes("schema cache") ||
+            fetchError.message.includes("not found")
+          ) {
             retries++;
             if (retries < MAX_RETRIES) {
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              await new Promise((resolve) => setTimeout(resolve, 2000));
               continue;
             }
           } else {
-            throw new Error(`Failed to fetch existing records: ${fetchError.message}`);
+            throw new Error(
+              `Failed to fetch existing records: ${fetchError.message}`,
+            );
           }
         } else {
           existingRecords = result.data || [];
@@ -1874,10 +1868,14 @@ async function saveCsvFuelDataToSupabase(rawData) {
               insertRetries++;
               if (insertRetries < MAX_INSERT_RETRIES) {
                 const backoffDelay = Math.pow(2, insertRetries) * 1000; // Exponential backoff: 2s, 4s, 8s, 16s
-                await new Promise(resolve => setTimeout(resolve, backoffDelay));
+                await new Promise((resolve) =>
+                  setTimeout(resolve, backoffDelay),
+                );
                 continue;
               } else {
-                throw new Error(`Insert failed after ${MAX_INSERT_RETRIES} retries: ${errorMsg}`);
+                throw new Error(
+                  `Insert failed after ${MAX_INSERT_RETRIES} retries: ${errorMsg}`,
+                );
               }
             } else {
               // Non-retryable error
@@ -1901,10 +1899,12 @@ async function saveCsvFuelDataToSupabase(rawData) {
           ) {
             if (insertRetries < MAX_INSERT_RETRIES) {
               const backoffDelay = Math.pow(2, insertRetries) * 1000;
-              await new Promise(resolve => setTimeout(resolve, backoffDelay));
+              await new Promise((resolve) => setTimeout(resolve, backoffDelay));
               continue;
             } else {
-              throw new Error(`Insert failed after ${MAX_INSERT_RETRIES} retries: ${errorMsg}`);
+              throw new Error(
+                `Insert failed after ${MAX_INSERT_RETRIES} retries: ${errorMsg}`,
+              );
             }
           } else {
             // Non-retryable error
@@ -1938,8 +1938,8 @@ async function backgroundSyncData() {
       rawData = await Promise.race([
         fetchCSV(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("CSV fetch timeout")), 15000)
-        )
+          setTimeout(() => reject(new Error("CSV fetch timeout")), 15000),
+        ),
       ]);
     } catch (csvErr) {
       return;
@@ -1954,8 +1954,8 @@ async function backgroundSyncData() {
       const syncPromise = Promise.race([
         saveCsvFuelDataToSupabase(rawData),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Supabase sync timeout")), 20000)
-        )
+          setTimeout(() => reject(new Error("Supabase sync timeout")), 20000),
+        ),
       ]);
       await syncPromise;
     } catch (syncErr) {
@@ -1994,7 +1994,7 @@ function hasDataChanged(oldData, newData) {
   // Check if any critical fields changed (status, fuel date, etc)
   for (let i = 0; i < oldData.length; i++) {
     const oldSite = oldData[i];
-    const newSite = newData.find(s => s.sitename === oldSite.sitename);
+    const newSite = newData.find((s) => s.sitename === oldSite.sitename);
 
     if (!newSite) {
       return true; // Site was removed
@@ -2013,7 +2013,7 @@ function hasDataChanged(oldData, newData) {
 
   // Check for new sites
   for (const newSite of newData) {
-    if (!oldData.find(s => s.sitename === newSite.sitename)) {
+    if (!oldData.find((s) => s.sitename === newSite.sitename)) {
       return true; // New site added
     }
   }
