@@ -374,10 +374,10 @@ async function startDashboardAsync() {
     updateHeaderDate();
     headerIntervalId = setInterval(updateHeaderDate, 1000);
 
-    // Auto-sync from CSV every 1 minute in background (soft update without flashing)
+    // Auto-sync from CSV every 5 seconds in background (soft update without flashing)
     refreshIntervalId = setInterval(() => {
       backgroundSyncData();
-    }, 60000);
+    }, 5000);
 
     const searchInput = document.getElementById("searchInput");
     if (searchInput) {

@@ -70,20 +70,41 @@ initializeDatabase().catch(console.error);
 let syncScheduleIntervalId = null;
 let lastSyncTime = null;
 
+// Basic in-memory cache for Google Sheets CSV to reduce repeated fetch latency
+// Short TTL so dashboard auto-syncs to near-real-time updates
+const CSV_CACHE_TTL_MS = 5 * 1000; // 5 seconds
+let cachedCsvText = null;
+let cachedCsvFetchedAt = 0;
+
 app.use(express.static(join(__dirname, "dist")));
 
 app.use(express.json());
 
 app.get("/api/fetch-csv", async (req, res) => {
   try {
-    console.log("Server: Fetching CSV from Google Sheets...");
+    const now = Date.now();
+
+    // Serve cached copy if it is still fresh to avoid repeated slow fetches
+    if (cachedCsvText && now - cachedCsvFetchedAt < CSV_CACHE_TTL_MS) {
+      res.setHeader("X-CSV-Cache", "HIT");
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Cache-Control", "no-cache");
+      return res.send(cachedCsvText);
+    }
+
+    console.log("Server: Fetching CSV from Google Sheets (cache miss)...");
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     const response = await fetch(CSV_URL, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       },
-    });
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeoutId));
 
     if (!response.ok) {
       console.error(
@@ -95,7 +116,10 @@ app.get("/api/fetch-csv", async (req, res) => {
     }
 
     const csvText = await response.text();
+    cachedCsvText = csvText;
+    cachedCsvFetchedAt = now;
     console.log(`Server: Successfully fetched CSV, length: ${csvText.length}`);
+    res.setHeader("X-CSV-Cache", "MISS");
 
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
