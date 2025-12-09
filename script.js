@@ -1687,6 +1687,6 @@ window.downloadInvoiceExcel = function downloadInvoiceExcel() {
   ];
 
   XLSX.writeFile(wb, filename);
-}
+};
 
 export {};
