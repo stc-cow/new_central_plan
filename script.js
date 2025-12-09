@@ -2211,28 +2211,68 @@ async function saveCsvFuelDataToSupabase(rawData) {
       let upsertError = null;
       let upsertedRecords = null;
       let insertRetries = 0;
-      const MAX_INSERT_RETRIES = 3;
+      const MAX_INSERT_RETRIES = 5;
 
       while (insertRetries < MAX_INSERT_RETRIES) {
-        const result = await supabaseClient
-          .from("live_fuel_data")
-          .insert(recordsToInsert);
+        try {
+          const result = await supabaseClient
+            .from("live_fuel_data")
+            .insert(recordsToInsert);
 
-        if (result.error) {
-          upsertError = result.error;
-          if (upsertError.message.includes("schema cache") || upsertError.message.includes("not found")) {
-            insertRetries++;
-            if (insertRetries < MAX_INSERT_RETRIES) {
-              console.warn(`⚠️ Schema cache issue on insert (attempt ${insertRetries}/${MAX_INSERT_RETRIES}), retrying in 2 seconds...`);
-              await new Promise(resolve => setTimeout(resolve, 2000));
-              continue;
+          if (result.error) {
+            upsertError = result.error;
+            const errorMsg = upsertError.message || String(upsertError);
+
+            // Check if it's a network error or temporary issue
+            if (
+              errorMsg.includes("Failed to fetch") ||
+              errorMsg.includes("Network") ||
+              errorMsg.includes("timeout") ||
+              errorMsg.includes("ECONNREFUSED") ||
+              errorMsg.includes("schema cache") ||
+              errorMsg.includes("not found")
+            ) {
+              insertRetries++;
+              if (insertRetries < MAX_INSERT_RETRIES) {
+                const backoffDelay = Math.pow(2, insertRetries) * 1000; // Exponential backoff: 2s, 4s, 8s, 16s
+                console.warn(`⚠️ Temporary network/schema issue (attempt ${insertRetries}/${MAX_INSERT_RETRIES}), retrying in ${backoffDelay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, backoffDelay));
+                continue;
+              } else {
+                throw new Error(`Insert failed after ${MAX_INSERT_RETRIES} retries: ${errorMsg}`);
+              }
+            } else {
+              // Non-retryable error
+              throw new Error(`Insert failed: ${errorMsg}`);
             }
+          } else {
+            upsertedRecords = result.data;
+            upsertError = null;
+            break;
           }
-          throw new Error(`Insert failed: ${upsertError.message}`);
-        } else {
-          upsertedRecords = result.data;
-          upsertError = null;
-          break;
+        } catch (err) {
+          const errorMsg = err.message || String(err);
+          insertRetries++;
+
+          // Retry on network errors
+          if (
+            errorMsg.includes("Failed to fetch") ||
+            errorMsg.includes("Network") ||
+            errorMsg.includes("timeout") ||
+            errorMsg.includes("ECONNREFUSED")
+          ) {
+            if (insertRetries < MAX_INSERT_RETRIES) {
+              const backoffDelay = Math.pow(2, insertRetries) * 1000;
+              console.warn(`⚠️ Network error (attempt ${insertRetries}/${MAX_INSERT_RETRIES}), retrying in ${backoffDelay}ms...`);
+              await new Promise(resolve => setTimeout(resolve, backoffDelay));
+              continue;
+            } else {
+              throw new Error(`Insert failed after ${MAX_INSERT_RETRIES} retries: ${errorMsg}`);
+            }
+          } else {
+            // Non-retryable error
+            throw err;
+          }
         }
       }
 
