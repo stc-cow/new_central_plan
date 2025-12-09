@@ -187,10 +187,15 @@ async function startDashboardAsync() {
       });
     }
 
-    const modal = document.getElementById("searchModal");
+    const searchModal = document.getElementById("searchModal");
+    const invoiceModal = document.getElementById("invoiceModal");
+
     window.addEventListener("click", (e) => {
-      if (e.target === modal) {
+      if (e.target === searchModal) {
         closeSearchModal();
+      }
+      if (e.target === invoiceModal) {
+        closeInvoiceModal();
       }
     });
   } catch (error) {}
