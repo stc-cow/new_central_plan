@@ -2182,7 +2182,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
     console.log(`\n📤 Syncing ${recordsToMigrate.length} records to Supabase fuel_quantities table...`);
 
     let syncSuccess = false;
-    let useLocalFallback = false;
 
     try {
       // Initialize Supabase if needed
