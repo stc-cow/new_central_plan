@@ -2261,16 +2261,40 @@ async function saveCsvFuelDataToSupabase(rawData) {
         return;
       }
 
-      // Step 1: Fetch existing records to detect changes
+      // Step 1: Fetch existing records to detect changes (with retry for schema cache issues)
       console.log("🔍 Fetching existing records for change detection...");
-      const { data: existingRecords, error: fetchError } = await supabaseClient
-        .from("live_fuel_data")
-        .select("*");
+      let existingRecords = [];
+      let fetchError = null;
+      let retries = 0;
+      const MAX_RETRIES = 3;
 
-      if (fetchError && !fetchError.message.includes("not found")) {
-        throw new Error(
-          `Failed to fetch existing records: ${fetchError.message}`,
-        );
+      while (retries < MAX_RETRIES) {
+        const result = await supabaseClient
+          .from("live_fuel_data")
+          .select("*");
+
+        if (result.error) {
+          fetchError = result.error;
+          if (fetchError.message.includes("schema cache") || fetchError.message.includes("not found")) {
+            retries++;
+            if (retries < MAX_RETRIES) {
+              console.warn(`⚠️ Schema cache issue (attempt ${retries}/${MAX_RETRIES}), retrying in 2 seconds...`);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              continue;
+            }
+          } else {
+            throw new Error(`Failed to fetch existing records: ${fetchError.message}`);
+          }
+        } else {
+          existingRecords = result.data || [];
+          fetchError = null;
+          break;
+        }
+      }
+
+      if (fetchError && retries >= MAX_RETRIES) {
+        console.warn(`⚠️ Schema cache issue persists after ${MAX_RETRIES} retries, continuing with empty baseline`);
+        existingRecords = [];
       }
 
       const existing = existingRecords || [];
