@@ -1,4 +1,5 @@
-const CSV_API_URL = "/api/fetch-csv";
+const API_BASE = window.location.origin;
+const CSV_API_URL = `${API_BASE}/api/fetch-csv`;
 
 const ACES_ACCESS_CODE = "ACES2025";
 
@@ -237,7 +238,7 @@ async function fetchCSV() {
 
   // Try API endpoint first (for servers with backend like Fly.dev)
   try {
-    const response = await fetch("/api/fetch-csv", {
+    const response = await fetch(CSV_API_URL, {
       method: "GET",
       headers: {
         Accept: "text/csv",
