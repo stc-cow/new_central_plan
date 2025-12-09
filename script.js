@@ -519,8 +519,6 @@ async function fetchCSV() {
   } catch (error) {
   }
 
-  console.error(
-  );
   return [];
 }
 
