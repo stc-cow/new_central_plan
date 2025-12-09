@@ -237,8 +237,9 @@ async function fetchCSV() {
   ];
 
   // Check if API endpoint is available (not static hosting like GitHub Pages)
-  const isStaticHosting = window.location.hostname.includes("github.io") ||
-                          window.location.hostname === "localhost";
+  const isStaticHosting =
+    window.location.hostname.includes("github.io") ||
+    window.location.hostname === "localhost";
 
   // Try API endpoint first (for servers with backend like Fly.dev)
   if (!isStaticHosting) {
