@@ -1826,7 +1826,7 @@ window.addEventListener("click", (event) => {
   }
 });
 
-function selectRegion(region) {
+window.selectRegion = function selectRegion(region) {
   selectedRegion = region;
 
   // Save last selected region for remember-me restoration
@@ -1850,7 +1850,7 @@ function selectRegion(region) {
 
   // Reload dashboard with new region filter
   loadDashboard();
-}
+};
 
 function isInSelectedRegion(site) {
   if (!site.regionname) {
