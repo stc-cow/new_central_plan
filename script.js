@@ -1475,4 +1475,224 @@ function hasDataChanged(oldData, newData) {
   return false; // No changes detected
 }
 
+// Invoicing Module Functions
+let invoiceData = [];
+let filteredInvoiceData = [];
+
+async function showInvoicing() {
+  hideAllPages();
+  document.getElementById("invoicingPage").style.display = "flex";
+  await loadInvoiceData();
+  applyInvoiceFilters();
+}
+
+function showDashboard() {
+  hideAllPages();
+  document.getElementById("dashboardPage").style.display = "flex";
+}
+
+async function loadInvoiceData() {
+  const CORS_PROXIES = [
+    "https://corsproxy.io/?",
+    "https://api.codetabs.com/v1/proxy?quest=",
+  ];
+
+  try {
+    for (let i = 0; i < CORS_PROXIES.length; i++) {
+      try {
+        let proxyUrl;
+        if (CORS_PROXIES[i].includes("?")) {
+          proxyUrl = CORS_PROXIES[i] + INVOICE_CSV_URL;
+        } else {
+          proxyUrl = CORS_PROXIES[i] + encodeURIComponent(INVOICE_CSV_URL);
+        }
+
+        const response = await fetch(proxyUrl, {
+          method: "GET",
+          headers: {
+            Accept: "text/plain",
+          },
+        });
+
+        if (response.ok) {
+          const csvText = await response.text();
+          if (csvText.trim()) {
+            invoiceData = parseInvoiceCSV(csvText);
+            return;
+          }
+        }
+      } catch (proxyError) {
+        // Try next proxy
+      }
+    }
+
+    try {
+      const response = await fetch(INVOICE_CSV_URL, {
+        method: "GET",
+        mode: "cors",
+      });
+
+      if (response.ok) {
+        const csvText = await response.text();
+        if (csvText.trim()) {
+          invoiceData = parseInvoiceCSV(csvText);
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to load invoice data:", error);
+    }
+  } catch (error) {
+    console.error("Error loading invoice data:", error);
+  }
+
+  invoiceData = [];
+}
+
+function parseInvoiceCSV(csvText) {
+  const lines = csvText.trim().split("\n");
+  if (lines.length === 0) return [];
+
+  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+  const data = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+
+    const values = parseCSVLine(line);
+    const row = {};
+
+    headers.forEach((header, index) => {
+      row[header] = values[index] ? values[index].trim() : "";
+    });
+
+    // Validate required fields
+    if (row.sitename && row.lastfuelingdate) {
+      const dateValid = !Number.isNaN(Date.parse(row.lastfuelingdate));
+      const quantity = Number(row.lastfuelingquantity) || 0;
+
+      if (dateValid && quantity > 0) {
+        data.push({
+          sitename: row.sitename,
+          region: row.region || "",
+          lastfuelingdate: row.lastfuelingdate,
+          lastfuelingquantity: quantity,
+        });
+      }
+    }
+  }
+
+  return data;
+}
+
+function applyInvoiceFilters() {
+  const startDate = document.getElementById("invoiceStartDate").value;
+  const endDate = document.getElementById("invoiceEndDate").value;
+  const region = document.getElementById("invoiceRegion").value;
+
+  filteredInvoiceData = invoiceData.filter((row) => {
+    const rowDate = new Date(row.lastfuelingdate);
+
+    if (startDate) {
+      const start = new Date(startDate);
+      if (rowDate < start) return false;
+    }
+
+    if (endDate) {
+      const end = new Date(endDate);
+      if (rowDate > end) return false;
+    }
+
+    if (region && region !== "") {
+      const rowRegion = row.region.toLowerCase();
+      const filterRegion = region.toLowerCase();
+
+      if (filterRegion === "cer") {
+        if (!rowRegion.includes("central") && !rowRegion.includes("east")) {
+          return false;
+        }
+      } else {
+        if (!rowRegion.includes(filterRegion)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
+
+  displayInvoiceTable();
+  updateInvoiceSummary();
+}
+
+function displayInvoiceTable() {
+  const tbody = document.getElementById("invoiceTableBody");
+  tbody.innerHTML = "";
+
+  filteredInvoiceData.forEach((row) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHTML(row.sitename)}</td>
+      <td>${escapeHTML(row.region)}</td>
+      <td>${escapeHTML(row.lastfuelingdate)}</td>
+      <td>${row.lastfuelingquantity.toFixed(2)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function updateInvoiceSummary() {
+  const rowCount = filteredInvoiceData.length;
+  const totalQty = filteredInvoiceData.reduce(
+    (sum, row) => sum + row.lastfuelingquantity,
+    0
+  );
+
+  document.getElementById("invoiceRowCount").textContent = rowCount;
+  document.getElementById("invoiceTotalQty").textContent = totalQty.toFixed(2);
+}
+
+function downloadInvoiceExcel() {
+  const startDate = document.getElementById("invoiceStartDate").value || "All";
+  const endDate = document.getElementById("invoiceEndDate").value || "All";
+  const region = document.getElementById("invoiceRegion").value || "All";
+
+  const filename = `invoice_${startDate}_to_${endDate}_${region}.xlsx`;
+
+  const wsData = [
+    ["Site Name", "Region", "Last Fueling Date", "Last Fueling Qty"],
+    ...filteredInvoiceData.map((row) => [
+      row.sitename,
+      row.region,
+      row.lastfuelingdate,
+      row.lastfuelingquantity,
+    ]),
+    [],
+    ["Total Rows:", filteredInvoiceData.length],
+    ["Total Quantity:", filteredInvoiceData.reduce((sum, row) => sum + row.lastfuelingquantity, 0).toFixed(2)],
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Invoice");
+
+  // Set column widths
+  ws["!cols"] = [
+    { wch: 20 },
+    { wch: 15 },
+    { wch: 18 },
+    { wch: 18 },
+  ];
+
+  XLSX.writeFile(wb, filename);
+}
+
+function hideAllPages() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("analyticsPage").style.display = "none";
+  document.getElementById("dashboardPage").style.display = "none";
+  document.getElementById("invoicingPage").style.display = "none";
+}
+
 export {};
