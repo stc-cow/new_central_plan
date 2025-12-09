@@ -1483,14 +1483,14 @@ function hasDataChanged(oldData, newData) {
 let invoiceData = [];
 let filteredInvoiceData = [];
 
-async function showInvoicing() {
+window.showInvoicing = async function showInvoicing() {
   document.getElementById("loginPage").classList.remove("show");
   document.getElementById("dashboardPage").style.display = "none";
   document.getElementById("analyticsPage").style.display = "none";
   document.getElementById("invoicingPage").style.display = "flex";
   await loadInvoiceData();
   applyInvoiceFilters();
-}
+};
 
 async function loadInvoiceData() {
   const CORS_PROXIES = [
