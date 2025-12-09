@@ -2718,3 +2718,5 @@ function generateInvoiceExcel(records, startDate, endDate, regionFilter = "") {
   const fileName = `Fuel_Invoice${regionSuffix}_${startDate}_to_${endDate}_${new Date().toISOString().split("T")[0]}.xlsx`;
   XLSX.writeFile(workbook, fileName);
 }
+
+export {};
