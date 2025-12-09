@@ -2264,7 +2264,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
       // Step 1: Fetch existing records to detect changes
       console.log("🔍 Fetching existing records for change detection...");
       const { data: existingRecords, error: fetchError } = await supabaseClient
-        .from("fuel_quantities")
+        .from("live_fuel_data")
         .select("*");
 
       if (fetchError && !fetchError.message.includes("not found")) {
@@ -2328,9 +2328,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
         console.log("ℹ️  No changes detected - no history records needed");
       }
 
-      // Step 4: Upsert new/updated records into fuel_quantities
+      // Step 4: Upsert new/updated records into live_fuel_data
       console.log(
-        `📝 Upserting ${recordsToMigrate.length} records to fuel_quantities...`,
+        `📝 Upserting ${recordsToMigrate.length} records to live_fuel_data...`,
       );
       const recordsToInsert = recordsToMigrate.map((record) => ({
         sitename: record.sitename,
@@ -2342,15 +2342,15 @@ async function saveCsvFuelDataToSupabase(rawData) {
       }));
 
       const { error: upsertError, data: upsertedRecords } = await supabaseClient
-        .from("fuel_quantities")
-        .upsert(recordsToInsert, { onConflict: "sitename,refilled_date" });
+        .from("live_fuel_data")
+        .insert(recordsToInsert);
 
       if (upsertError) {
         throw new Error(`Upsert failed: ${upsertError.message}`);
       }
 
       console.log(`\n✅ Supabase sync successful!`);
-      console.log(`📊 Records synced: ${recordsToInsert.length}`);
+      console.log(`📊 Records synced: ${upsertedRecords ? upsertedRecords.length : recordsToInsert.length}`);
       console.log(`📝 Changes archived to history: ${historyRecords.length}`);
       supabaseAvailable = true;
       syncSuccess = true;
@@ -2511,14 +2511,14 @@ async function fetchFuelQuantitiesByDateRange(
     }
 
     if (supabaseClient) {
-      console.log("📖 Trying Supabase fuel_quantities table...");
+      console.log("📖 Trying Supabase live_fuel_data table...");
       const { data: records, error } = await supabaseClient
-        .from("fuel_quantities")
+        .from("live_fuel_data")
         .select("*");
 
       if (!error && records && records.length > 0) {
         console.log(
-          `✅ Loaded ${records.length} records from Supabase fuel_quantities`,
+          `✅ Loaded ${records.length} records from Supabase live_fuel_data`,
         );
 
         // Filter by date range and region
@@ -2546,15 +2546,15 @@ async function fetchFuelQuantitiesByDateRange(
         });
 
         console.log(
-          `✅ Filtered ${filteredRecords.length} records from Supabase`,
+          `✅ Filtered ${filteredRecords.length} records from Supabase live_fuel_data`,
         );
         return filteredRecords;
       } else if (error) {
-        console.warn("⚠️ Supabase query failed:", error.message);
+        console.warn("⚠️ Supabase live_fuel_data query failed:", error.message);
       }
     }
   } catch (supabaseErr) {
-    console.warn("⚠️ Supabase fallback failed:", supabaseErr.message);
+    console.warn("⚠️ Supabase live_fuel_data fallback failed:", supabaseErr.message);
   }
 
   // Fallback 2: Try localStorage with fuel_quantities_storage key
