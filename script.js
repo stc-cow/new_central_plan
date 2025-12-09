@@ -379,7 +379,6 @@ async function startDashboardAsync() {
 
     // Auto-sync from CSV every 1 minute in background (soft update without flashing)
     refreshIntervalId = setInterval(() => {
-      console.log("🔄 Background: Auto-syncing CSV data with Supabase...");
       backgroundSyncData();
     }, 60000);
 
@@ -1489,14 +1488,10 @@ function getGradientStyleForFuelDate(days) {
 }
 
 function updateEventCards(sites) {
-  console.log("=== Event Cards Debug ===");
-  console.log("Total sites:", sites.length);
-
   // Show all unique sitelabel values
   const uniqueLabels = [
     ...new Set(sites.map((s) => s.sitelabel).filter(Boolean)),
   ];
-  console.log("Unique SiteLabels in data:", uniqueLabels);
 
   // Show sites that have VVVIP in sitelabel
   const sitesWithVVVIP = sites.filter(
@@ -1729,46 +1724,25 @@ async function saveCsvFuelDataToSupabase(rawData) {
     localStorage.setItem("cachedFuelData", JSON.stringify(fuelRecords));
 
     // Final validation before sending to Supabase
-    console.log(
-      `\n🔍 Final validation for ${recordsToMigrate.length} records...`,
-    );
     const invalidMigrateRecords = recordsToMigrate.filter((record) => {
       // Verify date exists and is valid
       if (!record.refilled_date) {
-        console.warn(`  ❌ ${record.sitename}: Missing valid date`);
         return true;
       }
       // Verify quantity is a positive number
       if (!record.refilled_quantity || record.refilled_quantity <= 0) {
-        console.warn(
-          `  ❌ ${record.sitename}: Quantity is ${record.refilled_quantity} (must be > 0)`,
-        );
         return true;
       }
       return false;
     });
 
     if (invalidMigrateRecords.length > 0) {
-      console.error(
-        `❌ CRITICAL: Found ${invalidMigrateRecords.length} invalid record(s) that should have been filtered!`,
-      );
-      console.error(
-        `⛔ These records will NOT be sent to Supabase:`,
-        invalidMigrateRecords,
-      );
       // Remove invalid records to ensure Supabase only gets valid data
       const validMigrateRecords = recordsToMigrate.filter(
         (record) => record.refilled_date && record.refilled_quantity > 0,
       );
       recordsToMigrate.length = 0;
       recordsToMigrate.push(...validMigrateRecords);
-      console.log(
-        `✅ Cleaned records: ${validMigrateRecords.length} valid records remaining for Supabase`,
-      );
-    } else {
-      console.log(
-        `✅ All ${recordsToMigrate.length} records validated - safe to send to Supabase`,
-      );
     }
 
     // Send only NEW records to backend API for Supabase insertion
@@ -1776,9 +1750,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log(
-      `\n📤 Syncing ${recordsToMigrate.length} records to Supabase fuel_quantities table...`,
-    );
 
     let syncSuccess = false;
 
@@ -1845,9 +1816,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
           parseFloat(existingRecord.refilled_quantity) !==
             parseFloat(incomingRecord.refilled_quantity)
         ) {
-          console.log(
-            `📝 Change detected: ${key} quantity ${existingRecord.refilled_quantity} → ${incomingRecord.refilled_quantity}`,
-          );
           historyRecords.push({
             live_data_id: existingRecord.id,
             sitename: existingRecord.sitename,
