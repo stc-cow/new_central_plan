@@ -1403,7 +1403,7 @@ async function backgroundSyncData() {
       rawData = await Promise.race([
         fetchCSV(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("CSV fetch timeout")), 15000),
+          setTimeout(() => reject(new Error("CSV fetch timeout")), 8000),
         ),
       ]);
     } catch (csvErr) {
