@@ -2196,6 +2196,10 @@ body {
   transform: translateY(0);
 }
 
+.download-invoice-btn:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 1200px) {
   .invoice-modal-body {
     grid-template-columns: 1fr;
