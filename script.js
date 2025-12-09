@@ -1910,8 +1910,12 @@ async function ensureStorageBucket() {
 
 async function saveCsvFuelDataToSupabase(rawData) {
   try {
+    // Skip Supabase sync if not available
+    if (!supabaseAvailable) {
+      return;
+    }
+
     if (rawData.length === 0) {
-      console.warn("⚠️ No CSV data to migrate");
       return;
     }
 
@@ -2055,9 +2059,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
     // Cache data locally IMMEDIATELY before attempting backend sync
     cachedFuelData = fuelRecords;
     localStorage.setItem("cachedFuelData", JSON.stringify(fuelRecords));
-    console.log(
-      `\n✅ Data cached locally (${fuelRecords.length} records) - invoice filtering will work offline`,
-    );
 
     // Final validation before sending to Supabase
     console.log(
@@ -2117,17 +2118,15 @@ async function saveCsvFuelDataToSupabase(rawData) {
     try {
       // Initialize Supabase client
       if (!supabaseClient) {
-        console.log("🔌 Initializing Supabase client...");
         await initSupabaseClient();
       }
 
-      if (!supabaseClient) {
-        console.error("❌ Supabase client not available");
+      if (!supabaseClient || !supabaseAvailable) {
+        // Supabase not available, continue with cached data
         return;
       }
 
       // Step 1: Fetch existing records to detect changes (with retry for schema cache issues)
-      console.log("🔍 Fetching existing records for change detection...");
       let existingRecords = [];
       let fetchError = null;
       let retries = 0;
@@ -2143,7 +2142,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
           if (fetchError.message.includes("schema cache") || fetchError.message.includes("not found")) {
             retries++;
             if (retries < MAX_RETRIES) {
-              console.warn(`⚠️ Schema cache issue (attempt ${retries}/${MAX_RETRIES}), retrying in 2 seconds...`);
               await new Promise(resolve => setTimeout(resolve, 2000));
               continue;
             }
@@ -2158,12 +2156,10 @@ async function saveCsvFuelDataToSupabase(rawData) {
       }
 
       if (fetchError && retries >= MAX_RETRIES) {
-        console.warn(`⚠️ Schema cache issue persists after ${MAX_RETRIES} retries, continuing with empty baseline`);
         existingRecords = [];
       }
 
       const existing = existingRecords || [];
-      console.log(`✅ Found ${existing.length} existing records in Supabase`);
 
       // Step 2: Identify changes and prepare history records
       const historyRecords = [];
@@ -2199,28 +2195,16 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
       // Step 3: Save history records if there are changes
       if (historyRecords.length > 0) {
-        console.log(
-          `💾 Saving ${historyRecords.length} old records to history_fuel_data...`,
-        );
         const { error: historyError } = await supabaseClient
           .from("history_fuel_data")
           .insert(historyRecords);
 
         if (historyError) {
-          console.error(
-            `⚠️ Warning: Could not save history: ${historyError.message}`,
-          );
-        } else {
-          console.log(`✅ Saved ${historyRecords.length} records to history`);
+          // History save is optional, continue anyway
         }
-      } else {
-        console.log("ℹ️  No changes detected - no history records needed");
       }
 
       // Step 4: Insert new/updated records into live_fuel_data (with retry for schema cache issues)
-      console.log(
-        `📝 Inserting ${recordsToMigrate.length} records to live_fuel_data...`,
-      );
       const recordsToInsert = recordsToMigrate.map((record) => ({
         sitename: record.sitename,
         region: record.region,
@@ -2257,7 +2241,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
               insertRetries++;
               if (insertRetries < MAX_INSERT_RETRIES) {
                 const backoffDelay = Math.pow(2, insertRetries) * 1000; // Exponential backoff: 2s, 4s, 8s, 16s
-                console.warn(`⚠️ Temporary network/schema issue (attempt ${insertRetries}/${MAX_INSERT_RETRIES}), retrying in ${backoffDelay}ms...`);
                 await new Promise(resolve => setTimeout(resolve, backoffDelay));
                 continue;
               } else {
@@ -2285,7 +2268,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
           ) {
             if (insertRetries < MAX_INSERT_RETRIES) {
               const backoffDelay = Math.pow(2, insertRetries) * 1000;
-              console.warn(`⚠️ Network error (attempt ${insertRetries}/${MAX_INSERT_RETRIES}), retrying in ${backoffDelay}ms...`);
               await new Promise(resolve => setTimeout(resolve, backoffDelay));
               continue;
             } else {
@@ -2298,29 +2280,14 @@ async function saveCsvFuelDataToSupabase(rawData) {
         }
       }
 
-      console.log(`\n✅ Supabase sync successful!`);
-      console.log(`📊 Records synced: ${upsertedRecords ? upsertedRecords.length : recordsToInsert.length}`);
-      console.log(`📝 Changes archived to history: ${historyRecords.length}`);
       supabaseAvailable = true;
       syncSuccess = true;
     } catch (dbErr) {
-      console.error("❌ Supabase sync failed:", dbErr.message);
+      // Supabase sync failed, continue with cached data
       syncSuccess = false;
     }
-
-    // Final status summary
-    if (syncSuccess) {
-      console.log("\n🎉 Sync successful!");
-    } else {
-      console.log("\n⚠️ Sync failed");
-    }
   } catch (err) {
-    console.error("❌ Error in saveCsvFuelDataToSupabase:", err.message);
-    console.error("Stack trace:", err.stack);
-    console.warn("⚠️ CSV migration encountered an error");
-    console.log("✅ App will continue with cached data");
-    console.log("🔄 Next auto-sync in 1 minute");
-    // Don't re-throw - let app continue with cached data
+    // Error in CSV migration, app will continue with cached data
     return;
   }
 }
