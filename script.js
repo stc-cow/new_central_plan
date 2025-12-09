@@ -81,14 +81,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initializeApp();
 });
 
-// Monitor network connectivity
-window.addEventListener("online", () => {
-  console.log("✅ Network connection restored");
-});
-
-window.addEventListener("offline", () => {
-  console.warn("⚠️ Network connection lost");
-});
 
 // Clean up active user when page is closed or navigated away
 window.addEventListener("beforeunload", () => {
@@ -264,67 +256,6 @@ async function fallbackCountActiveUsers() {
   }
 }
 
-async function diagnoseSupabaseSetup() {
-  console.group("🔍 Supabase Diagnostic Report");
-
-  // Check 1: Supabase client
-  console.log("1. Supabase Client Status:");
-  if (supabaseClient) {
-    console.log("✓ Supabase client initialized");
-  } else {
-    console.error("❌ Supabase client NOT initialized");
-    return;
-  }
-
-  // Check 2: Table exists
-  console.log("\n2. Checking active_users table...");
-  try {
-    const { count, error } = await supabaseClient
-      .from("active_users")
-      .select("*", { count: "exact", head: true });
-
-    if (error) {
-      console.error("❌ Table error:", error.message);
-    } else {
-      console.log("✓ active_users table exists, current records:", count);
-    }
-  } catch (e) {
-    console.error("❌ Exception checking table:", e.message);
-  }
-
-  // Check 3: RPC function exists
-  console.log("\n3. Checking count_active_users RPC function...");
-  try {
-    const { data, error } = await supabaseClient.rpc("count_active_users");
-    if (error) {
-      console.error("❌ RPC function error:", error.code, error.message);
-    } else {
-      console.log("✓ RPC function works, returned:", data);
-    }
-  } catch (e) {
-    console.error("❌ Exception calling RPC:", e.message);
-  }
-
-  // Check 4: Last activity data
-  console.log("\n4. Recent active users (last 10 records)...");
-  try {
-    const { data, error } = await supabaseClient
-      .from("active_users")
-      .select("*")
-      .order("last_activity", { ascending: false })
-      .limit(10);
-
-    if (error) {
-      console.error("❌ Query error:", error.message);
-    } else {
-      console.table(data);
-    }
-  } catch (e) {
-    console.error("❌ Exception querying users:", e.message);
-  }
-
-  console.groupEnd();
-}
 
 async function removeActiveUser() {
   // Skip if Supabase not available or no session
@@ -346,121 +277,6 @@ async function removeActiveUser() {
   }
 }
 
-// Test Supabase REST endpoints
-async function testSupabaseRESTEndpoints() {
-  console.group("🧪 Testing Supabase REST Endpoints");
-
-  if (!supabaseClient) {
-    await initSupabaseClient();
-  }
-
-  if (!supabaseClient) {
-    console.error("❌ Supabase client not initialized");
-    console.groupEnd();
-    return;
-  }
-
-  const apiKey = VITE_SUPABASE_KEY;
-  const baseUrl = VITE_SUPABASE_URL;
-
-  // Test 1: Query active_users table via REST
-  console.log("\n📋 Test 1: Query active_users table");
-  try {
-    const response = await fetch(
-      `${baseUrl}/rest/v1/active_users?select=*&limit=5`,
-      {
-        headers: {
-          apikey: apiKey,
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    const data = await response.json();
-    if (response.ok) {
-      console.log("✅ REST endpoint working. Records:", data.length);
-      console.table(data);
-    } else {
-      console.error(`❌ REST error (${response.status}):`, data);
-    }
-  } catch (err) {
-    console.error("❌ Fetch error:", err.message);
-  }
-
-  // Test 2: Query remember_me_tokens table via REST
-  console.log("\n📋 Test 2: Query remember_me_tokens table");
-  try {
-    const response = await fetch(
-      `${baseUrl}/rest/v1/remember_me_tokens?select=*&limit=5`,
-      {
-        headers: {
-          apikey: apiKey,
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    const data = await response.json();
-    if (response.ok) {
-      console.log("✅ REST endpoint working. Records:", data.length);
-      console.table(data);
-    } else {
-      console.error(`❌ REST error (${response.status}):`, data);
-    }
-  } catch (err) {
-    console.error("❌ Fetch error:", err.message);
-  }
-
-  // Test 3: Call count_active_users RPC function
-  console.log("\n📋 Test 3: Call count_active_users RPC");
-  try {
-    const response = await fetch(`${baseUrl}/rest/v1/rpc/count_active_users`, {
-      method: "POST",
-      headers: {
-        apikey: apiKey,
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    if (response.ok) {
-      console.log("✅ RPC function working. Active users:", data);
-    } else {
-      console.error(`❌ RPC error (${response.status}):`, data);
-    }
-  } catch (err) {
-    console.error("❌ Fetch error:", err.message);
-  }
-
-  // Test 4: Insert test record into active_users
-  console.log("\n📋 Test 4: Insert test record (via SDK)");
-  try {
-    const testSession = "test_" + Date.now();
-    const { data, error } = await supabaseClient.from("active_users").insert({
-      session_id: testSession,
-      username: "test_user",
-      last_activity: new Date().toISOString(),
-    });
-
-    if (error) {
-      console.error("❌ Insert error:", error.message);
-    } else {
-      console.log("✅ Insert successful. Data:", data);
-
-      // Clean up test record
-      await supabaseClient
-        .from("active_users")
-        .delete()
-        .eq("session_id", testSession)
-        .catch((e) => console.error("Cleanup error:", e));
-    }
-  } catch (err) {
-    console.error("❌ Exception:", err.message);
-  }
-
-  console.log("\n✅ Testing complete");
-  console.groupEnd();
-}
 
 async function initializeApp() {
   // Initialize Supabase client
@@ -1899,14 +1715,6 @@ function startDashboard() {
 
 
 
-async function ensureStorageBucket() {
-  // Skip bucket checks - just return true and let upload attempt
-  // If storage is not available, we'll fall back to localStorage
-  console.log(
-    "📦 Storage mode: Will attempt Supabase Storage with localStorage fallback",
-  );
-  return true;
-}
 
 async function saveCsvFuelDataToSupabase(rawData) {
   try {
