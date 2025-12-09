@@ -1481,13 +1481,14 @@ function hasDataChanged(oldData, newData) {
 let invoiceData = [];
 let filteredInvoiceData = [];
 
-window.showInvoicing = async function showInvoicing() {
-  document.getElementById("loginPage").classList.remove("show");
-  document.getElementById("dashboardPage").style.display = "none";
-  document.getElementById("analyticsPage").style.display = "none";
-  document.getElementById("invoicingPage").style.display = "flex";
+window.showInvoiceModal = async function showInvoiceModal() {
+  document.getElementById("invoiceModal").style.display = "flex";
   await loadInvoiceData();
   applyInvoiceFilters();
+};
+
+window.closeInvoiceModal = function closeInvoiceModal() {
+  document.getElementById("invoiceModal").style.display = "none";
 };
 
 async function loadInvoiceData() {
