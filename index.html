@@ -263,6 +263,66 @@
       </div>
     </div>
 
+    <!-- Invoicing Page -->
+    <div id="invoicingPage" class="invoicing-page" style="display: none">
+      <div class="invoicing-header">
+        <h1>Invoice Management</h1>
+        <button class="back-btn" onclick="showDashboard()">← Back to Dashboard</button>
+      </div>
+
+      <div class="invoicing-container">
+        <div class="invoicing-filters">
+          <h3>Filter Invoice Data</h3>
+          <div class="filter-group">
+            <label for="invoiceStartDate">Start Date:</label>
+            <input type="date" id="invoiceStartDate" class="date-input" />
+          </div>
+          <div class="filter-group">
+            <label for="invoiceEndDate">End Date:</label>
+            <input type="date" id="invoiceEndDate" class="date-input" />
+          </div>
+          <div class="filter-group">
+            <label for="invoiceRegion">Region:</label>
+            <select id="invoiceRegion" class="region-select">
+              <option value="">All Regions</option>
+              <option value="Central">Central</option>
+              <option value="East">East</option>
+            </select>
+          </div>
+          <button class="apply-filter-btn" onclick="applyInvoiceFilters()">Apply Filters</button>
+        </div>
+
+        <div class="invoicing-table-section">
+          <div class="invoice-summary">
+            <div class="summary-item">
+              <span class="summary-label">Total Rows:</span>
+              <span class="summary-value" id="invoiceRowCount">0</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Total Quantity:</span>
+              <span class="summary-value" id="invoiceTotalQty">0</span>
+            </div>
+          </div>
+
+          <table class="invoicing-table">
+            <thead>
+              <tr>
+                <th>Site Name</th>
+                <th>Region</th>
+                <th>Last Fueling Date</th>
+                <th>Last Fueling Qty</th>
+              </tr>
+            </thead>
+            <tbody id="invoiceTableBody"></tbody>
+          </table>
+
+          <button class="download-invoice-btn" onclick="downloadInvoiceExcel()">
+            📥 Download Invoice (Excel)
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div id="searchModal" class="search-modal">
       <div class="search-modal-content">
         <button class="search-modal-close" onclick="closeSearchModal()">
