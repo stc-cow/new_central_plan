@@ -12,6 +12,60 @@ const PORT = process.env.PORT || 3000;
 const CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1149576218&single=true&output=csv";
 
+// Initialize database tables if they don't exist
+async function initializeDatabase() {
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn(
+        "⚠️  Supabase credentials not configured, skipping table initialization",
+      );
+      return;
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Check if live_fuel_data table exists
+    const { data: liveData, error: liveError } = await supabase
+      .from("live_fuel_data")
+      .select("*")
+      .limit(1);
+
+    if (!liveError) {
+      console.log("✅ live_fuel_data table already exists");
+    } else {
+      console.warn(
+        "⚠️  live_fuel_data table not found, please create it in Supabase dashboard",
+      );
+    }
+
+    // Check if history_fuel_data table exists
+    const { data: historyData, error: historyError } = await supabase
+      .from("history_fuel_data")
+      .select("*")
+      .limit(1);
+
+    if (!historyError) {
+      console.log("✅ history_fuel_data table already exists");
+    } else {
+      console.warn(
+        "⚠️  history_fuel_data table not found, please create it in Supabase dashboard",
+      );
+    }
+  } catch (error) {
+    console.warn(
+      "⚠️  Could not check/create tables (might not have permissions):",
+      error.message,
+    );
+  }
+}
+
+// Initialize on startup
+initializeDatabase().catch(console.error);
+
 // Global state for scheduled sync
 let syncScheduleIntervalId = null;
 let lastSyncTime = null;
@@ -64,13 +118,17 @@ app.post("/api/save-fuel-data", async (req, res) => {
     console.log(`Server: Received ${records.length} fuel records to save`);
 
     // Server-side validation: ensure only valid data is sent to Supabase
-    console.log(`Server: Validating records (must have valid date and quantity > 0)...`);
+    console.log(
+      `Server: Validating records (must have valid date and quantity > 0)...`,
+    );
     const validRecords = [];
     const invalidRecords = [];
 
     records.forEach((record, idx) => {
-      const hasValidDate = record.refilled_date && String(record.refilled_date).trim() !== '';
-      const hasValidQty = record.refilled_quantity && Number(record.refilled_quantity) > 0;
+      const hasValidDate =
+        record.refilled_date && String(record.refilled_date).trim() !== "";
+      const hasValidQty =
+        record.refilled_quantity && Number(record.refilled_quantity) > 0;
 
       if (hasValidDate && hasValidQty) {
         validRecords.push(record);
@@ -78,9 +136,9 @@ app.post("/api/save-fuel-data", async (req, res) => {
         invalidRecords.push({
           index: idx,
           sitename: record.sitename,
-          date: record.refilled_date || 'MISSING',
-          qty: record.refilled_quantity || 'MISSING',
-          reason: !hasValidDate ? 'Invalid/Missing Date' : 'Quantity ≤ 0'
+          date: record.refilled_date || "MISSING",
+          qty: record.refilled_quantity || "MISSING",
+          reason: !hasValidDate ? "Invalid/Missing Date" : "Quantity ≤ 0",
         });
       }
     });
@@ -91,11 +149,15 @@ app.post("/api/save-fuel-data", async (req, res) => {
 
     if (invalidRecords.length > 0) {
       console.warn(`Server: Invalid records that will be EXCLUDED:`);
-      invalidRecords.slice(0, 10).forEach(rec => {
-        console.warn(`  - ${rec.sitename}: Date=${rec.date}, Qty=${rec.qty} (${rec.reason})`);
+      invalidRecords.slice(0, 10).forEach((rec) => {
+        console.warn(
+          `  - ${rec.sitename}: Date=${rec.date}, Qty=${rec.qty} (${rec.reason})`,
+        );
       });
       if (invalidRecords.length > 10) {
-        console.warn(`  ... and ${invalidRecords.length - 10} more invalid records`);
+        console.warn(
+          `  ... and ${invalidRecords.length - 10} more invalid records`,
+        );
       }
     }
 
@@ -105,9 +167,10 @@ app.post("/api/save-fuel-data", async (req, res) => {
         success: false,
         inserted: 0,
         total: records.length,
-        message: "No valid records (all records had invalid date or quantity ≤ 0)",
+        message:
+          "No valid records (all records had invalid date or quantity ≤ 0)",
         invalidRecords: invalidRecords.length,
-        batchResults: []
+        batchResults: [],
       });
     }
 
@@ -121,7 +184,7 @@ app.post("/api/save-fuel-data", async (req, res) => {
       console.error("Server: Missing Supabase credentials");
       return res.status(500).json({
         error: "Supabase not configured on server",
-        inserted: 0
+        inserted: 0,
       });
     }
 
@@ -140,46 +203,58 @@ app.post("/api/save-fuel-data", async (req, res) => {
 
       while (!inserted && retryCount < MAX_RETRIES) {
         try {
-          console.log(`Server: Inserting batch ${batchNum} (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+          console.log(
+            `Server: Inserting batch ${batchNum} (attempt ${retryCount + 1}/${MAX_RETRIES})...`,
+          );
 
           const { data, error } = await supabase
-            .from("fuel_quantities")
+            .from("live_fuel_data")
             .insert(batch);
 
           if (error) {
             retryCount++;
             if (retryCount < MAX_RETRIES) {
-              console.warn(`Server: Batch ${batchNum} failed (attempt ${retryCount}): ${error.message}`);
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              console.warn(
+                `Server: Batch ${batchNum} failed (attempt ${retryCount}): ${error.message}`,
+              );
+              await new Promise((resolve) => setTimeout(resolve, 2000));
             } else {
-              console.error(`Server: Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${error.message}`);
+              console.error(
+                `Server: Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${error.message}`,
+              );
               batchResults.push({
                 batch: batchNum,
                 status: "failed",
-                error: error.message
+                error: error.message,
               });
             }
           } else {
             insertedCount += batch.length;
-            console.log(`Server: Batch ${batchNum} inserted: ${batch.length} records (Total: ${insertedCount})`);
+            console.log(
+              `Server: Batch ${batchNum} inserted: ${batch.length} records (Total: ${insertedCount})`,
+            );
             batchResults.push({
               batch: batchNum,
               status: "success",
-              count: batch.length
+              count: batch.length,
             });
             inserted = true;
           }
         } catch (err) {
           retryCount++;
           if (retryCount < MAX_RETRIES) {
-            console.warn(`Server: Batch ${batchNum} exception (attempt ${retryCount}): ${err.message}`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            console.warn(
+              `Server: Batch ${batchNum} exception (attempt ${retryCount}): ${err.message}`,
+            );
+            await new Promise((resolve) => setTimeout(resolve, 2000));
           } else {
-            console.error(`Server: Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${err.message}`);
+            console.error(
+              `Server: Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${err.message}`,
+            );
             batchResults.push({
               batch: batchNum,
               status: "failed",
-              error: err.message
+              error: err.message,
             });
           }
         }
@@ -187,8 +262,12 @@ app.post("/api/save-fuel-data", async (req, res) => {
     }
 
     console.log(`Server: Migration complete!`);
-    console.log(`  ✅ Inserted to Supabase: ${insertedCount}/${validRecords.length} valid records`);
-    console.log(`  ❌ Excluded (invalid data): ${invalidRecords.length} records`);
+    console.log(
+      `  ✅ Inserted to Supabase: ${insertedCount}/${validRecords.length} valid records`,
+    );
+    console.log(
+      `  ❌ Excluded (invalid data): ${invalidRecords.length} records`,
+    );
 
     return res.json({
       success: insertedCount > 0,
@@ -196,13 +275,13 @@ app.post("/api/save-fuel-data", async (req, res) => {
       total: records.length,
       valid: validRecords.length,
       invalid: invalidRecords.length,
-      batchResults
+      batchResults,
     });
   } catch (error) {
     console.error("Server: Error in /api/save-fuel-data:", error.message);
     return res.status(500).json({
       error: error.message,
-      inserted: 0
+      inserted: 0,
     });
   }
 });
@@ -214,13 +293,13 @@ app.get("/api/get-invoice-data", async (req, res) => {
     if (!startDate || !endDate) {
       return res.status(400).json({
         error: "Missing startDate or endDate",
-        received: { startDate, endDate }
+        received: { startDate, endDate },
       });
     }
 
     console.log(`\n📋 Invoice API: Fetching records from database...`);
     console.log(`   Date range: ${startDate} to ${endDate}`);
-    console.log(`   Region filter: ${region || 'All'}`);
+    console.log(`   Region filter: ${region || "All"}`);
 
     const { createClient } = await import("@supabase/supabase-js");
 
@@ -229,40 +308,88 @@ app.get("/api/get-invoice-data", async (req, res) => {
 
     if (!supabaseUrl || !supabaseKey) {
       console.error("Server: Missing Supabase credentials");
-      return res.status(500).json({ error: "Supabase not configured on server" });
+      return res
+        .status(500)
+        .json({ error: "Supabase not configured on server" });
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Read all records from database table
-    const { data, error } = await supabase
-      .from("fuel_quantities")
+    // Fetch live records within date range
+    console.log("📥 Fetching live_fuel_data records...");
+    const { data: liveData, error: liveError } = await supabase
+      .from("live_fuel_data")
       .select("sitename, region, refilled_date, refilled_quantity")
       .gte("refilled_date", startDate)
       .lte("refilled_date", endDate);
 
-    if (error) {
-      console.error("❌ Database query error:", error.message);
+    if (liveError) {
+      console.error("❌ Live data query error:", liveError.message);
       return res.status(500).json({
-        error: "Failed to fetch invoice data from database",
-        details: error.message
+        error: "Failed to fetch live invoice data from database",
+        details: liveError.message,
       });
     }
 
-    if (!data) {
-      console.warn("⚠️  Database returned no data");
-      return res.json({ records: [] });
+    console.log(
+      `✅ Fetched ${liveData?.length || 0} records from live_fuel_data`,
+    );
+
+    // Fetch history records within date range
+    console.log("📥 Fetching history_fuel_data records...");
+    const { data: historyData, error: historyError } = await supabase
+      .from("history_fuel_data")
+      .select("sitename, region, refilled_date, refilled_quantity")
+      .gte("refilled_date", startDate)
+      .lte("refilled_date", endDate);
+
+    if (historyError) {
+      console.error("❌ History data query error:", historyError.message);
+      return res.status(500).json({
+        error: "Failed to fetch history invoice data from database",
+        details: historyError.message,
+      });
     }
 
-    console.log(`✅ Fetched ${data.length} records from database (within date range)`);
+    console.log(
+      `✅ Fetched ${historyData?.length || 0} records from history_fuel_data`,
+    );
+
+    // Combine live and history data
+    const allRecords = [...(liveData || []), ...(historyData || [])];
+
+    if (!allRecords || allRecords.length === 0) {
+      console.warn("⚠️  No records found in live or history tables");
+      return res.json({ records: [], count: 0, total: 0 });
+    }
+
+    console.log(`📊 Total combined records: ${allRecords.length}`);
+
+    // Deduplicate: keep only latest version for each site+date combination
+    // Live data takes precedence over history data for the same site+date
+    const deduped = {};
+    for (const record of allRecords) {
+      const key = `${record.sitename}|${record.refilled_date}`;
+      // Always keep the record, but if same key exists, prefer keeping it
+      // (since live data is processed first, it will naturally be used)
+      if (!deduped[key]) {
+        deduped[key] = record;
+      }
+    }
+    let filteredData = Object.values(deduped);
+    const dupesRemoved = allRecords.length - filteredData.length;
+    if (dupesRemoved > 0) {
+      console.log(`🔄 Removed ${dupesRemoved} duplicate/conflicting records`);
+    }
 
     // Apply region filter if specified
-    let filteredData = data;
     if (region && region.trim() !== "" && region !== "All") {
-      filteredData = data.filter((record) => {
+      filteredData = filteredData.filter((record) => {
         if (region === "CER") {
-          return record.region?.toLowerCase().includes("central") ||
-                 record.region?.toLowerCase().includes("east");
+          return (
+            record.region?.toLowerCase().includes("central") ||
+            record.region?.toLowerCase().includes("east")
+          );
         } else if (region === "Central") {
           return record.region?.toLowerCase().includes("central");
         } else if (region === "East") {
@@ -270,46 +397,68 @@ app.get("/api/get-invoice-data", async (req, res) => {
         }
         return true;
       });
-      console.log(`✅ After region filter (${region}): ${filteredData.length} records`);
+      console.log(
+        `✅ After region filter (${region}): ${filteredData.length} records`,
+      );
     }
+
+    // Sort by site name, then by date (newest first)
+    filteredData.sort((a, b) => {
+      if (a.sitename !== b.sitename) {
+        return a.sitename.localeCompare(b.sitename);
+      }
+      return new Date(b.refilled_date) - new Date(a.refilled_date);
+    });
 
     console.log(`📊 Sample records:`);
     filteredData.slice(0, 5).forEach((record, idx) => {
-      console.log(`  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
+      console.log(
+        `  [${idx + 1}] ${record.sitename} | ${record.refilled_date} | Qty: ${record.refilled_quantity}`,
+      );
     });
 
     res.json({
       success: true,
       records: filteredData,
       count: filteredData.length,
-      total: data.length,
-      filtered: data.length - filteredData.length
+      total: allRecords.length,
+      filtered: allRecords.length - filteredData.length,
+      deduplicated: dupesRemoved,
+      sources: {
+        live: liveData?.length || 0,
+        history: historyData?.length || 0,
+      },
     });
   } catch (error) {
     console.error("❌ Error in /api/get-invoice-data:", error.message);
     res.status(500).json({
       error: error.message,
-      records: []
+      records: [],
     });
   }
 });
 
 app.post("/api/sync-fuel-sheet", async (req, res) => {
   try {
-    console.log("\n🔄 Starting Google Sheets Fuel Data Sync (hash-based deduplication)...");
+    console.log(
+      "\n🔄 Starting Google Sheets Fuel Data Sync (hash-based deduplication)...",
+    );
     const syncStartTime = Date.now();
 
     const { createClient } = await import("@supabase/supabase-js");
 
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE;
+    const supabaseUrl =
+      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const supabaseServiceRole =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.VITE_SUPABASE_SERVICE_ROLE;
 
     if (!supabaseUrl || !supabaseServiceRole) {
       console.error("❌ Missing Supabase credentials for sync");
       return res.status(500).json({
         status: "error",
         error: "Supabase credentials not configured",
-        records: { processed: 0, inserted: 0, skipped: 0, invalid: 0 }
+        records: { processed: 0, inserted: 0, skipped: 0, invalid: 0 },
       });
     }
 
@@ -319,8 +468,9 @@ app.post("/api/sync-fuel-sheet", async (req, res) => {
     console.log("📥 Fetching CSV from Google Sheets...");
     const csvResponse = await fetch(CSV_URL, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-      }
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
     });
 
     if (!csvResponse.ok) {
@@ -328,9 +478,9 @@ app.post("/api/sync-fuel-sheet", async (req, res) => {
     }
 
     const csvText = await csvResponse.text();
-    const rows = csvText.split("\n").map(r => r.split(","));
+    const rows = csvText.split("\n").map((r) => r.split(","));
     const headers = rows[0];
-    const dataRows = rows.slice(1).filter(row => row.length >= 4);
+    const dataRows = rows.slice(1).filter((row) => row.length >= 4);
 
     console.log(`📊 CSV fetched successfully: ${dataRows.length} data rows`);
 
@@ -371,47 +521,89 @@ app.post("/api/sync-fuel-sheet", async (req, res) => {
           .update(`${sitename}-${region}-${refilled_date}-${refilled_quantity}`)
           .digest("hex");
 
-        // Check if this row already exists (using unique constraint)
+        // Check if this record already exists (by sitename + date)
         const { data: existing, error: checkError } = await supabase
-          .from("fuel_quantities")
-          .select("id")
-          .eq("row_hash", row_hash)
+          .from("live_fuel_data")
+          .select("id, refilled_quantity")
+          .eq("sitename", sitename)
+          .eq("refilled_date", refilled_date)
           .maybeSingle();
 
         if (checkError) {
-          console.warn(`⚠️  Error checking existing row: ${checkError.message}`);
+          console.warn(
+            `⚠️  Error checking existing row: ${checkError.message}`,
+          );
         }
 
         if (existing) {
-          skipped++;
+          // If quantity has changed, move old to history and update live
+          if (existing.refilled_quantity !== refilled_quantity) {
+            console.log(
+              `📝 Quantity changed for ${sitename} on ${refilled_date}: ${existing.refilled_quantity} -> ${refilled_quantity}`,
+            );
+            // Archive old record to history
+            const { error: archiveError } = await supabase
+              .from("history_fuel_data")
+              .insert([
+                {
+                  live_data_id: existing.id,
+                  sitename,
+                  region,
+                  refilled_date,
+                  refilled_quantity: existing.refilled_quantity,
+                  original_created_at: new Date().toISOString(),
+                },
+              ]);
+
+            if (!archiveError) {
+              // Update the live record with new quantity
+              const { error: updateError } = await supabase
+                .from("live_fuel_data")
+                .update({
+                  refilled_quantity,
+                  region,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", existing.id);
+
+              if (!updateError) {
+                inserted++;
+              }
+            }
+          } else {
+            skipped++;
+          }
           continue;
         }
 
-        // Insert new record with row_hash
+        // Insert new record to live table
         const { data: insertData, error: insertError } = await supabase
-          .from("fuel_quantities")
-          .insert([{
-            sitename,
-            region,
-            refilled_date,
-            refilled_quantity,
-            row_hash
-          }]);
+          .from("live_fuel_data")
+          .insert([
+            {
+              sitename,
+              region,
+              refilled_date,
+              refilled_quantity,
+            },
+          ]);
 
         if (insertError) {
           errors.push({
             sitename,
             date: refilled_date,
-            error: insertError.message
+            error: insertError.message,
           });
-          console.warn(`⚠️  Insert failed for ${sitename}: ${insertError.message}`);
+          console.warn(
+            `⚠️  Insert failed for ${sitename}: ${insertError.message}`,
+          );
         } else {
           inserted++;
         }
       } catch (rowError) {
         console.warn(`⚠️  Error processing row: ${rowError.message}`);
         errors.push({
-          error: rowError.message
+          error: rowError.message,
         });
       }
     }
@@ -433,18 +625,18 @@ app.post("/api/sync-fuel-sheet", async (req, res) => {
         processed,
         inserted,
         skipped,
-        invalid
+        invalid,
       },
       lastSync: lastSyncTime,
       durationMs: syncDurationMs,
-      errors: errors.length > 0 ? errors.slice(0, 10) : []
+      errors: errors.length > 0 ? errors.slice(0, 10) : [],
     });
   } catch (error) {
     console.error("❌ Sync failed:", error.message);
     res.status(500).json({
       status: "error",
       error: error.message,
-      records: { processed: 0, inserted: 0, skipped: 0, invalid: 0 }
+      records: { processed: 0, inserted: 0, skipped: 0, invalid: 0 },
     });
   }
 });
@@ -454,107 +646,159 @@ app.get("/api/sync-fuel-sheet", async (req, res) => {
     status: "info",
     message: "Use POST /api/sync-fuel-sheet to trigger a sync",
     lastSync: lastSyncTime,
-    nextScheduledSync: "Every 6 hours (configurable)"
+    nextScheduledSync: "Every 6 hours (configurable)",
   });
 });
 
 app.post("/api/cleanup-duplicates", async (req, res) => {
   try {
-    console.log("\n🧹 Starting database deduplication cleanup...");
+    console.log("\n🧹 Starting duplicate cleanup process...");
 
     const { createClient } = await import("@supabase/supabase-js");
 
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE;
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
-    if (!supabaseUrl || !supabaseServiceRole) {
+    console.log(`📋 Supabase URL: ${supabaseUrl ? "✓ Set" : "✗ Missing"}`);
+    console.log(`🔑 Supabase Key: ${supabaseKey ? "✓ Set" : "✗ Missing"}`);
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Missing Supabase credentials");
       return res.status(500).json({
         status: "error",
-        error: "Supabase credentials not configured"
+        error: "Supabase not configured",
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceRole);
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch all records from database
-    const { data: allRecords, error: fetchError } = await supabase
-      .from("fuel_quantities")
-      .select("id, sitename, region, refilled_date, refilled_quantity");
+    // Fetch all records from the database
+    console.log("📥 Fetching all records from live_fuel_data table...");
+    let { data: allRecords, error: fetchError } = await supabase
+      .from("live_fuel_data")
+      .select("id, sitename, refilled_date, refilled_quantity, region");
 
     if (fetchError) {
-      throw new Error(`Failed to fetch records: ${fetchError.message}`);
+      console.error(
+        "❌ Error fetching records:",
+        fetchError?.message || fetchError,
+      );
+      return res.status(500).json({
+        status: "error",
+        error: "Failed to fetch records from database",
+        details:
+          fetchError?.message || fetchError?.details || String(fetchError),
+      });
     }
 
-    console.log(`📊 Total records in database: ${allRecords.length}`);
+    if (!allRecords) {
+      allRecords = [];
+    }
 
-    // Find duplicates: same sitename + date + quantity
-    const recordMap = new Map();
+    if (allRecords.length === 0) {
+      console.log("✅ No records to clean");
+      return res.json({
+        status: "success",
+        message: "No records to clean",
+        duplicatesRemoved: 0,
+        recordsKept: 0,
+        totalBefore: 0,
+      });
+    }
+
+    console.log(`📊 Total records: ${allRecords.length}`);
+
+    // Group records by sitename + refilled_date and find duplicates
+    const grouped = {};
     const duplicateIds = [];
 
     for (const record of allRecords) {
-      const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
+      const key = `${record.sitename}|${record.refilled_date}`;
 
-      if (!recordMap.has(key)) {
-        recordMap.set(key, []);
+      if (!grouped[key]) {
+        grouped[key] = [];
       }
-      recordMap.get(key).push(record.id);
+      grouped[key].push(record.id);
     }
 
-    // Identify which IDs to delete (keep first, delete rest)
-    for (const [key, ids] of recordMap.entries()) {
-      if (ids.length > 1) {
-        console.log(`⚠️  Found ${ids.length} duplicates for: ${key}`);
-        // Keep the first ID, mark the rest for deletion
-        duplicateIds.push(...ids.slice(1));
+    // Identify duplicate IDs (keep first, remove rest)
+    let dupeCount = 0;
+    for (const key in grouped) {
+      if (grouped[key].length > 1) {
+        dupeCount++;
+        console.log(`⚠️  Found ${grouped[key].length} duplicates for: ${key}`);
+        // Keep the first one (lowest ID), mark others for deletion
+        for (let i = 1; i < grouped[key].length; i++) {
+          duplicateIds.push(grouped[key][i]);
+        }
       }
     }
-
-    console.log(`🗑️  Total duplicate records to delete: ${duplicateIds.length}`);
 
     if (duplicateIds.length === 0) {
+      console.log("✅ No duplicates found");
       return res.json({
         status: "success",
-        message: "No duplicates found",
-        deletedCount: 0,
-        totalRecords: allRecords.length
+        message: "No duplicates found in the database",
+        duplicatesRemoved: 0,
+        recordsKept: allRecords.length,
+        totalBefore: allRecords.length,
       });
     }
 
+    console.log(
+      `🔄 Removing ${duplicateIds.length} duplicate records from ${dupeCount} groups...`,
+    );
+
     // Delete duplicates in batches
-    const BATCH_SIZE = 100;
-    let totalDeleted = 0;
+    let deletedCount = 0;
+    const BATCH_SIZE = 50;
 
     for (let i = 0; i < duplicateIds.length; i += BATCH_SIZE) {
       const batch = duplicateIds.slice(i, i + BATCH_SIZE);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+
+      console.log(`   Deleting batch ${batchNum} (${batch.length} records)...`);
+
       const { error: deleteError } = await supabase
-        .from("fuel_quantities")
+        .from("live_fuel_data")
         .delete()
         .in("id", batch);
 
       if (deleteError) {
-        console.warn(`⚠️  Batch delete error: ${deleteError.message}`);
-      } else {
-        totalDeleted += batch.length;
-        console.log(`✅ Deleted batch: ${batch.length} records (Total: ${totalDeleted})`);
+        console.error(
+          `❌ Batch ${batchNum} delete failed:`,
+          deleteError?.message || deleteError,
+        );
+        return res.status(500).json({
+          status: "error",
+          error: `Failed to delete batch ${batchNum}`,
+          details: deleteError?.message || String(deleteError),
+          deletedSoFar: deletedCount,
+        });
       }
+
+      deletedCount += batch.length;
+      console.log(`   ✅ Batch ${batchNum} deleted: ${batch.length} records`);
     }
 
-    console.log(`\n✅ Cleanup complete!`);
-    console.log(`   🗑️  Deleted: ${totalDeleted} duplicate records`);
-    console.log(`   📊 Remaining: ${allRecords.length - totalDeleted} unique records`);
+    console.log(`\n✅ Cleanup Complete!`);
+    console.log(`   🗑️  Duplicates removed: ${deletedCount}`);
+    console.log(`   ✨ Records kept: ${allRecords.length - deletedCount}`);
 
     res.json({
       status: "success",
-      message: "Database deduplication completed",
-      deletedCount: totalDeleted,
-      totalRecords: allRecords.length - totalDeleted,
-      originalCount: allRecords.length
+      message: "Duplicates cleaned successfully",
+      duplicatesRemoved: deletedCount,
+      recordsKept: allRecords.length - deletedCount,
+      totalBefore: allRecords.length,
     });
   } catch (error) {
-    console.error("❌ Cleanup failed:", error.message);
+    console.error("❌ Cleanup failed:", error);
+    console.error("   Stack:", error?.stack);
     res.status(500).json({
       status: "error",
-      error: error.message
+      error: error?.message || String(error),
+      type: error?.constructor?.name,
     });
   }
 });
@@ -567,17 +811,25 @@ function startScheduledSync() {
     console.log("\n⏰ Scheduled sync triggered...");
     try {
       const { createClient } = await import("@supabase/supabase-js");
-      const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-      const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE;
+      const supabaseUrl =
+        process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+      const supabaseServiceRole =
+        process.env.SUPABASE_SERVICE_ROLE_KEY ||
+        process.env.VITE_SUPABASE_SERVICE_ROLE;
 
       if (!supabaseUrl || !supabaseServiceRole) {
-        console.warn("⚠️  Scheduled sync skipped: missing Supabase credentials");
+        console.warn(
+          "⚠️  Scheduled sync skipped: missing Supabase credentials",
+        );
         return;
       }
 
       const supabase = createClient(supabaseUrl, supabaseServiceRole);
       const csvResponse = await fetch(CSV_URL, {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
       });
 
       if (!csvResponse.ok) {
@@ -585,8 +837,8 @@ function startScheduledSync() {
       }
 
       const csvText = await csvResponse.text();
-      const rows = csvText.split("\n").map(r => r.split(","));
-      const dataRows = rows.slice(1).filter(row => row.length >= 4);
+      const rows = csvText.split("\n").map((r) => r.split(","));
+      const dataRows = rows.slice(1).filter((row) => row.length >= 4);
 
       let syncInserted = 0;
       let syncSkipped = 0;
@@ -598,19 +850,27 @@ function startScheduledSync() {
           const refilled_date = row[2]?.trim();
           const refilled_quantity = parseFloat(row[3]?.trim());
 
-          if (!refilled_quantity || refilled_quantity <= 0 || isNaN(Date.parse(refilled_date)) || !sitename) {
+          if (
+            !refilled_quantity ||
+            refilled_quantity <= 0 ||
+            isNaN(Date.parse(refilled_date)) ||
+            !sitename
+          ) {
             continue;
           }
 
           const row_hash = crypto
             .createHash("sha256")
-            .update(`${sitename}-${region}-${refilled_date}-${refilled_quantity}`)
+            .update(
+              `${sitename}-${region}-${refilled_date}-${refilled_quantity}`,
+            )
             .digest("hex");
 
           const { data: existing } = await supabase
-            .from("fuel_quantities")
+            .from("live_fuel_data")
             .select("id")
-            .eq("row_hash", row_hash)
+            .eq("sitename", sitename)
+            .eq("refilled_date", refilled_date)
             .maybeSingle();
 
           if (existing) {
@@ -619,8 +879,8 @@ function startScheduledSync() {
           }
 
           const { error: insertError } = await supabase
-            .from("fuel_quantities")
-            .insert([{ sitename, region, refilled_date, refilled_quantity, row_hash }]);
+            .from("live_fuel_data")
+            .insert([{ sitename, region, refilled_date, refilled_quantity }]);
 
           if (!insertError) {
             syncInserted++;
@@ -631,7 +891,9 @@ function startScheduledSync() {
       }
 
       lastSyncTime = new Date().toISOString();
-      console.log(`✅ Scheduled sync complete: Inserted ${syncInserted}, Skipped ${syncSkipped}`);
+      console.log(
+        `✅ Scheduled sync complete: Inserted ${syncInserted}, Skipped ${syncSkipped}`,
+      );
     } catch (error) {
       console.error("❌ Scheduled sync failed:", error.message);
     }

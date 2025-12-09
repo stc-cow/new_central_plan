@@ -1903,6 +1903,46 @@ body {
   box-shadow: 0 4px 16px rgba(211, 47, 47, 0.3);
 }
 
+.sync-csv-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+.sync-csv-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);
+}
+
+.cleanup-duplicates-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ff9e00 0%, #f57c00 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 158, 0, 0.2);
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+.cleanup-duplicates-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 158, 0, 0.3);
+}
+
 .invoice-preview {
   max-height: 400px;
   overflow-y: auto;
