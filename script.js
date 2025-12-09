@@ -2026,7 +2026,7 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log("🔄 Starting CSV to Supabase Storage migration...");
+    console.log("🔄 Starting CSV to Supabase fuel_quantities table migration...");
     console.log(`📊 Processing ${rawData.length} CSV rows`);
 
     console.log("🔍 Extracting data from CSV columns A, D, AE, AF...");
