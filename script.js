@@ -1523,12 +1523,18 @@ async function loadInvoiceData() {
           proxyUrl = CORS_PROXIES[i] + encodeURIComponent(INVOICE_CSV_URL);
         }
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
         const response = await fetch(proxyUrl, {
           method: "GET",
           headers: {
             Accept: "text/plain",
           },
+          signal: controller.signal,
         });
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const csvText = await response.text();
@@ -1543,10 +1549,16 @@ async function loadInvoiceData() {
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
       const response = await fetch(INVOICE_CSV_URL, {
         method: "GET",
         mode: "cors",
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const csvText = await response.text();
