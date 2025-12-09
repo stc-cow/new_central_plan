@@ -2305,18 +2305,43 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
 async function backgroundSyncData() {
   try {
+    // Check network connectivity before syncing
+    if (!navigator.onLine) {
+      console.warn("⚠️ Background sync: No internet connection, skipping sync");
+      return;
+    }
+
     // Silently fetch latest CSV data
-    const rawData = await fetchCSV();
+    let rawData = [];
+    try {
+      rawData = await Promise.race([
+        fetchCSV(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("CSV fetch timeout")), 15000)
+        )
+      ]);
+    } catch (csvErr) {
+      console.warn("⚠️ Background sync: CSV fetch failed", csvErr.message);
+      return;
+    }
+
     if (rawData.length === 0) {
       console.warn("⚠️ Background sync: No CSV data available");
       return;
     }
 
-    // Silently sync to Supabase without logging verbose details
+    // Silently sync to Supabase without logging verbose details (non-blocking)
     try {
-      await saveCsvFuelDataToSupabase(rawData);
+      const syncPromise = Promise.race([
+        saveCsvFuelDataToSupabase(rawData),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Supabase sync timeout")), 20000)
+        )
+      ]);
+      await syncPromise;
     } catch (syncErr) {
       console.warn("⚠️ Background sync: Supabase sync failed (continuing)", syncErr.message);
+      // Continue even if Supabase sync fails - local data is still valid
     }
 
     // Filter and validate sites
@@ -2342,7 +2367,8 @@ async function backgroundSyncData() {
       console.log("ℹ️ Background sync: No changes detected, skipping UI update");
     }
   } catch (error) {
-    console.error("❌ Background sync failed:", error.message);
+    console.warn("⚠️ Background sync encountered an error:", error.message);
+    // Silent fail - don't disrupt the application
   }
 }
 
