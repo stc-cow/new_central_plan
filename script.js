@@ -537,11 +537,11 @@ async function startDashboardAsync() {
     updateHeaderDate();
     headerIntervalId = setInterval(updateHeaderDate, 1000);
 
-    // Auto-sync from CSV every 30 seconds (without page refresh)
+    // Auto-sync from CSV every 1 minute in background (soft update without flashing)
     refreshIntervalId = setInterval(() => {
-      console.log("🔄 Auto-syncing CSV data with Supabase...");
-      loadDashboard();
-    }, 30000);
+      console.log("🔄 Background: Auto-syncing CSV data with Supabase...");
+      backgroundSyncData();
+    }, 60000);
 
     const searchInput = document.getElementById("searchInput");
     if (searchInput) {
