@@ -348,8 +348,7 @@ async function handleLogin() {
       document.getElementById("username").value = "";
       document.getElementById("password").value = "";
     } catch (error) {
-      console.error("Error during login:", error);
-      loginError.textContent =
+        loginError.textContent =
         "An error occurred during login. Please try again.";
       loginError.style.display = "block";
 
@@ -400,7 +399,6 @@ async function startDashboardAsync() {
       }
     });
   } catch (error) {
-    console.error("Error loading dashboard:", error);
   }
 }
 
@@ -453,7 +451,6 @@ async function fetchCSV() {
 
   // Try API endpoint first (for servers with backend like Fly.dev)
   try {
-    console.log("Fetching CSV from API endpoint: /api/fetch-csv");
 
     const response = await fetch("/api/fetch-csv", {
       method: "GET",
@@ -465,18 +462,10 @@ async function fetchCSV() {
     if (response.ok) {
       const csvText = await response.text();
       if (csvText.trim()) {
-        console.log(
-          "CSV fetched successfully from API endpoint, length:",
-          csvText.length,
-        );
         const parsed = parseCSV(csvText);
-        console.log("Parsed CSV rows:", parsed.length);
         return parsed;
       }
     } else {
-      console.warn(
-        `API endpoint returned status ${response.status}, trying alternatives...`,
-      );
     }
   } catch (error) {
     // API endpoint not available, try alternatives
@@ -492,9 +481,6 @@ async function fetchCSV() {
         proxyUrl = CORS_PROXIES[i] + encodeURIComponent(CSV_URL);
       }
 
-      console.log(
-        `Trying CORS proxy ${i + 1}/${CORS_PROXIES.length}: ${CORS_PROXIES[i]}`,
-      );
 
       const response = await fetch(proxyUrl, {
         method: "GET",
@@ -507,16 +493,10 @@ async function fetchCSV() {
         const csvText = await response.text();
 
         if (csvText.trim()) {
-          console.log(
-            `CSV fetched successfully from CORS proxy ${i + 1}, length:`,
-            csvText.length,
-          );
           const parsed = parseCSV(csvText);
-          console.log("Parsed CSV rows:", parsed.length);
           return parsed;
         }
       } else {
-        console.warn(`CORS proxy ${i + 1} returned status ${response.status}`);
       }
     } catch (proxyError) {
       // CORS proxy error, try next proxy
@@ -525,7 +505,6 @@ async function fetchCSV() {
 
   // Last resort: try direct Google Sheets fetch
   try {
-    console.log("Attempting to fetch CSV directly from Google Sheets...");
     const response = await fetch(CSV_URL, {
       method: "GET",
       mode: "cors",
@@ -534,17 +513,11 @@ async function fetchCSV() {
     if (response.ok) {
       const csvText = await response.text();
       if (csvText.trim()) {
-        console.log(
-          "CSV fetched successfully from Google Sheets, length:",
-          csvText.length,
-        );
         const parsed = parseCSV(csvText);
-        console.log("Parsed CSV rows:", parsed.length);
         return parsed;
       }
     }
   } catch (error) {
-    console.warn("Direct Google Sheets fetch failed:", error.message);
   }
 
   console.error(
@@ -738,9 +711,6 @@ function convertDateToISO(dateStr) {
 
     // Validate month and day
     if (month < 1 || month > 12 || day < 1 || day > 31) {
-      console.warn(
-        `Invalid date values: ${dateStr} (day=${day}, month=${month})`,
-      );
       return null;
     }
 
@@ -765,9 +735,6 @@ function convertDateToISO(dateStr) {
     const year = parseInt(match[3], 10);
 
     if (month < 1 || month > 12 || day < 1 || day > 31) {
-      console.warn(
-        `Invalid date values (MM/DD/YYYY): ${dateStr} (month=${month}, day=${day})`,
-      );
       return null;
     }
 
@@ -1366,7 +1333,6 @@ window.downloadExcel = function downloadExcel() {
   try {
     if (!window.XLSX) {
       alert("Excel library is still loading. Please try again.");
-      console.error("XLSX library not available");
       return;
     }
 
@@ -1444,7 +1410,6 @@ window.downloadExcel = function downloadExcel() {
     const fileName = `Central_Fuel_Plan_${timestamp.replace(/[/:]/g, "-")}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   } catch (error) {
-    console.error("Error downloading Excel:", error);
     alert("Failed to download Excel file. Please try again.");
   }
 };
