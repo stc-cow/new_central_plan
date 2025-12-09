@@ -18,6 +18,16 @@ let cachedCsvFetchedAt = 0;
 // Lightweight in-memory store for posted fuel data (non-persistent)
 const inMemoryFuelRecords = [];
 
+// Disable caching for HTML, JS, CSS files to ensure users get the latest version
+app.use((req, res, next) => {
+  if (req.url.endsWith('.html') || req.url.endsWith('.js') || req.url.endsWith('.css')) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
 app.use(express.static(join(__dirname, "dist")));
 app.use(express.json());
 
