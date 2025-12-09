@@ -2197,43 +2197,34 @@ body {
 }
 
 @media (max-width: 1200px) {
-  .invoicing-container {
+  .invoice-modal-body {
     grid-template-columns: 1fr;
   }
 
-  .invoicing-filters {
+  .invoice-filters {
     height: auto;
   }
 }
 
 @media (max-width: 768px) {
-  .invoicing-page {
-    padding: 16px;
+  .invoice-modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .invoice-modal-body {
+    grid-template-columns: 1fr;
     gap: 16px;
+    padding: 16px;
   }
 
-  .invoicing-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .invoicing-header h1 {
-    font-size: 22px;
-  }
-
-  .back-btn {
-    width: 100%;
-    text-align: center;
-  }
-
-  .invoicing-table {
+  .invoice-table {
     font-size: 12px;
   }
 
-  .invoicing-table th,
-  .invoicing-table td {
-    padding: 10px;
+  .invoice-table th,
+  .invoice-table td {
+    padding: 8px;
   }
 
   .invoice-summary {
