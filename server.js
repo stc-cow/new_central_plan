@@ -71,8 +71,7 @@ let syncScheduleIntervalId = null;
 let lastSyncTime = null;
 
 // Basic in-memory cache for Google Sheets CSV to reduce repeated fetch latency
-// Short TTL so dashboard auto-syncs to near-real-time updates
-const CSV_CACHE_TTL_MS = 5 * 1000; // 5 seconds
+const CSV_CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
 let cachedCsvText = null;
 let cachedCsvFetchedAt = 0;
 
