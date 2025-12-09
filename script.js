@@ -2296,7 +2296,6 @@ async function backgroundSyncData() {
   try {
     // Check network connectivity before syncing
     if (!navigator.onLine) {
-      console.warn("⚠️ Background sync: No internet connection, skipping sync");
       return;
     }
 
@@ -2310,12 +2309,10 @@ async function backgroundSyncData() {
         )
       ]);
     } catch (csvErr) {
-      console.warn("⚠️ Background sync: CSV fetch failed", csvErr.message);
       return;
     }
 
     if (rawData.length === 0) {
-      console.warn("⚠️ Background sync: No CSV data available");
       return;
     }
 
@@ -2329,7 +2326,6 @@ async function backgroundSyncData() {
       ]);
       await syncPromise;
     } catch (syncErr) {
-      console.warn("⚠️ Background sync: Supabase sync failed (continuing)", syncErr.message);
       // Continue even if Supabase sync fails - local data is still valid
     }
 
@@ -2340,7 +2336,6 @@ async function backgroundSyncData() {
     const dataChanged = hasDataChanged(sitesData, newSitesData);
 
     if (dataChanged) {
-      console.log("✅ Background sync: Data changed, updating UI...");
       sitesData = newSitesData;
 
       // Soft update: only update metrics and tables, not the map
@@ -2348,15 +2343,11 @@ async function backgroundSyncData() {
         updateMetrics(sitesData);
         populateDueTable(sitesData);
         updateEventCards(sitesData);
-        console.log("✅ Background sync: UI updated successfully");
       } catch (uiErr) {
-        console.error("❌ Background sync: Error updating UI:", uiErr.message);
+        // Silent fail - don't disrupt the application
       }
-    } else {
-      console.log("ℹ️ Background sync: No changes detected, skipping UI update");
     }
   } catch (error) {
-    console.warn("⚠️ Background sync encountered an error:", error.message);
     // Silent fail - don't disrupt the application
   }
 }
