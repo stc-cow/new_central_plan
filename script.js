@@ -1625,7 +1625,7 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
 
   displayInvoiceTable();
   updateInvoiceSummary();
-}
+};
 
 function displayInvoiceTable() {
   const tbody = document.getElementById("invoiceTableBody");
