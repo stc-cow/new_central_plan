@@ -115,15 +115,15 @@ function initSupabaseClient() {
             VITE_SUPABASE_URL,
             VITE_SUPABASE_KEY,
           );
-          console.log("✓ Supabase client initialized");
+          supabaseAvailable = true;
           resolve();
         } catch (err) {
-          console.warn("Could not initialize Supabase client:", err.message);
+          supabaseAvailable = false;
           resolve();
         }
       };
       script.onerror = function () {
-        console.warn("Could not load Supabase library");
+        supabaseAvailable = false;
         resolve();
       };
       document.head.appendChild(script);
@@ -133,10 +133,10 @@ function initSupabaseClient() {
           VITE_SUPABASE_URL,
           VITE_SUPABASE_KEY,
         );
-        console.log("✓ Supabase client initialized");
+        supabaseAvailable = true;
         resolve();
       } catch (err) {
-        console.warn("Could not initialize Supabase client:", err.message);
+        supabaseAvailable = false;
         resolve();
       }
     }
@@ -144,6 +144,12 @@ function initSupabaseClient() {
 }
 
 async function registerActiveUser(username) {
+  // Skip active user tracking since Supabase is disconnected
+  if (!supabaseAvailable) {
+    currentSessionId = getOrCreateSessionId();
+    return;
+  }
+
   if (!supabaseClient) {
     await initSupabaseClient();
   }
@@ -166,12 +172,10 @@ async function registerActiveUser(username) {
     );
 
     if (error) {
-      console.warn("⚠ Active user tracking not available:", error.message);
-      // Gracefully continue even if active user tracking fails
+      // Silently fail - active user tracking is optional
       return;
     }
 
-    console.log("✓ User registered as active with session:", currentSessionId);
     updateActiveUsersCount();
 
     // Update activity every 20 seconds
@@ -182,7 +186,7 @@ async function registerActiveUser(username) {
     if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
     activeUsersIntervalId = setInterval(updateActiveUsersCount, 10000);
   } catch (error) {
-    console.warn("⚠ Active user tracking unavailable:", error.message);
+    // Silently fail - active user tracking is optional
   }
 }
 
@@ -201,7 +205,12 @@ async function updateUserActivity() {
 }
 
 async function updateActiveUsersCount() {
-  if (!supabaseClient) return;
+  // Skip if Supabase not available
+  if (!supabaseClient || !supabaseAvailable) {
+    const countElement = document.getElementById("activeUsersCount");
+    if (countElement) countElement.textContent = "0";
+    return;
+  }
 
   try {
     // Call Supabase RPC function to get active users count (within last 2 minutes)
@@ -216,7 +225,6 @@ async function updateActiveUsersCount() {
     const countElement = document.getElementById("activeUsersCount");
     if (countElement && data !== null) {
       countElement.textContent = data || 0;
-      console.log("✓ Active users count updated:", data);
     }
   } catch (error) {
     // Silently fail for active user count
@@ -225,7 +233,12 @@ async function updateActiveUsersCount() {
 }
 
 async function fallbackCountActiveUsers() {
-  if (!supabaseClient) return;
+  // Skip if Supabase not available
+  if (!supabaseClient || !supabaseAvailable) {
+    const countElement = document.getElementById("activeUsersCount");
+    if (countElement) countElement.textContent = "0";
+    return;
+  }
 
   try {
     const { data, error } = await supabaseClient
@@ -245,7 +258,6 @@ async function fallbackCountActiveUsers() {
     const countElement = document.getElementById("activeUsersCount");
     if (countElement) {
       countElement.textContent = data?.length || 0;
-      console.log("✓ Active users count:", data?.length || 0);
     }
   } catch (error) {
     // Silently fail
@@ -315,14 +327,18 @@ async function diagnoseSupabaseSetup() {
 }
 
 async function removeActiveUser() {
-  if (!supabaseClient || !currentSessionId) return;
+  // Skip if Supabase not available or no session
+  if (!supabaseClient || !currentSessionId || !supabaseAvailable) {
+    currentSessionId = null;
+    return;
+  }
 
   try {
     await supabaseClient
       .from("active_users")
       .delete()
       .eq("session_id", currentSessionId)
-      .catch((err) => null); // Silently fail if table doesn't exist
+      .catch((err) => null);
 
     currentSessionId = null;
   } catch (error) {
@@ -647,7 +663,7 @@ async function fetchCSV() {
       );
     }
   } catch (error) {
-    console.warn("API endpoint not available, trying alternatives...");
+    // API endpoint not available, try alternatives
   }
 
   // Try CORS proxies
@@ -687,7 +703,7 @@ async function fetchCSV() {
         console.warn(`CORS proxy ${i + 1} returned status ${response.status}`);
       }
     } catch (proxyError) {
-      console.warn(`CORS proxy ${i + 1} error:`, proxyError.message);
+      // CORS proxy error, try next proxy
     }
   }
 
@@ -922,6 +938,11 @@ function convertDateToISO(dateStr) {
 
   dateStr = dateStr.trim();
 
+  // Silently skip Excel error codes and invalid values
+  if (dateStr === "#N/A" || dateStr === "#REF!" || dateStr === "#VALUE!" || dateStr === "#ERROR!") {
+    return null;
+  }
+
   // Try DD/MM/YYYY format
   const ddmmyyyyRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
   let match = dateStr.match(ddmmyyyyRegex);
@@ -972,7 +993,7 @@ function convertDateToISO(dateStr) {
     return `${year}-${monthStr}-${dayStr}`;
   }
 
-  console.warn(`Could not parse date: ${dateStr}`);
+  // Silently fail for unparseable dates (data quality issue, not code error)
   return null;
 }
 
@@ -1963,15 +1984,11 @@ async function saveCsvFuelDataToSupabase(rawData) {
         if (refilled_date_raw && refilled_date_raw !== "") {
           refilled_date_iso = convertDateToISO(refilled_date_raw);
           if (!refilled_date_iso) {
-            console.warn(
-              `Excluding row for site ${sitename}: invalid date in column AE "${refilled_date_raw}"`,
-            );
+            // Exclude rows with invalid or missing dates (data quality issue)
             return null;
           }
         } else {
-          console.warn(
-            `Excluding row for site ${sitename}: column AE (refilled_date) is empty`,
-          );
+          // Exclude rows with missing dates
           return null;
         }
 
@@ -1980,15 +1997,11 @@ async function saveCsvFuelDataToSupabase(rawData) {
         if (refilled_qty_raw && refilled_qty_raw !== "") {
           refilled_quantity_num = parseFloat(refilled_qty_raw);
           if (isNaN(refilled_quantity_num) || refilled_quantity_num <= 0) {
-            console.warn(
-              `Excluding row for site ${sitename}: column AF (refilled_quantity) is not a valid number > 0 (got: "${refilled_qty_raw}")`,
-            );
+            // Exclude rows with invalid or zero quantities
             return null;
           }
         } else {
-          console.warn(
-            `Excluding row for site ${sitename}: column AF (refilled_quantity) is empty`,
-          );
+          // Exclude rows with missing quantities
           return null;
         }
 
