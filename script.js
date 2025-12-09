@@ -1587,7 +1587,7 @@ function parseInvoiceCSV(csvText) {
   return data;
 }
 
-function applyInvoiceFilters() {
+window.applyInvoiceFilters = function applyInvoiceFilters() {
   const startDate = document.getElementById("invoiceStartDate").value;
   const endDate = document.getElementById("invoiceEndDate").value;
   const region = document.getElementById("invoiceRegion").value;
