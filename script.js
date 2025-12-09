@@ -1488,9 +1488,19 @@ let invoiceData = [];
 let filteredInvoiceData = [];
 
 window.showInvoiceModal = async function showInvoiceModal() {
-  document.getElementById("invoiceModal").style.display = "flex";
-  await loadInvoiceData();
-  applyInvoiceFilters();
+  try {
+    const modal = document.getElementById("invoiceModal");
+    if (!modal) {
+      console.error("Invoice modal not found");
+      return;
+    }
+
+    modal.style.display = "flex";
+    await loadInvoiceData();
+    window.applyInvoiceFilters();
+  } catch (error) {
+    console.error("Error showing invoice modal:", error);
+  }
 };
 
 window.closeInvoiceModal = function closeInvoiceModal() {
