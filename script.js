@@ -1689,11 +1689,4 @@ function downloadInvoiceExcel() {
   XLSX.writeFile(wb, filename);
 }
 
-function hideAllPages() {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("analyticsPage").style.display = "none";
-  document.getElementById("dashboardPage").style.display = "none";
-  document.getElementById("invoicingPage").style.display = "none";
-}
-
 export {};
