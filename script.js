@@ -1919,19 +1919,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
       return;
     }
 
-    console.log(
-      "🔄 Starting CSV to Supabase fuel_quantities table migration...",
-    );
-    console.log(`📊 Processing ${rawData.length} CSV rows`);
-
-    console.log("🔍 Extracting data from CSV columns A, D, AE, AF...");
-
     // Get column headers from first row (lowercase keys)
     const sampleRow = rawData[0];
     const headers = Object.keys(sampleRow);
-
-    console.log("CSV total headers:", headers.length);
-    console.log("All headers:", headers.join(" | "));
 
     const fuelRecords = rawData
       .map((row) => {
@@ -2019,42 +2009,11 @@ async function saveCsvFuelDataToSupabase(rawData) {
       .filter((record) => record !== null);
 
     if (fuelRecords.length === 0) {
-      console.log("⚠️ No fuel records extracted from CSV");
       return;
     }
 
-    console.log(`\n📊 CSV Validation Summary:`);
-    console.log(`  Total CSV rows processed: ${rawData.length}`);
-    console.log(`  Valid records extracted: ${fuelRecords.length}`);
-    console.log(
-      `  Excluded records (invalid date or quantity ≤ 0): ${rawData.length - fuelRecords.length}`,
-    );
-
     // Prepare records for INSERT-ONLY sync (append all, never replace)
-    console.log("\n📝 Preparing all records for INSERT-ONLY migration...");
     const recordsToMigrate = [...fuelRecords];
-
-    console.log(`  ✅ Records to migrate: ${recordsToMigrate.length}`);
-    console.log(
-      `  📌 INSERT-ONLY: Every sync appends new records, never updates existing ones`,
-    );
-
-    if (recordsToMigrate.length > 0) {
-      console.log("\n📋 Sample of records to migrate (first 3):");
-      recordsToMigrate.slice(0, 3).forEach((record, idx) => {
-        console.log(
-          `  [${idx + 1}] Site: ${record.sitename} | Region: ${record.region || "NULL"} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`,
-        );
-      });
-    } else if (recordsToMigrate.length === 0 && duplicates.length > 0) {
-      console.log(
-        "ℹ️  No new records to migrate - CSV data hasn't changed since last sync",
-      );
-    } else {
-      console.warn(
-        `⚠️ No records matched the filters (valid date in AE + quantity > 0 in AF)`,
-      );
-    }
 
     // Cache data locally IMMEDIATELY before attempting backend sync
     cachedFuelData = fuelRecords;
@@ -2105,7 +2064,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
     // Send only NEW records to backend API for Supabase insertion
     if (recordsToMigrate.length === 0) {
-      console.log("✅ No new records to sync - Supabase is up to date");
       return;
     }
 
