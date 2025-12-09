@@ -2269,15 +2269,22 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
         console.log(`💾 Uploading to storage (${(jsonBlob.size / 1024).toFixed(2)} KB)...`);
 
-        const { error: uploadError } = await supabaseClient.storage
-          .from('fuel_data')
-          .upload('fuel_quantities.json', jsonBlob, {
-            upsert: true,
-            contentType: 'application/json'
-          });
+        try {
+          const { error: uploadError } = await supabaseClient.storage
+            .from('fuel_data')
+            .upload('fuel_quantities.json', jsonBlob, {
+              upsert: true,
+              contentType: 'application/json'
+            });
 
-        if (uploadError) {
-          throw new Error(`Storage upload failed: ${uploadError.message}`);
+          if (uploadError) {
+            throw new Error(`Storage upload failed: ${uploadError.message || 'Unknown error'}`);
+          }
+        } catch (uploadErr) {
+          if (uploadErr.message && uploadErr.message.includes("Failed to fetch")) {
+            throw new Error(`Storage upload failed (network issue): ${uploadErr.message}`);
+          }
+          throw uploadErr;
         }
 
         console.log(`\n✅ Storage sync successful!`);
