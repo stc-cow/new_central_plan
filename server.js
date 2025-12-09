@@ -20,10 +20,14 @@ const inMemoryFuelRecords = [];
 
 // Disable caching for HTML, JS, CSS files to ensure users get the latest version
 app.use((req, res, next) => {
-  if (req.url.endsWith('.html') || req.url.endsWith('.js') || req.url.endsWith('.css')) {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+  if (
+    req.url.endsWith(".html") ||
+    req.url.endsWith(".js") ||
+    req.url.endsWith(".css")
+  ) {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
   }
   next();
 });
@@ -33,7 +37,11 @@ app.use(express.json());
 
 async function fetchLatestCsv(forceRefresh = false) {
   const now = Date.now();
-  if (!forceRefresh && cachedCsvText && now - cachedCsvFetchedAt < CSV_CACHE_TTL_MS) {
+  if (
+    !forceRefresh &&
+    cachedCsvText &&
+    now - cachedCsvFetchedAt < CSV_CACHE_TTL_MS
+  ) {
     return { csvText: cachedCsvText, cached: true };
   }
 
@@ -42,13 +50,16 @@ async function fetchLatestCsv(forceRefresh = false) {
 
   const response = await fetch(CSV_URL, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     },
     signal: controller.signal,
   }).finally(() => clearTimeout(timeoutId));
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch CSV: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch CSV: ${response.status} ${response.statusText}`,
+    );
   }
 
   const csvText = await response.text();
@@ -105,7 +116,10 @@ app.post("/api/save-fuel-data", (req, res) => {
   const normalized = records.map(normalizeFuelRecord).filter(isValidFuelRecord);
 
   const existingMap = new Map(
-    inMemoryFuelRecords.map((record) => [`${record.sitename}|${record.refilled_date}`, record]),
+    inMemoryFuelRecords.map((record) => [
+      `${record.sitename}|${record.refilled_date}`,
+      record,
+    ]),
   );
 
   let inserted = 0;
@@ -141,7 +155,11 @@ app.get("/api/get-invoice-data", (req, res) => {
     });
   }
 
-  let filteredData = filterRecordsByDate(inMemoryFuelRecords, startDate, endDate);
+  let filteredData = filterRecordsByDate(
+    inMemoryFuelRecords,
+    startDate,
+    endDate,
+  );
 
   if (region && region !== "All") {
     const target = region.toLowerCase();
