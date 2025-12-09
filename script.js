@@ -1484,15 +1484,12 @@ let invoiceData = [];
 let filteredInvoiceData = [];
 
 async function showInvoicing() {
-  hideAllPages();
+  document.getElementById("loginPage").classList.remove("show");
+  document.getElementById("dashboardPage").style.display = "none";
+  document.getElementById("analyticsPage").style.display = "none";
   document.getElementById("invoicingPage").style.display = "flex";
   await loadInvoiceData();
   applyInvoiceFilters();
-}
-
-function showDashboard() {
-  hideAllPages();
-  document.getElementById("dashboardPage").style.display = "flex";
 }
 
 async function loadInvoiceData() {
