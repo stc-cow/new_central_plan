@@ -81,6 +81,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   await initializeApp();
 });
 
+// Monitor network connectivity
+window.addEventListener("online", () => {
+  console.log("✅ Network connection restored");
+});
+
+window.addEventListener("offline", () => {
+  console.warn("⚠️ Network connection lost");
+});
+
 // Clean up active user when page is closed or navigated away
 window.addEventListener("beforeunload", () => {
   removeActiveUser();
