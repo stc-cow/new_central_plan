@@ -1654,7 +1654,7 @@ function updateInvoiceSummary() {
   document.getElementById("invoiceTotalQty").textContent = totalQty.toFixed(2);
 }
 
-function downloadInvoiceExcel() {
+window.downloadInvoiceExcel = function downloadInvoiceExcel() {
   const startDate = document.getElementById("invoiceStartDate").value || "All";
   const endDate = document.getElementById("invoiceEndDate").value || "All";
   const region = document.getElementById("invoiceRegion").value || "All";
