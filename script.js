@@ -2227,9 +2227,23 @@ async function saveCsvFuelDataToSupabase(rawData) {
 
         console.log("📌 Note: Historical data is queried server-side via /api/get-invoice-data when needed");
 
+        // Deduplicate new records against existing records
+        const existingKeys = new Set(allRecords.map(r => `${r.sitename}|${r.refilled_date}|${r.refilled_quantity}`));
+        const uniqueNewRecords = recordsToMigrate.filter(record => {
+          const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
+          return !existingKeys.has(key);
+        });
+
+        console.log(`📊 Deduplication: ${recordsToMigrate.length} CSV records -> ${uniqueNewRecords.length} unique new records (skipped ${recordsToMigrate.length - uniqueNewRecords.length} duplicates)`);
+
+        if (uniqueNewRecords.length === 0) {
+          console.log("✅ No new unique records to add - storage is up to date");
+          return { success: true, allRecords };
+        }
+
         // Add new records with timestamp
         const now = new Date().toISOString();
-        const newRecordsWithMeta = recordsToMigrate.map((record, idx) => ({
+        const newRecordsWithMeta = uniqueNewRecords.map((record, idx) => ({
           ...record,
           id: (allRecords.length + idx + 1).toString(),
           created_at: now,
@@ -2262,10 +2276,6 @@ async function saveCsvFuelDataToSupabase(rawData) {
         console.log(`📝 New records added: ${newRecordsWithMeta.length}`);
         console.log(`📂 File path: fuel_data/fuel_quantities.json`);
         console.log(`📦 File size: ${(jsonBlob.size / 1024).toFixed(2)} KB`);
-        console.log(`\n📋 Sample of all records now in storage:`);
-        allRecords.forEach((record, idx) => {
-          console.log(`  [${record.id || idx}] Site: ${record.sitename} | Date: ${record.refilled_date} | Qty: ${record.refilled_quantity}`);
-        });
 
         return { success: true, allRecords };
       })();
@@ -2291,13 +2301,35 @@ async function saveCsvFuelDataToSupabase(rawData) {
       try {
         let localRecords = [];
         const cached = localStorage.getItem("fuel_quantities_storage");
-        if (cached) {
-          localRecords = JSON.parse(cached);
+
+        // Try to parse cached data
+        try {
+          if (cached) {
+            localRecords = JSON.parse(cached);
+          }
+        } catch (parseErr) {
+          console.warn("⚠️ Could not parse cached localStorage data, starting fresh:", parseErr.message);
+          localRecords = [];
+        }
+
+        // Deduplicate new records against existing localStorage records
+        const existingKeys = new Set(localRecords.map(r => `${r.sitename}|${r.refilled_date}|${r.refilled_quantity}`));
+        const uniqueNewRecords = recordsToMigrate.filter(record => {
+          const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
+          return !existingKeys.has(key);
+        });
+
+        console.log(`📊 Deduplication: ${recordsToMigrate.length} CSV records -> ${uniqueNewRecords.length} unique new records (skipped ${recordsToMigrate.length - uniqueNewRecords.length} duplicates)`);
+
+        if (uniqueNewRecords.length === 0) {
+          console.log("✅ No new unique records to add - localStorage is up to date");
+          syncSuccess = true;
+          return;
         }
 
         // Add new records with timestamp
         const now = new Date().toISOString();
-        const newRecords = recordsToMigrate.map((record, idx) => ({
+        const newRecords = uniqueNewRecords.map((record, idx) => ({
           ...record,
           id: (localRecords.length + idx + 1).toString(),
           created_at: now,
@@ -2305,6 +2337,17 @@ async function saveCsvFuelDataToSupabase(rawData) {
         }));
 
         localRecords.push(...newRecords);
+
+        // Limit localStorage size: keep only last 1000 records (most recent first)
+        const MAX_RECORDS = 1000;
+        if (localRecords.length > MAX_RECORDS) {
+          console.warn(`⚠️ localStorage exceeding limit (${localRecords.length} records > ${MAX_RECORDS} max)`);
+          // Sort by created_at descending and keep only the most recent records
+          localRecords.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          localRecords = localRecords.slice(0, MAX_RECORDS);
+          console.log(`✅ Trimmed to ${localRecords.length} most recent records`);
+        }
+
         localStorage.setItem("fuel_quantities_storage", JSON.stringify(localRecords));
 
         console.log(`✅ Data saved to localStorage instead`);
@@ -2313,6 +2356,17 @@ async function saveCsvFuelDataToSupabase(rawData) {
         syncSuccess = true;
       } catch (localErr) {
         console.error("❌ localStorage save failed:", localErr.message);
+
+        // If localStorage fails due to quota, clear it and start fresh
+        if (localErr.message.includes("quota") || localErr.code === 22) {
+          console.warn("⚠️ localStorage quota exceeded - clearing old data");
+          try {
+            localStorage.removeItem("fuel_quantities_storage");
+            console.log("✅ Cleared fuel_quantities_storage from localStorage");
+          } catch (clearErr) {
+            console.error("❌ Could not clear localStorage:", clearErr.message);
+          }
+        }
       }
     }
 
