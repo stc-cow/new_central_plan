@@ -2175,7 +2175,7 @@ body {
 
 .export-invoice-btn {
   padding: 12px 20px;
-  border: 2px solid var(--aces-primary);
+  border: 2px solid #7c3aed;
   border-radius: 20px;
   background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
   color: white;
