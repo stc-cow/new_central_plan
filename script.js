@@ -2184,19 +2184,15 @@ async function saveCsvFuelDataToSupabase(rawData) {
     let syncSuccess = false;
 
     try {
-      // Initialize Supabase if needed
+      // Initialize Supabase client
       if (!supabaseClient) {
         console.log("🔌 Initializing Supabase client...");
         await initSupabaseClient();
       }
 
       if (!supabaseClient) {
-        console.warn("⚠️ Supabase client not available - will use localStorage fallback");
-        useLocalFallback = true;
-      }
-
-      if (useLocalFallback) {
-        throw new Error("Using localStorage fallback");
+        console.error("❌ Supabase client not available");
+        return;
       }
 
       // Try to use Supabase Storage with timeout
