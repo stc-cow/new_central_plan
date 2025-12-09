@@ -2352,9 +2352,9 @@ async function saveCsvFuelDataToSupabase(rawData) {
         console.log("ℹ️  No changes detected - no history records needed");
       }
 
-      // Step 4: Upsert new/updated records into live_fuel_data
+      // Step 4: Insert new/updated records into live_fuel_data (with retry for schema cache issues)
       console.log(
-        `📝 Upserting ${recordsToMigrate.length} records to live_fuel_data...`,
+        `📝 Inserting ${recordsToMigrate.length} records to live_fuel_data...`,
       );
       const recordsToInsert = recordsToMigrate.map((record) => ({
         sitename: record.sitename,
@@ -2365,12 +2365,32 @@ async function saveCsvFuelDataToSupabase(rawData) {
         updated_at: new Date().toISOString(),
       }));
 
-      const { error: upsertError, data: upsertedRecords } = await supabaseClient
-        .from("live_fuel_data")
-        .insert(recordsToInsert);
+      let upsertError = null;
+      let upsertedRecords = null;
+      let insertRetries = 0;
+      const MAX_INSERT_RETRIES = 3;
 
-      if (upsertError) {
-        throw new Error(`Upsert failed: ${upsertError.message}`);
+      while (insertRetries < MAX_INSERT_RETRIES) {
+        const result = await supabaseClient
+          .from("live_fuel_data")
+          .insert(recordsToInsert);
+
+        if (result.error) {
+          upsertError = result.error;
+          if (upsertError.message.includes("schema cache") || upsertError.message.includes("not found")) {
+            insertRetries++;
+            if (insertRetries < MAX_INSERT_RETRIES) {
+              console.warn(`⚠️ Schema cache issue on insert (attempt ${insertRetries}/${MAX_INSERT_RETRIES}), retrying in 2 seconds...`);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              continue;
+            }
+          }
+          throw new Error(`Insert failed: ${upsertError.message}`);
+        } else {
+          upsertedRecords = result.data;
+          upsertError = null;
+          break;
+        }
       }
 
       console.log(`\n✅ Supabase sync successful!`);
