@@ -1,6 +1,7 @@
 const API_BASE = window.location.origin;
 const CSV_API_URL = `${API_BASE}/api/fetch-csv`;
-const INVOICE_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1289106706&single=true&output=csv";
+const INVOICE_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0GkXnQMdKYZITuuMsAzeWDtGUqEJ3lWwqNdA67NewOsDOgqsZHKHECEEkea4nrukx4-DqxKmf62nC/pub?gid=1289106706&single=true&output=csv";
 
 const ACES_ACCESS_CODE = "ACES2025";
 
@@ -1651,7 +1652,7 @@ function updateInvoiceSummary() {
   const rowCount = filteredInvoiceData.length;
   const totalQty = filteredInvoiceData.reduce(
     (sum, row) => sum + row.lastfuelingquantity,
-    0
+    0,
   );
 
   document.getElementById("invoiceRowCount").textContent = rowCount;
@@ -1675,7 +1676,12 @@ window.downloadInvoiceExcel = function downloadInvoiceExcel() {
     ]),
     [],
     ["Total Rows:", filteredInvoiceData.length],
-    ["Total Quantity:", filteredInvoiceData.reduce((sum, row) => sum + row.lastfuelingquantity, 0).toFixed(2)],
+    [
+      "Total Quantity:",
+      filteredInvoiceData
+        .reduce((sum, row) => sum + row.lastfuelingquantity, 0)
+        .toFixed(2),
+    ],
   ];
 
   const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -1683,12 +1689,7 @@ window.downloadInvoiceExcel = function downloadInvoiceExcel() {
   XLSX.utils.book_append_sheet(wb, ws, "Invoice");
 
   // Set column widths
-  ws["!cols"] = [
-    { wch: 20 },
-    { wch: 15 },
-    { wch: 18 },
-    { wch: 18 },
-  ];
+  ws["!cols"] = [{ wch: 20 }, { wch: 15 }, { wch: 18 }, { wch: 18 }];
 
   XLSX.writeFile(wb, filename);
 };
