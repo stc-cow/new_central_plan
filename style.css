@@ -709,7 +709,6 @@ body {
   transform: translateY(-2px);
 }
 
-
 .modal {
   display: none;
   position: fixed;
@@ -749,7 +748,6 @@ body {
   font-weight: 700;
   color: var(--aces-primary);
 }
-
 
 .stc-logo {
   height: 60px;
@@ -812,9 +810,6 @@ body {
 .vvvip-table tbody tr:hover {
   background-color: #ede9fe;
 }
-
-
-
 
 .header-date {
   font-size: 13px;
