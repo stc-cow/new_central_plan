@@ -236,25 +236,36 @@ async function fetchCSV() {
     "https://api.codetabs.com/v1/proxy?quest=",
   ];
 
-  // Try API endpoint first (for servers with backend like Fly.dev)
-  try {
-    const response = await fetch(CSV_API_URL, {
-      method: "GET",
-      headers: {
-        Accept: "text/csv",
-      },
-    });
+  // Check if API endpoint is available (not static hosting like GitHub Pages)
+  const isStaticHosting = window.location.hostname.includes("github.io") ||
+                          window.location.hostname === "localhost";
 
-    if (response.ok) {
-      const csvText = await response.text();
-      if (csvText.trim()) {
-        const parsed = parseCSV(csvText);
-        return parsed;
+  // Try API endpoint first (for servers with backend like Fly.dev)
+  if (!isStaticHosting) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(CSV_API_URL, {
+        method: "GET",
+        headers: {
+          Accept: "text/csv",
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const csvText = await response.text();
+        if (csvText.trim()) {
+          const parsed = parseCSV(csvText);
+          return parsed;
+        }
       }
-    } else {
+    } catch (error) {
+      // API endpoint not available, try alternatives
     }
-  } catch (error) {
-    // API endpoint not available, try alternatives
   }
 
   // Try CORS proxies
@@ -281,7 +292,6 @@ async function fetchCSV() {
           const parsed = parseCSV(csvText);
           return parsed;
         }
-      } else {
       }
     } catch (proxyError) {
       // CORS proxy error, try next proxy
