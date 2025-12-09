@@ -1,4 +1,5 @@
-const CSV_API_URL = "/api/fetch-csv";
+const API_BASE = window.location.origin;
+const CSV_API_URL = `${API_BASE}/api/fetch-csv`;
 
 const ACES_ACCESS_CODE = "ACES2025";
 
@@ -18,16 +19,6 @@ const VVVIP_SITES_LIST = [
   "CWH972",
   "COW552",
 ];
-
-// Supabase configuration - using environment variables
-const VITE_SUPABASE_URL = "https://qpnpqudrrrzgvfwdkljo.supabase.co";
-const VITE_SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbnBxdWRycnJ6Z3Zmd2RrbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NDQ1MjcsImV4cCI6MjA3NDEyMDUyN30.v4MAx44YMTq7hYufn5IlIWCu_SGrKulZIHXwCY999WE";
-
-let supabaseClient = null;
-let currentSessionId = null;
-let activeUsersIntervalId = null;
-let updateActivityIntervalId = null;
 
 // Extract username from URL params
 const urlParams = new URLSearchParams(window.location.search);
@@ -72,223 +63,26 @@ let dashboardInitialized = false;
 let headerIntervalId = null;
 let refreshIntervalId = null;
 let selectedRegion = "CER";
-let csvDataMigrated = false;
-let supabaseAvailable = false;
-let cachedFuelData = [];
 
 // Load dashboard on page load
 document.addEventListener("DOMContentLoaded", async () => {
   await initializeApp();
 });
 
-// Clean up active user when page is closed or navigated away
+// Clean up intervals when page is closed or navigated away
 window.addEventListener("beforeunload", () => {
-  removeActiveUser();
-  if (updateActivityIntervalId) clearInterval(updateActivityIntervalId);
-  if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
+  if (headerIntervalId) clearInterval(headerIntervalId);
+  if (refreshIntervalId) clearInterval(refreshIntervalId);
+  pulsingIntervals.forEach((interval) => clearInterval(interval));
 });
 
-function initSupabaseClient() {
-  // Return immediately if client is already initialized
-  if (supabaseClient) {
-    return Promise.resolve();
-  }
-
-  return new Promise((resolve) => {
-    if (!window.supabase) {
-      // Load Supabase library if not already loaded
-      const script = document.createElement("script");
-      script.src =
-        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js";
-      script.onload = function () {
-        try {
-          supabaseClient = window.supabase.createClient(
-            VITE_SUPABASE_URL,
-            VITE_SUPABASE_KEY,
-          );
-          supabaseAvailable = true;
-          resolve();
-        } catch (err) {
-          supabaseAvailable = false;
-          resolve();
-        }
-      };
-      script.onerror = function () {
-        supabaseAvailable = false;
-        resolve();
-      };
-      document.head.appendChild(script);
-    } else {
-      try {
-        supabaseClient = window.supabase.createClient(
-          VITE_SUPABASE_URL,
-          VITE_SUPABASE_KEY,
-        );
-        supabaseAvailable = true;
-        resolve();
-      } catch (err) {
-        supabaseAvailable = false;
-        resolve();
-      }
-    }
-  });
-}
-
-async function registerActiveUser(username) {
-  // Skip active user tracking since Supabase is disconnected
-  if (!supabaseAvailable) {
-    currentSessionId = getOrCreateSessionId();
-    return;
-  }
-
-  if (!supabaseClient) {
-    await initSupabaseClient();
-  }
-
-  // Get or create session ID
-  currentSessionId = getOrCreateSessionId();
-
-  // Use URL username if available, otherwise use parameter
-  const finalUsername = urlUsername !== "Guest" ? urlUsername : username;
-
-  try {
-    // Use upsert to insert or update existing session
-    const { error } = await supabaseClient.from("active_users").upsert(
-      {
-        username: finalUsername,
-        session_id: currentSessionId,
-        last_activity: new Date().toISOString(),
-      },
-      { onConflict: "session_id" },
-    );
-
-    if (error) {
-      // Silently fail - active user tracking is optional
-      return;
-    }
-
-    updateActiveUsersCount();
-
-    // Update activity every 20 seconds
-    if (updateActivityIntervalId) clearInterval(updateActivityIntervalId);
-    updateActivityIntervalId = setInterval(updateUserActivity, 20000);
-
-    // Fetch active users count every 10 seconds
-    if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
-    activeUsersIntervalId = setInterval(updateActiveUsersCount, 10000);
-  } catch (error) {
-    // Silently fail - active user tracking is optional
-  }
-}
-
-async function updateUserActivity() {
-  if (!supabaseClient || !currentSessionId) return;
-
-  try {
-    await supabaseClient
-      .from("active_users")
-      .update({ last_activity: new Date().toISOString() })
-      .eq("session_id", currentSessionId)
-      .catch((err) => null); // Silently fail if table doesn't exist
-  } catch (error) {
-    // Silently fail - activity tracking is optional
-  }
-}
-
-async function updateActiveUsersCount() {
-  // Skip if Supabase not available
-  if (!supabaseClient || !supabaseAvailable) {
-    const countElement = document.getElementById("activeUsersCount");
-    if (countElement) countElement.textContent = "0";
-    return;
-  }
-
-  try {
-    // Call Supabase RPC function to get active users count (within last 2 minutes)
-    const { data, error } = await supabaseClient.rpc("count_active_users");
-
-    if (error) {
-      // Fallback: directly count from table
-      await fallbackCountActiveUsers();
-      return;
-    }
-
-    const countElement = document.getElementById("activeUsersCount");
-    if (countElement && data !== null) {
-      countElement.textContent = data || 0;
-    }
-  } catch (error) {
-    // Silently fail for active user count
-    await fallbackCountActiveUsers();
-  }
-}
-
-async function fallbackCountActiveUsers() {
-  // Skip if Supabase not available
-  if (!supabaseClient || !supabaseAvailable) {
-    const countElement = document.getElementById("activeUsersCount");
-    if (countElement) countElement.textContent = "0";
-    return;
-  }
-
-  try {
-    const { data, error } = await supabaseClient
-      .from("active_users")
-      .select("*", { count: "exact", head: true })
-      .gt("last_activity", new Date(Date.now() - 2 * 60 * 1000).toISOString());
-
-    if (error) {
-      // Active user count not critical, gracefully continue
-      const countElement = document.getElementById("activeUsersCount");
-      if (countElement) {
-        countElement.textContent = "0";
-      }
-      return;
-    }
-
-    const countElement = document.getElementById("activeUsersCount");
-    if (countElement) {
-      countElement.textContent = data?.length || 0;
-    }
-  } catch (error) {
-    // Silently fail
-  }
-}
-
-async function removeActiveUser() {
-  // Skip if Supabase not available or no session
-  if (!supabaseClient || !currentSessionId || !supabaseAvailable) {
-    currentSessionId = null;
-    return;
-  }
-
-  try {
-    await supabaseClient
-      .from("active_users")
-      .delete()
-      .eq("session_id", currentSessionId)
-      .catch((err) => null);
-
-    currentSessionId = null;
-  } catch (error) {
-    // Silently fail on logout
-  }
-}
-
 async function initializeApp() {
-  // Initialize Supabase client
-  await initSupabaseClient();
-
-  // Check if user is already logged in (session)
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
 
   if (isLoggedIn) {
-    const username = sessionStorage.getItem("username") || "Aces@MSD";
     showDashboard();
-    registerActiveUser(username);
     startDashboardAsync();
   } else {
-    // Show login page
     showLoginPage();
     setupLoginForm();
   }
@@ -372,12 +166,14 @@ async function startDashboardAsync() {
     await loadDashboard();
 
     updateHeaderDate();
+    if (headerIntervalId) clearInterval(headerIntervalId);
     headerIntervalId = setInterval(updateHeaderDate, 1000);
 
-    // Auto-sync from CSV every 5 seconds in background (soft update without flashing)
+    // Auto-sync from CSV in background without duplicating intervals
+    if (refreshIntervalId) clearInterval(refreshIntervalId);
     refreshIntervalId = setInterval(() => {
       backgroundSyncData();
-    }, 5000);
+    }, 15000);
 
     const searchInput = document.getElementById("searchInput");
     if (searchInput) {
@@ -402,10 +198,7 @@ window.handleLogout = function handleLogout() {
   sessionStorage.removeItem("isLoggedIn");
   sessionStorage.removeItem("username");
 
-  // Remove user from active users and clear intervals
-  removeActiveUser();
-  if (updateActivityIntervalId) clearInterval(updateActivityIntervalId);
-  if (activeUsersIntervalId) clearInterval(activeUsersIntervalId);
+  // Clear intervals
   if (headerIntervalId) clearInterval(headerIntervalId);
   if (refreshIntervalId) clearInterval(refreshIntervalId);
 
@@ -415,7 +208,6 @@ window.handleLogout = function handleLogout() {
 
   // Reset dashboard state
   dashboardInitialized = false;
-  csvDataMigrated = false;
 
   // Clear markers and map
   if (map) {
@@ -446,7 +238,7 @@ async function fetchCSV() {
 
   // Try API endpoint first (for servers with backend like Fly.dev)
   try {
-    const response = await fetch("/api/fetch-csv", {
+    const response = await fetch(CSV_API_URL, {
       method: "GET",
       headers: {
         Accept: "text/csv",
@@ -1246,21 +1038,6 @@ async function loadDashboard() {
 
     sitesData = filterAndValidateSites(rawData);
 
-    if (sitesData.length === 0) {
-    }
-
-    // Migrate CSV fuel data to Supabase (runs on every load for auto-sync)
-    try {
-      if (!csvDataMigrated) {
-        await saveCsvFuelDataToSupabase(rawData);
-        csvDataMigrated = true;
-      } else {
-        await saveCsvFuelDataToSupabase(rawData);
-      }
-    } catch (migrationErr) {
-      // Continue with dashboard rendering even if migration fails
-    }
-
     // Update UI regardless of migration success
     try {
       updateMetrics(sitesData);
@@ -1602,329 +1379,6 @@ function startDashboard() {
   startDashboardAsync();
 }
 
-async function saveCsvFuelDataToSupabase(rawData) {
-  try {
-    // Skip Supabase sync if not available
-    if (!supabaseAvailable) {
-      return;
-    }
-
-    if (rawData.length === 0) {
-      return;
-    }
-
-    // Get column headers from first row (lowercase keys)
-    const sampleRow = rawData[0];
-    const headers = Object.keys(sampleRow);
-
-    const fuelRecords = rawData
-      .map((row) => {
-        const rowHeaders = Object.keys(row);
-
-        // Extract sitename - look for the actual site name (not ID)
-        // Try different possible column names for the site name
-        let sitename =
-          row.sitename ||
-          row["site name"] ||
-          row["site_name"] ||
-          row["sitelabel"] ||
-          row["site label"] ||
-          row["site_label"] ||
-          "";
-
-        // If still empty, try to find any column that looks like a site name
-        if (!sitename) {
-          const siteKey = Object.keys(row).find(
-            (key) =>
-              key.toLowerCase().includes("site") &&
-              !key.toLowerCase().includes("id") &&
-              row[key] &&
-              String(row[key]).trim() !== "",
-          );
-          sitename = siteKey ? row[siteKey] : "";
-        }
-
-        // Column D (index 3) = region
-        const region =
-          rowHeaders[3] && row[rowHeaders[3]]
-            ? String(row[rowHeaders[3]]).trim()
-            : "";
-
-        // Column AE (index 30) = refilled_date (DD/MM/YYYY format)
-        const refilled_date_raw =
-          rowHeaders[30] && row[rowHeaders[30]]
-            ? String(row[rowHeaders[30]]).trim()
-            : "";
-
-        // Column AF (index 31) = refilled_quantity
-        const refilled_qty_raw =
-          rowHeaders[31] && row[rowHeaders[31]]
-            ? String(row[rowHeaders[31]]).trim()
-            : "";
-
-        // Only include rows with sitename
-        if (!sitename || sitename.trim() === "") {
-          return null;
-        }
-
-        // Validate and convert date to YYYY-MM-DD format
-        let refilled_date_iso = null;
-        if (refilled_date_raw && refilled_date_raw !== "") {
-          refilled_date_iso = convertDateToISO(refilled_date_raw);
-          if (!refilled_date_iso) {
-            // Exclude rows with invalid or missing dates (data quality issue)
-            return null;
-          }
-        } else {
-          // Exclude rows with missing dates
-          return null;
-        }
-
-        // Validate quantity is a number greater than zero
-        let refilled_quantity_num = null;
-        if (refilled_qty_raw && refilled_qty_raw !== "") {
-          refilled_quantity_num = parseFloat(refilled_qty_raw);
-          if (isNaN(refilled_quantity_num) || refilled_quantity_num <= 0) {
-            // Exclude rows with invalid or zero quantities
-            return null;
-          }
-        } else {
-          // Exclude rows with missing quantities
-          return null;
-        }
-
-        return {
-          sitename: String(sitename).trim(),
-          region: region && region !== "" ? region : null,
-          refilled_date: refilled_date_iso,
-          refilled_quantity: refilled_quantity_num,
-        };
-      })
-      .filter((record) => record !== null);
-
-    if (fuelRecords.length === 0) {
-      return;
-    }
-
-    // Prepare records for INSERT-ONLY sync (append all, never replace)
-    const recordsToMigrate = [...fuelRecords];
-
-    // Cache data locally IMMEDIATELY before attempting backend sync
-    cachedFuelData = fuelRecords;
-    localStorage.setItem("cachedFuelData", JSON.stringify(fuelRecords));
-
-    // Final validation before sending to Supabase
-    const invalidMigrateRecords = recordsToMigrate.filter((record) => {
-      // Verify date exists and is valid
-      if (!record.refilled_date) {
-        return true;
-      }
-      // Verify quantity is a positive number
-      if (!record.refilled_quantity || record.refilled_quantity <= 0) {
-        return true;
-      }
-      return false;
-    });
-
-    if (invalidMigrateRecords.length > 0) {
-      // Remove invalid records to ensure Supabase only gets valid data
-      const validMigrateRecords = recordsToMigrate.filter(
-        (record) => record.refilled_date && record.refilled_quantity > 0,
-      );
-      recordsToMigrate.length = 0;
-      recordsToMigrate.push(...validMigrateRecords);
-    }
-
-    // Send only NEW records to backend API for Supabase insertion
-    if (recordsToMigrate.length === 0) {
-      return;
-    }
-
-    let syncSuccess = false;
-
-    try {
-      // Initialize Supabase client
-      if (!supabaseClient) {
-        await initSupabaseClient();
-      }
-
-      if (!supabaseClient || !supabaseAvailable) {
-        // Supabase not available, continue with cached data
-        return;
-      }
-
-      // Step 1: Fetch existing records to detect changes (with retry for schema cache issues)
-      let existingRecords = [];
-      let fetchError = null;
-      let retries = 0;
-      const MAX_RETRIES = 3;
-
-      while (retries < MAX_RETRIES) {
-        const result = await supabaseClient.from("live_fuel_data").select("*");
-
-        if (result.error) {
-          fetchError = result.error;
-          if (
-            fetchError.message.includes("schema cache") ||
-            fetchError.message.includes("not found")
-          ) {
-            retries++;
-            if (retries < MAX_RETRIES) {
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-              continue;
-            }
-          } else {
-            throw new Error(
-              `Failed to fetch existing records: ${fetchError.message}`,
-            );
-          }
-        } else {
-          existingRecords = result.data || [];
-          fetchError = null;
-          break;
-        }
-      }
-
-      if (fetchError && retries >= MAX_RETRIES) {
-        existingRecords = [];
-      }
-
-      const existing = existingRecords || [];
-
-      // Step 2: Identify changes and prepare history records
-      const historyRecords = [];
-      const existingMap = new Map(
-        existing.map((r) => [`${r.sitename}|${r.refilled_date}`, r]),
-      );
-      const incomingMap = new Map(
-        recordsToMigrate.map((r) => [`${r.sitename}|${r.refilled_date}`, r]),
-      );
-
-      // Check for updates (quantity changed)
-      for (const [key, existingRecord] of existingMap) {
-        const incomingRecord = incomingMap.get(key);
-        if (
-          incomingRecord &&
-          parseFloat(existingRecord.refilled_quantity) !==
-            parseFloat(incomingRecord.refilled_quantity)
-        ) {
-          historyRecords.push({
-            live_data_id: existingRecord.id,
-            sitename: existingRecord.sitename,
-            region: existingRecord.region,
-            refilled_date: existingRecord.refilled_date,
-            refilled_quantity: existingRecord.refilled_quantity,
-            original_created_at: existingRecord.created_at,
-            original_updated_at: existingRecord.updated_at,
-          });
-        }
-      }
-
-      // Step 3: Save history records if there are changes
-      if (historyRecords.length > 0) {
-        const { error: historyError } = await supabaseClient
-          .from("history_fuel_data")
-          .insert(historyRecords);
-
-        if (historyError) {
-          // History save is optional, continue anyway
-        }
-      }
-
-      // Step 4: Insert new/updated records into live_fuel_data (with retry for schema cache issues)
-      const recordsToInsert = recordsToMigrate.map((record) => ({
-        sitename: record.sitename,
-        region: record.region,
-        refilled_date: record.refilled_date,
-        refilled_quantity: record.refilled_quantity,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }));
-
-      let upsertError = null;
-      let upsertedRecords = null;
-      let insertRetries = 0;
-      const MAX_INSERT_RETRIES = 5;
-
-      while (insertRetries < MAX_INSERT_RETRIES) {
-        try {
-          const result = await supabaseClient
-            .from("live_fuel_data")
-            .insert(recordsToInsert);
-
-          if (result.error) {
-            upsertError = result.error;
-            const errorMsg = upsertError.message || String(upsertError);
-
-            // Check if it's a network error or temporary issue
-            if (
-              errorMsg.includes("Failed to fetch") ||
-              errorMsg.includes("Network") ||
-              errorMsg.includes("timeout") ||
-              errorMsg.includes("ECONNREFUSED") ||
-              errorMsg.includes("schema cache") ||
-              errorMsg.includes("not found")
-            ) {
-              insertRetries++;
-              if (insertRetries < MAX_INSERT_RETRIES) {
-                const backoffDelay = Math.pow(2, insertRetries) * 1000; // Exponential backoff: 2s, 4s, 8s, 16s
-                await new Promise((resolve) =>
-                  setTimeout(resolve, backoffDelay),
-                );
-                continue;
-              } else {
-                throw new Error(
-                  `Insert failed after ${MAX_INSERT_RETRIES} retries: ${errorMsg}`,
-                );
-              }
-            } else {
-              // Non-retryable error
-              throw new Error(`Insert failed: ${errorMsg}`);
-            }
-          } else {
-            upsertedRecords = result.data;
-            upsertError = null;
-            break;
-          }
-        } catch (err) {
-          const errorMsg = err.message || String(err);
-          insertRetries++;
-
-          // Retry on network errors
-          if (
-            errorMsg.includes("Failed to fetch") ||
-            errorMsg.includes("Network") ||
-            errorMsg.includes("timeout") ||
-            errorMsg.includes("ECONNREFUSED")
-          ) {
-            if (insertRetries < MAX_INSERT_RETRIES) {
-              const backoffDelay = Math.pow(2, insertRetries) * 1000;
-              await new Promise((resolve) => setTimeout(resolve, backoffDelay));
-              continue;
-            } else {
-              throw new Error(
-                `Insert failed after ${MAX_INSERT_RETRIES} retries: ${errorMsg}`,
-              );
-            }
-          } else {
-            // Non-retryable error
-            throw err;
-          }
-        }
-      }
-
-      supabaseAvailable = true;
-      syncSuccess = true;
-    } catch (dbErr) {
-      // Supabase sync failed, continue with cached data
-      syncSuccess = false;
-    }
-  } catch (err) {
-    // Error in CSV migration, app will continue with cached data
-    return;
-  }
-}
-
 async function backgroundSyncData() {
   try {
     // Check network connectivity before syncing
@@ -1949,19 +1403,6 @@ async function backgroundSyncData() {
       return;
     }
 
-    // Silently sync to Supabase without logging verbose details (non-blocking)
-    try {
-      const syncPromise = Promise.race([
-        saveCsvFuelDataToSupabase(rawData),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Supabase sync timeout")), 20000),
-        ),
-      ]);
-      await syncPromise;
-    } catch (syncErr) {
-      // Continue even if Supabase sync fails - local data is still valid
-    }
-
     // Filter and validate sites
     const newSitesData = filterAndValidateSites(rawData);
 
@@ -1976,6 +1417,7 @@ async function backgroundSyncData() {
         updateMetrics(sitesData);
         populateDueTable(sitesData);
         updateEventCards(sitesData);
+        addMarkersToMap(sitesData);
       } catch (uiErr) {
         // Silent fail - don't disrupt the application
       }
