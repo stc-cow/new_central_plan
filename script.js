@@ -2394,7 +2394,53 @@ async function fetchFuelQuantitiesByDateRange(startDate, endDate, regionFilter =
     console.warn("⚠️ Backend API fetch failed:", err.message);
   }
 
-  // Fallback 1: Try localStorage with fuel_quantities_storage key
+  // Fallback 1: Try Supabase fuel_quantities table directly
+  try {
+    if (!supabaseClient) {
+      await initSupabaseClient();
+    }
+
+    if (supabaseClient) {
+      console.log("📖 Trying Supabase fuel_quantities table...");
+      const { data: records, error } = await supabaseClient
+        .from('fuel_quantities')
+        .select('*');
+
+      if (!error && records && records.length > 0) {
+        console.log(`✅ Loaded ${records.length} records from Supabase fuel_quantities`);
+
+        // Filter by date range and region
+        let filteredRecords = records.filter(record => {
+          const recordDate = record.refilled_date;
+          const dateMatch = recordDate >= startDate && recordDate <= endDate;
+
+          if (!dateMatch) return false;
+
+          // Apply region filter if specified
+          if (regionFilter && regionFilter.trim() !== "") {
+            if (regionFilter === "CER") {
+              return record.region?.toLowerCase().includes("central") || record.region?.toLowerCase().includes("east");
+            } else if (regionFilter === "Central") {
+              return record.region?.toLowerCase().includes("central");
+            } else if (regionFilter === "East") {
+              return record.region?.toLowerCase().includes("east");
+            }
+          }
+
+          return true;
+        });
+
+        console.log(`✅ Filtered ${filteredRecords.length} records from Supabase`);
+        return filteredRecords;
+      } else if (error) {
+        console.warn("⚠️ Supabase query failed:", error.message);
+      }
+    }
+  } catch (supabaseErr) {
+    console.warn("⚠️ Supabase fallback failed:", supabaseErr.message);
+  }
+
+  // Fallback 2: Try localStorage with fuel_quantities_storage key
   try {
     console.log("📖 Trying localStorage (fuel_quantities_storage)...");
     const cached = localStorage.getItem("fuel_quantities_storage");
