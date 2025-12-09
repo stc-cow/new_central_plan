@@ -2195,197 +2195,91 @@ async function saveCsvFuelDataToSupabase(rawData) {
         return;
       }
 
-      // Try to use Supabase Storage with timeout
-      console.log("📖 Attempting Supabase Storage sync...");
+      // Step 1: Fetch existing records to detect changes
+      console.log("🔍 Fetching existing records for change detection...");
+      const { data: existingRecords, error: fetchError } = await supabaseClient
+        .from('fuel_quantities')
+        .select('*');
 
-      // Use Promise.race with timeout to fail fast
-      const storagePromise = (async () => {
-        let allRecords = [];
-
-        // Load existing records from Storage
-        try {
-          console.log("🔄 Downloading fuel_quantities.json from Storage...");
-          const { data, error } = await supabaseClient.storage
-            .from('fuel_data')
-            .download('fuel_quantities.json');
-
-          if (!error && data) {
-            try {
-              const text = await data.text();
-              allRecords = JSON.parse(text);
-              console.log(`✅ Found ${allRecords.length} existing records in storage`);
-            } catch (parseErr) {
-              console.warn("⚠️ Could not parse Storage data:", parseErr.message);
-            }
-          } else if (error && error.message && error.message.includes("not found")) {
-            console.log("ℹ️  Storage file doesn't exist yet - starting fresh");
-          } else if (error) {
-            throw new Error(`Storage read error: ${error.message || 'Unknown error'}`);
-          }
-        } catch (readErr) {
-          console.log("ℹ️  Storage read failed:", readErr.message);
-          if (readErr.message && readErr.message.includes("Failed to fetch")) {
-            console.log("   (Network issue or bucket doesn't exist)");
-          }
-        }
-
-        console.log("📌 Note: Historical data is queried server-side via /api/get-invoice-data when needed");
-
-        // Deduplicate new records against existing records
-        const existingKeys = new Set(allRecords.map(r => `${r.sitename}|${r.refilled_date}|${r.refilled_quantity}`));
-        const uniqueNewRecords = recordsToMigrate.filter(record => {
-          const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
-          return !existingKeys.has(key);
-        });
-
-        console.log(`📊 Deduplication: ${recordsToMigrate.length} CSV records -> ${uniqueNewRecords.length} unique new records (skipped ${recordsToMigrate.length - uniqueNewRecords.length} duplicates)`);
-
-        if (uniqueNewRecords.length === 0) {
-          console.log("✅ No new unique records to add - storage is up to date");
-          return { success: true, allRecords };
-        }
-
-        // Add new records with timestamp
-        const now = new Date().toISOString();
-        const newRecordsWithMeta = uniqueNewRecords.map((record, idx) => ({
-          ...record,
-          id: (allRecords.length + idx + 1).toString(),
-          created_at: now,
-          updated_at: now
-        }));
-
-        console.log(`📝 Adding ${newRecordsWithMeta.length} new records`);
-        allRecords.push(...newRecordsWithMeta);
-        console.log(`📊 Total records after merge: ${allRecords.length}`);
-
-        // Save all records back to storage
-        const jsonContent = JSON.stringify(allRecords, null, 2);
-        const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
-
-        console.log(`💾 Uploading to storage (${(jsonBlob.size / 1024).toFixed(2)} KB)...`);
-
-        try {
-          const { error: uploadError } = await supabaseClient.storage
-            .from('fuel_data')
-            .upload('fuel_quantities.json', jsonBlob, {
-              upsert: true,
-              contentType: 'application/json'
-            });
-
-          if (uploadError) {
-            throw new Error(`Storage upload failed: ${uploadError.message || 'Unknown error'}`);
-          }
-        } catch (uploadErr) {
-          if (uploadErr.message && uploadErr.message.includes("Failed to fetch")) {
-            throw new Error(`Storage upload failed (network issue): ${uploadErr.message}`);
-          }
-          throw uploadErr;
-        }
-
-        console.log(`\n✅ Storage sync successful!`);
-        console.log(`📊 Total records in storage: ${allRecords.length}`);
-        console.log(`📝 New records added: ${newRecordsWithMeta.length}`);
-        console.log(`📂 File path: fuel_data/fuel_quantities.json`);
-        console.log(`📦 File size: ${(jsonBlob.size / 1024).toFixed(2)} KB`);
-
-        return { success: true, allRecords };
-      })();
-
-      // Timeout after 5 seconds - fail fast if no response
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Storage timeout - falling back to localStorage")), 5000)
-      );
-
-      try {
-        const result = await Promise.race([storagePromise, timeoutPromise]);
-        syncSuccess = true;
-        supabaseAvailable = true;
-      } catch (timeoutErr) {
-        // Timeout or storage error - fall through to localStorage fallback
-        throw timeoutErr;
+      if (fetchError && !fetchError.message.includes('not found')) {
+        throw new Error(`Failed to fetch existing records: ${fetchError.message}`);
       }
-    } catch (fetchErr) {
+
+      const existing = existingRecords || [];
+      console.log(`✅ Found ${existing.length} existing records in Supabase`);
+
+      // Step 2: Identify changes and prepare history records
+      const historyRecords = [];
+      const existingMap = new Map(existing.map(r => [`${r.sitename}|${r.refilled_date}`, r]));
+      const incomingMap = new Map(recordsToMigrate.map(r => [`${r.sitename}|${r.refilled_date}`, r]));
+
+      // Check for updates (quantity changed)
+      for (const [key, existingRecord] of existingMap) {
+        const incomingRecord = incomingMap.get(key);
+        if (incomingRecord && parseFloat(existingRecord.refilled_quantity) !== parseFloat(incomingRecord.refilled_quantity)) {
+          console.log(`📝 Change detected: ${key} quantity ${existingRecord.refilled_quantity} → ${incomingRecord.refilled_quantity}`);
+          historyRecords.push({
+            live_data_id: existingRecord.id,
+            sitename: existingRecord.sitename,
+            region: existingRecord.region,
+            refilled_date: existingRecord.refilled_date,
+            refilled_quantity: existingRecord.refilled_quantity,
+            original_created_at: existingRecord.created_at,
+            original_updated_at: existingRecord.updated_at
+          });
+        }
+      }
+
+      // Step 3: Save history records if there are changes
+      if (historyRecords.length > 0) {
+        console.log(`💾 Saving ${historyRecords.length} old records to history_fuel_data...`);
+        const { error: historyError } = await supabaseClient
+          .from('history_fuel_data')
+          .insert(historyRecords);
+
+        if (historyError) {
+          console.error(`⚠️ Warning: Could not save history: ${historyError.message}`);
+        } else {
+          console.log(`✅ Saved ${historyRecords.length} records to history`);
+        }
+      } else {
+        console.log("ℹ️  No changes detected - no history records needed");
+      }
+
+      // Step 4: Upsert new/updated records into fuel_quantities
+      console.log(`📝 Upserting ${recordsToMigrate.length} records to fuel_quantities...`);
+      const recordsToInsert = recordsToMigrate.map(record => ({
+        sitename: record.sitename,
+        region: record.region,
+        refilled_date: record.refilled_date,
+        refilled_quantity: record.refilled_quantity,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
+
+      const { error: upsertError, data: upsertedRecords } = await supabaseClient
+        .from('fuel_quantities')
+        .upsert(recordsToInsert, { onConflict: 'sitename,refilled_date' });
+
+      if (upsertError) {
+        throw new Error(`Upsert failed: ${upsertError.message}`);
+      }
+
+      console.log(`\n✅ Supabase sync successful!`);
+      console.log(`📊 Records synced: ${recordsToInsert.length}`);
+      console.log(`📝 Changes archived to history: ${historyRecords.length}`);
+      supabaseAvailable = true;
+      syncSuccess = true;
+    } catch (dbErr) {
+      console.error("❌ Supabase sync failed:", dbErr.message);
       syncSuccess = false;
-      console.warn("\n⚠️ Storage sync not available:", fetchErr.message);
-      console.log("\n📌 Fallback: Using localStorage...");
-
-      try {
-        let localRecords = [];
-        const cached = localStorage.getItem("fuel_quantities_storage");
-
-        // Try to parse cached data
-        try {
-          if (cached) {
-            localRecords = JSON.parse(cached);
-          }
-        } catch (parseErr) {
-          console.warn("⚠️ Could not parse cached localStorage data, starting fresh:", parseErr.message);
-          localRecords = [];
-        }
-
-        // Deduplicate new records against existing localStorage records
-        const existingKeys = new Set(localRecords.map(r => `${r.sitename}|${r.refilled_date}|${r.refilled_quantity}`));
-        const uniqueNewRecords = recordsToMigrate.filter(record => {
-          const key = `${record.sitename}|${record.refilled_date}|${record.refilled_quantity}`;
-          return !existingKeys.has(key);
-        });
-
-        console.log(`📊 Deduplication: ${recordsToMigrate.length} CSV records -> ${uniqueNewRecords.length} unique new records (skipped ${recordsToMigrate.length - uniqueNewRecords.length} duplicates)`);
-
-        if (uniqueNewRecords.length === 0) {
-          console.log("✅ No new unique records to add - localStorage is up to date");
-          syncSuccess = true;
-          return;
-        }
-
-        // Add new records with timestamp
-        const now = new Date().toISOString();
-        const newRecords = uniqueNewRecords.map((record, idx) => ({
-          ...record,
-          id: (localRecords.length + idx + 1).toString(),
-          created_at: now,
-          updated_at: now
-        }));
-
-        localRecords.push(...newRecords);
-
-        // Limit localStorage size: keep only last 1000 records (most recent first)
-        const MAX_RECORDS = 1000;
-        if (localRecords.length > MAX_RECORDS) {
-          console.warn(`⚠️ localStorage exceeding limit (${localRecords.length} records > ${MAX_RECORDS} max)`);
-          // Sort by created_at descending and keep only the most recent records
-          localRecords.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-          localRecords = localRecords.slice(0, MAX_RECORDS);
-          console.log(`✅ Trimmed to ${localRecords.length} most recent records`);
-        }
-
-        localStorage.setItem("fuel_quantities_storage", JSON.stringify(localRecords));
-
-        console.log(`✅ Data saved to localStorage instead`);
-        console.log(`📊 Total records in localStorage: ${localRecords.length}`);
-        console.log(`📝 New records added: ${newRecords.length}`);
-        syncSuccess = true;
-      } catch (localErr) {
-        console.error("❌ localStorage save failed:", localErr.message);
-
-        // If localStorage fails due to quota, clear it and start fresh
-        if (localErr.message.includes("quota") || localErr.code === 22) {
-          console.warn("⚠️ localStorage quota exceeded - clearing old data");
-          try {
-            localStorage.removeItem("fuel_quantities_storage");
-            console.log("✅ Cleared fuel_quantities_storage from localStorage");
-          } catch (clearErr) {
-            console.error("❌ Could not clear localStorage:", clearErr.message);
-          }
-        }
-      }
     }
 
     // Final status summary
     if (syncSuccess) {
       console.log("\n🎉 Sync successful!");
     } else {
-      console.log("\n⚠️ Sync failed - data cached locally only");
+      console.log("\n⚠️ Sync failed");
     }
   } catch (err) {
     console.error("❌ Error in saveCsvFuelDataToSupabase:", err.message);
