@@ -1709,28 +1709,26 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       }
     }
 
+    // Normalize row date to midnight for comparison
+    const normalizedRowDate = new Date(rowDate);
+    normalizedRowDate.setHours(0, 0, 0, 0);
+
     if (startDate) {
       const start = new Date(startDate);
-      // Normalize to midnight
       start.setHours(0, 0, 0, 0);
-      rowDate.setHours(0, 0, 0, 0);
 
-      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${rowDate}, Filter Start: ${start}, Comparison (${rowDate} < ${start}):`, rowDate < start);
+      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${normalizedRowDate}, Filter Start: ${start}, rowDate >= start:`, normalizedRowDate >= start);
 
-      if (rowDate < start) return false;
+      if (normalizedRowDate < start) return false;
     }
 
     if (endDate) {
       const end = new Date(endDate);
-      // Normalize to end of day (23:59:59)
-      end.setHours(23, 59, 59, 999);
-      if (rowDate.getHours() === 0) {
-        rowDate.setHours(0, 0, 0, 0);
-      }
+      end.setHours(0, 0, 0, 0);
 
-      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${rowDate}, Filter End: ${end}, Comparison (${rowDate} > ${end}):`, rowDate > end);
+      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${normalizedRowDate}, Filter End: ${end}, rowDate <= end:`, normalizedRowDate <= end);
 
-      if (rowDate > end) return false;
+      if (normalizedRowDate > end) return false;
     }
 
     if (region && region !== "") {
