@@ -1609,21 +1609,21 @@ function parseInvoiceCSV(csvText) {
 
   // Find column indices - handle different possible header names
   const siteNameIndex = headerLower.findIndex(
-    (h) => h === "sitename" || h === "site name" || h === "site_name"
+    (h) => h === "sitename" || h === "site name" || h === "site_name",
   );
   const regionIndex = headerLower.findIndex((h) => h === "region");
   const dateIndex = headerLower.findIndex(
     (h) =>
       h === "lastfuelingdate" ||
       h === "last fueling date" ||
-      h === "last_fueling_date"
+      h === "last_fueling_date",
   );
   const qtyIndex = headerLower.findIndex(
     (h) =>
       h === "lastfuelingqty" ||
       h === "lastfuelingquantity" ||
       h === "last fueling qty" ||
-      h === "last fueling quantity"
+      h === "last fueling quantity",
   );
 
   console.log("Invoice CSV Headers:", headers);
@@ -1635,7 +1635,7 @@ function parseInvoiceCSV(csvText) {
     "Date:",
     dateIndex,
     "Qty:",
-    qtyIndex
+    qtyIndex,
   );
 
   for (let i = 1; i < lines.length; i++) {
@@ -1643,9 +1643,11 @@ function parseInvoiceCSV(csvText) {
     if (!line.trim()) continue;
 
     const values = parseCSVLine(line);
-    const sitename = siteNameIndex >= 0 ? (values[siteNameIndex] || "").trim() : "";
+    const sitename =
+      siteNameIndex >= 0 ? (values[siteNameIndex] || "").trim() : "";
     const region = regionIndex >= 0 ? (values[regionIndex] || "").trim() : "";
-    const lastfuelingdate = dateIndex >= 0 ? (values[dateIndex] || "").trim() : "";
+    const lastfuelingdate =
+      dateIndex >= 0 ? (values[dateIndex] || "").trim() : "";
     const lastfuelingqty = qtyIndex >= 0 ? (values[qtyIndex] || "").trim() : "";
 
     // Validate required fields
