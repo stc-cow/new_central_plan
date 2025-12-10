@@ -1792,11 +1792,13 @@ function parseInvoiceCSV(csvText) {
     const lastfuelingqty = qtyIndex >= 0 ? (values[qtyIndex] || "").trim() : "";
 
     // Validate required fields
-    if (sitename && lastfuelingdate) {
-      const dateValid = !Number.isNaN(Date.parse(lastfuelingdate));
-      const quantity = Number(lastfuelingqty) || 0;
+    if (sitename && lastfuelingdate && lastfuelingqty) {
+      // Use the same robust date parsing as applyInvoiceFilters
+      const parsedDate = parseDateToString(lastfuelingdate);
+      const quantity = parseFloat(lastfuelingqty);
 
-      if (dateValid && quantity > 0) {
+      // Only include if we have a valid date and valid positive quantity
+      if (parsedDate && !isNaN(quantity) && quantity > 0) {
         data.push({
           sitename,
           region,
