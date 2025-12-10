@@ -756,7 +756,6 @@ function populateTodayTable(sites) {
   });
 }
 
-
 function initMap() {
   // Initialize Leaflet map
   map = L.map("map").setView([SA_CENTER[0], SA_CENTER[1]], 5);
@@ -1079,7 +1078,20 @@ function formatDateShort(dateStr) {
 
   if (isNaN(date.getTime())) return "N/A";
 
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const day = date.getDate();
   const month = months[date.getMonth()];
   const year = date.getFullYear();
@@ -1099,7 +1111,9 @@ window.searchSite = function searchSite(siteName) {
   if (result) {
     const nextFuelingDate = formatDateShort(result.nextfuelingplan);
     const lastFuelingDate = formatDateShort(result.lastfuelingdate);
-    const lastFuelingQty = result.lastfuelingqty ? parseFloat(result.lastfuelingqty).toFixed(2) : "N/A";
+    const lastFuelingQty = result.lastfuelingqty
+      ? parseFloat(result.lastfuelingqty).toFixed(2)
+      : "N/A";
 
     resultDiv.innerHTML = `
       <div class="search-result-item">
