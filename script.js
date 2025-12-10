@@ -707,8 +707,13 @@ function populateDueTable(sites) {
     .filter((s) => s.status === "today")
     .sort((a, b) => new Date(a.nextfuelingplan) - new Date(b.nextfuelingplan));
 
+  const comingSites = sites
+    .filter((s) => s.status === "coming3")
+    .sort((a, b) => a.days - b.days);
+
   populateOverdueTable(dueSites);
   populateTodayTable(todaySites);
+  populateComingTable(comingSites);
 }
 
 function populateOverdueTable(sites) {
