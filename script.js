@@ -1675,16 +1675,61 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   const endDate = document.getElementById("invoiceEndDate").value;
   const region = document.getElementById("invoiceRegion").value;
 
+  console.log("Applying filters - Start:", startDate, "End:", endDate, "Region:", region);
+  console.log("Total invoice data rows:", invoiceData.length);
+
   filteredInvoiceData = invoiceData.filter((row) => {
-    const rowDate = new Date(row.lastfuelingdate);
+    // Parse the date from CSV - handle various date formats
+    let rowDate = new Date(row.lastfuelingdate);
+
+    // If date parsing fails, try to parse MM/DD/YYYY or DD/MM/YYYY formats
+    if (isNaN(rowDate.getTime())) {
+      const parts = row.lastfuelingdate.split(/[-\/]/);
+      if (parts.length === 3) {
+        // Try different date formats
+        let year, month, day;
+
+        // Try YYYY-MM-DD or YYYY/MM/DD
+        if (parts[0].length === 4) {
+          year = parseInt(parts[0]);
+          month = parseInt(parts[1]);
+          day = parseInt(parts[2]);
+        }
+        // Try DD-MM-YYYY or MM-DD-YYYY
+        else if (parts[2].length === 4) {
+          year = parseInt(parts[2]);
+          // Assume DD/MM format (day first)
+          day = parseInt(parts[0]);
+          month = parseInt(parts[1]);
+        }
+
+        if (year && month && day) {
+          rowDate = new Date(year, month - 1, day);
+        }
+      }
+    }
 
     if (startDate) {
       const start = new Date(startDate);
+      // Normalize to midnight
+      start.setHours(0, 0, 0, 0);
+      rowDate.setHours(0, 0, 0, 0);
+
+      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${rowDate}, Filter Start: ${start}, Comparison (${rowDate} < ${start}):`, rowDate < start);
+
       if (rowDate < start) return false;
     }
 
     if (endDate) {
       const end = new Date(endDate);
+      // Normalize to end of day (23:59:59)
+      end.setHours(23, 59, 59, 999);
+      if (rowDate.getHours() === 0) {
+        rowDate.setHours(0, 0, 0, 0);
+      }
+
+      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${rowDate}, Filter End: ${end}, Comparison (${rowDate} > ${end}):`, rowDate > end);
+
       if (rowDate > end) return false;
     }
 
@@ -1706,6 +1751,7 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
     return true;
   });
 
+  console.log("Filtered invoice data rows:", filteredInvoiceData.length);
   displayInvoiceTable();
   updateInvoiceSummary();
 };
