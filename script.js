@@ -327,6 +327,17 @@ async function fetchCSV() {
   return [];
 }
 
+function escapeHTML(text) {
+  const map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
+}
+
 function parseCSV(csvText) {
   const lines = csvText.trim().split("\n");
   if (lines.length === 0) return [];
