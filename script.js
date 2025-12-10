@@ -1850,10 +1850,10 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
         month = first;
         day = second;
       }
-      // Ambiguous - assume DD-MM
+      // Ambiguous - assume MM-DD (US format - month first)
       else {
-        day = first;
-        month = second;
+        month = first;
+        day = second;
       }
 
       // Validate
