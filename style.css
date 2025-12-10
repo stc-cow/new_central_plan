@@ -1696,7 +1696,12 @@ body {
 .search-no-result {
   font-size: 16px;
   color: var(--text-secondary);
-  padding: 24px;
+  padding: 48px 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
+  border: 2px dashed #e8ecff;
+  border-radius: 16px;
+  letter-spacing: -0.2px;
 }
 
 @media (max-width: 768px) {
