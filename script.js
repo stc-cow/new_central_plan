@@ -1717,7 +1717,7 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       const start = new Date(startDate);
       start.setHours(0, 0, 0, 0);
 
-      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${normalizedRowDate}, Filter Start: ${start}, rowDate >= start:`, normalizedRowDate >= start);
+      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${normalizedRowDate.toISOString()}, Filter Start: ${start.toISOString()}, rowDate < start (excluded):`, normalizedRowDate < start);
 
       if (normalizedRowDate < start) return false;
     }
@@ -1726,7 +1726,7 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       const end = new Date(endDate);
       end.setHours(0, 0, 0, 0);
 
-      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${normalizedRowDate}, Filter End: ${end}, rowDate <= end:`, normalizedRowDate <= end);
+      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${normalizedRowDate.toISOString()}, Filter End: ${end.toISOString()}, rowDate > end (excluded):`, normalizedRowDate > end);
 
       if (normalizedRowDate > end) return false;
     }
