@@ -1106,7 +1106,6 @@ window.searchSite = function searchSite(siteName) {
       <div class="search-result-item">
         <div class="search-result-header">
           <div class="search-result-site-name">${escapeHTML(result.sitename)}</div>
-          <div class="search-result-priority" style="color: ${result.color || '#27ae60'}; font-weight: bold;">${priority}</div>
         </div>
         <div class="search-result-table">
           <div class="search-result-row">
