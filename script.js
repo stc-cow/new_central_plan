@@ -1839,6 +1839,19 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       return `${yearStr}-${monthStr}-${dayStr}`;
     }
 
+    // Last resort: try JavaScript's built-in Date parser
+    try {
+      const parsed = new Date(dateStr);
+      if (!isNaN(parsed.getTime())) {
+        const year = parsed.getFullYear();
+        const month = String(parsed.getMonth() + 1).padStart(2, "0");
+        const day = String(parsed.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+    } catch (e) {
+      // Fall through to return null
+    }
+
     return null;
   }
 
