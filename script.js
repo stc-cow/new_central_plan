@@ -1895,7 +1895,20 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
     return true;
   });
 
-  console.log("Filtered invoice data rows:", filteredInvoiceData.length);
+  console.log(
+    `Filter results: ${filteredInvoiceData.length} rows (from ${invoiceData.length} total)`,
+  );
+
+  if (filteredInvoiceData.length > 0 && filteredInvoiceData.length <= 20) {
+    console.log("All matching rows:");
+    filteredInvoiceData.forEach((row, i) => {
+      const parsed = parseDateToString(row.lastfuelingdate);
+      console.log(
+        `  [${i}] ${row.sitename} | ${row.lastfuelingdate} (parsed: ${parsed}) | ${row.region}`,
+      );
+    });
+  }
+
   displayInvoiceTable();
   updateInvoiceSummary();
 };
