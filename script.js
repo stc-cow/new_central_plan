@@ -604,6 +604,7 @@ function getStatusLabel(status) {
   const labels = {
     due: "Overdue",
     today: "Today",
+    coming3: "Coming Soon",
     next15: "Healthy",
   };
   return labels[status] || "Unknown";
