@@ -1879,19 +1879,24 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       }
     }
 
-    // If no date filters, include the row
+    // If no date filters, include all rows (capture all Column AE data)
     if (!startDate && !endDate) {
       return true;
     }
 
-    // Parse the row date
+    // Parse the row date - only matters when date filter is active
     const rowDateStr = parseDateToString(row.lastfuelingdate);
 
+    // If we can't parse the date and date filtering is active, still try to include it
+    // (better to show data that might be valid than hide it)
     if (!rowDateStr) {
-      // Exclude rows with unparseable dates when date filtering is active
-      console.debug(
-        `Skipping ${row.sitename}: Could not parse date "${row.lastfuelingdate}"`,
-      );
+      // When date filtering is active but we can't parse, include anyway if date field is non-empty
+      if (row.lastfuelingdate) {
+        console.debug(
+          `Could not fully parse date "${row.lastfuelingdate}" for ${row.sitename}, but including anyway`,
+        );
+        return true;
+      }
       return false;
     }
 
@@ -1903,7 +1908,7 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       );
     }
 
-    // Apply date range filters
+    // Apply date range filters with parsed date
     if (startDate && rowDateStr < startDate) {
       return false;
     }
