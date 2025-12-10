@@ -256,21 +256,29 @@ async function fetchCSV() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(CSV_API_URL, {
-        method: "GET",
-        headers: {
-          Accept: "text/csv",
-        },
-        signal: controller.signal,
-      });
+      try {
+        const response = await fetch(CSV_API_URL, {
+          method: "GET",
+          headers: {
+            Accept: "text/csv",
+          },
+          signal: controller.signal,
+        });
 
-      clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const csvText = await response.text();
-        if (csvText.trim()) {
-          const parsed = parseCSV(csvText);
-          return parsed;
+        if (response.ok) {
+          const csvText = await response.text();
+          if (csvText.trim()) {
+            const parsed = parseCSV(csvText);
+            return parsed;
+          }
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        // Silently ignore AbortErrors (timeout) and other fetch failures
+        if (fetchError.name !== "AbortError") {
+          console.debug("API fetch failed:", fetchError.message);
         }
       }
     } catch (error) {
