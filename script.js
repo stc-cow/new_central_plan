@@ -1694,14 +1694,28 @@ function parseInvoiceCSV(csvText) {
   if (data.length > 0) {
     console.log("First row:", data[0]);
     console.log("Last row:", data[data.length - 1]);
-    // Log all dates for debugging
-    console.log(
-      "All dates in parsed data:",
-      data.map((row) => ({
-        sitename: row.sitename,
-        date: row.lastfuelingdate,
-      })),
-    );
+    // Log all dates for debugging - sample every 10th row
+    const dateSamples = data.filter((_, i) => i % Math.max(1, Math.floor(data.length / 20)) === 0);
+    console.log("Date format samples (every ~10th row):", dateSamples.map((row) => row.lastfuelingdate));
+
+    // Count rows by month
+    const monthCounts = {};
+    data.forEach((row) => {
+      const dateStr = row.lastfuelingdate;
+      // Extract month from various formats
+      let month = null;
+      if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+        month = dateStr.substring(5, 7);
+      } else if (/^\d{2}\/\d{2}\/\d{4}/.test(dateStr)) {
+        month = dateStr.substring(3, 5);
+      } else if (/^\d{2}-\d{2}-\d{4}/.test(dateStr)) {
+        month = dateStr.substring(3, 5);
+      }
+      if (month) {
+        monthCounts[month] = (monthCounts[month] || 0) + 1;
+      }
+    });
+    console.log("Rows by month:", monthCounts);
   }
   return data;
 }
