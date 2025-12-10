@@ -696,6 +696,7 @@ function csvProxyPlugin() {
 }
 
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH || "/",
   plugins: [csvProxyPlugin()],
   server: {
     port: 3000,
