@@ -1105,14 +1105,38 @@ window.searchSite = function searchSite(siteName) {
   const resultDiv = document.getElementById("searchResult");
 
   if (result) {
-    const formattedDate = formatFuelDate(result.fuelDate);
+    const nextFuelingDate = formatFuelDate(result.fuelDate);
+    const lastFuelingDate = result.lastfuelingdate || "N/A";
+    const lastFuelingQty = result.lastfuelingqty ? parseFloat(result.lastfuelingqty).toFixed(2) : "N/A";
+    const nextFuelingPlan = result.nextfuelingplan || "N/A";
+    const priority = result.status ? result.status.charAt(0).toUpperCase() + result.status.slice(1) : "N/A";
+
     resultDiv.innerHTML = `
-            <div class="search-result-item">
-                <div class="search-result-site-name">${result.sitename}</div>
-                <div class="search-result-date">Next Fueling Date:</div>
-                <div class="search-result-date-value">${formattedDate}</div>
-            </div>
-        `;
+      <div class="search-result-item">
+        <div class="search-result-header">
+          <div class="search-result-site-name">${escapeHTML(result.sitename)}</div>
+          <div class="search-result-priority" style="color: ${result.color || '#27ae60'}; font-weight: bold;">${priority}</div>
+        </div>
+        <div class="search-result-table">
+          <div class="search-result-row">
+            <div class="search-result-label">Last Fueling Date</div>
+            <div class="search-result-value">${escapeHTML(lastFuelingDate)}</div>
+          </div>
+          <div class="search-result-row">
+            <div class="search-result-label">Last Fueling Qty</div>
+            <div class="search-result-value">${escapeHTML(lastFuelingQty)}</div>
+          </div>
+          <div class="search-result-row">
+            <div class="search-result-label">Next Fueling Plan</div>
+            <div class="search-result-value">${escapeHTML(nextFuelingPlan)}</div>
+          </div>
+          <div class="search-result-row">
+            <div class="search-result-label">Next Fueling Date</div>
+            <div class="search-result-value">${escapeHTML(nextFuelingDate)}</div>
+          </div>
+        </div>
+      </div>
+    `;
   } else {
     resultDiv.innerHTML = `<div class="search-no-result">No site found with name "${siteName}"</div>`;
   }
