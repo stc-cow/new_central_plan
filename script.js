@@ -1583,25 +1583,18 @@ async function loadInvoiceData() {
 
     try {
       console.log("Trying direct fetch (no proxy)");
-      const controller = new AbortController();
-      let timeoutId;
+
+      const fetchPromise = fetch(INVOICE_CSV_URL, {
+        method: "GET",
+        mode: "cors",
+      });
+
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("timeout")), 8000);
+      });
 
       try {
-        timeoutId = setTimeout(() => {
-          try {
-            controller.abort();
-          } catch (e) {
-            // Ignore
-          }
-        }, 8000);
-
-        const response = await fetch(INVOICE_CSV_URL, {
-          method: "GET",
-          mode: "cors",
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
 
         if (response.ok) {
           const csvText = await response.text();
@@ -1615,9 +1608,7 @@ async function loadInvoiceData() {
           console.debug("Direct fetch failed with status:", response.status);
         }
       } catch (fetchError) {
-        clearTimeout(timeoutId);
-        // Silently ignore AbortErrors (timeout)
-        if (fetchError.name !== "AbortError") {
+        if (fetchError.message !== "timeout") {
           console.debug("Direct fetch error:", fetchError.message);
         }
       }
