@@ -1857,25 +1857,20 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       return false;
     }
 
-    // Log first few parsed dates for debugging
-    if (invoiceData.indexOf(row) < 3) {
+    // Log first 10 parsed dates for debugging
+    const rowIndex = invoiceData.indexOf(row);
+    if (rowIndex < 10 || (startDate && rowDateStr >= startDate && endDate && rowDateStr <= endDate && rowIndex < 20)) {
       console.log(
-        `Date parsing: Site=${row.sitename}, CSV="${row.lastfuelingdate}", Parsed="${rowDateStr}", Range=${startDate} to ${endDate}`,
+        `[${rowIndex}] Site=${row.sitename}, CSV="${row.lastfuelingdate}", Parsed="${rowDateStr}", InRange=${!startDate || rowDateStr >= startDate} && ${!endDate || rowDateStr <= endDate}`,
       );
     }
 
     // Apply date range filters
     if (startDate && rowDateStr < startDate) {
-      console.log(
-        `${row.sitename}: ${rowDateStr} < ${startDate} - excluded (before start)`,
-      );
       return false;
     }
 
     if (endDate && rowDateStr > endDate) {
-      console.log(
-        `${row.sitename}: ${rowDateStr} > ${endDate} - excluded (after end)`,
-      );
       return false;
     }
 
