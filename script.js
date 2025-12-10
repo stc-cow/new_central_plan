@@ -253,27 +253,19 @@ async function fetchCSV() {
   // Try API endpoint first (for servers with backend like Fly.dev)
   if (!isStaticHosting) {
     try {
-      const controller = new AbortController();
-      let timeoutId;
+      const fetchPromise = fetch(CSV_API_URL, {
+        method: "GET",
+        headers: {
+          Accept: "text/csv",
+        },
+      });
+
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("timeout")), 5000);
+      });
 
       try {
-        timeoutId = setTimeout(() => {
-          try {
-            controller.abort();
-          } catch (e) {
-            // Silently ignore abort errors
-          }
-        }, 5000);
-
-        const response = await fetch(CSV_API_URL, {
-          method: "GET",
-          headers: {
-            Accept: "text/csv",
-          },
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
 
         if (response.ok) {
           const csvText = await response.text();
@@ -283,9 +275,8 @@ async function fetchCSV() {
           }
         }
       } catch (fetchError) {
-        clearTimeout(timeoutId);
-        // Silently ignore AbortErrors (timeout) and other fetch failures
-        if (fetchError.name !== "AbortError") {
+        // Silently ignore timeout and fetch failures
+        if (fetchError.message !== "timeout") {
           console.debug("API fetch failed:", fetchError.message);
         }
       }
