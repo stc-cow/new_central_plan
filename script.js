@@ -1508,6 +1508,7 @@ window.closeInvoiceModal = function closeInvoiceModal() {
 };
 
 async function loadInvoiceData() {
+  console.log("Loading invoice data from:", INVOICE_CSV_URL);
   const CORS_PROXIES = [
     "https://corsproxy.io/?",
     "https://api.codetabs.com/v1/proxy?quest=",
@@ -1522,6 +1523,8 @@ async function loadInvoiceData() {
         } else {
           proxyUrl = CORS_PROXIES[i] + encodeURIComponent(INVOICE_CSV_URL);
         }
+
+        console.log("Trying proxy:", CORS_PROXIES[i]);
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -1538,17 +1541,20 @@ async function loadInvoiceData() {
 
         if (response.ok) {
           const csvText = await response.text();
+          console.log("CSV fetched successfully, length:", csvText.length);
           if (csvText.trim()) {
             invoiceData = parseInvoiceCSV(csvText);
+            console.log("Invoice data loaded:", invoiceData.length, "rows");
             return;
           }
         }
       } catch (proxyError) {
-        // Try next proxy
+        console.log("Proxy failed:", proxyError.message);
       }
     }
 
     try {
+      console.log("Trying direct fetch (no proxy)");
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -1562,18 +1568,23 @@ async function loadInvoiceData() {
 
       if (response.ok) {
         const csvText = await response.text();
+        console.log("CSV fetched directly, length:", csvText.length);
         if (csvText.trim()) {
           invoiceData = parseInvoiceCSV(csvText);
+          console.log("Invoice data loaded:", invoiceData.length, "rows");
           return;
         }
+      } else {
+        console.warn("Direct fetch failed with status:", response.status);
       }
     } catch (error) {
-      console.warn("Failed to load invoice data:", error);
+      console.warn("Failed to load invoice data:", error.message);
     }
   } catch (error) {
     console.error("Error loading invoice data:", error);
   }
 
+  console.warn("No invoice data loaded, invoiceData set to empty array");
   invoiceData = [];
 }
 
