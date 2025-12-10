@@ -109,7 +109,7 @@ setInterval(() => {
     window.outerHeight - window.innerHeight > threshold
   ) {
     // DevTools detected - optionally lock user out
-    console.clear();
+    // console.clear() is disabled, so we skip it
     // Uncomment below to logout user when DevTools is detected:
     // handleLogout();
   }
