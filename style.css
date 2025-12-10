@@ -1527,9 +1527,9 @@ body {
   padding: 32px;
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(32, 43, 109, 0.2);
-  max-width: 500px;
+  max-width: 900px;
   width: 90%;
-  max-height: 80vh;
+  max-height: 90vh;
   overflow-y: auto;
   animation: slideUp 0.3s ease;
   position: relative;
