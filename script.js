@@ -1747,23 +1747,45 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   }
 
   // Helper function to parse dates from various formats and return as YYYY-MM-DD string
+  // Handles Google Sheets text dates, Excel serial numbers, and common formats
   function parseDateToString(dateStr) {
-    if (!dateStr) return null;
+    if (!dateStr && dateStr !== 0) return null;
 
-    // Trim whitespace
-    dateStr = dateStr.trim();
+    // Convert to string if needed
+    let str = String(dateStr).trim();
+    if (!str) return null;
 
-    // Try ISO format first (YYYY-MM-DD)
-    if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
-      return dateStr.substring(0, 10);
+    // Try ISO format first (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+      return str.substring(0, 10);
+    }
+
+    // Try numeric Excel serial date (Google Sheets may export as number)
+    const numValue = Number(str);
+    if (!isNaN(numValue) && numValue > 0) {
+      // Excel serial dates start at 1 (Jan 1, 1900)
+      if (numValue > 30000 && numValue < 50000) {
+        const excelDate = new Date((numValue - 25569) * 86400 * 1000); // Convert Excel serial to JS date
+        if (!isNaN(excelDate.getTime())) {
+          const year = excelDate.getFullYear();
+          const month = String(excelDate.getMonth() + 1).padStart(2, "0");
+          const day = String(excelDate.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        }
+      }
     }
 
     // Try slash-separated format (MM/DD/YYYY or DD/MM/YYYY)
-    const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    const slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
     if (slashMatch) {
       const first = parseInt(slashMatch[1]);
       const second = parseInt(slashMatch[2]);
-      const year = parseInt(slashMatch[3]);
+      let year = parseInt(slashMatch[3]);
+
+      // Handle 2-digit years
+      if (year < 100) {
+        year = year < 30 ? 2000 + year : 1900 + year;
+      }
 
       let month, day;
 
@@ -1777,10 +1799,10 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
         month = first;
         day = second;
       }
-      // Both could be valid for either format, assume US format (MM/DD)
+      // Both could be valid for either format, assume DD/MM (international format from Google Sheets)
       else {
-        month = first;
-        day = second;
+        day = first;
+        month = second;
       }
 
       // Validate
@@ -1789,60 +1811,44 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       }
     }
 
-    // Try general format with various separators
-    const parts = dateStr.split(/[-\/\s,]/);
-    const cleanParts = parts.filter((p) => p.trim());
+    // Try dash-separated format (DD-MM-YYYY or MM-DD-YYYY)
+    const dashMatch = str.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})$/);
+    if (dashMatch) {
+      const first = parseInt(dashMatch[1]);
+      const second = parseInt(dashMatch[2]);
+      let year = parseInt(dashMatch[3]);
 
-    if (cleanParts.length === 3) {
-      let year, month, day;
-      const p0Len = cleanParts[0].length;
-      const p1Len = cleanParts[1].length;
-      const p2Len = cleanParts[2].length;
+      if (year < 100) {
+        year = year < 30 ? 2000 + year : 1900 + year;
+      }
 
-      // YYYY-MM-DD or YYYY/MM/DD
-      if (p0Len === 4) {
-        year = parseInt(cleanParts[0]);
-        month = parseInt(cleanParts[1]);
-        day = parseInt(cleanParts[2]);
+      let month, day;
+
+      // If first part > 12, it must be day (DD-MM format)
+      if (first > 12) {
+        day = first;
+        month = second;
       }
-      // DD-MM-YYYY or MM-DD-YYYY (4-digit year at end)
-      else if (p2Len === 4) {
-        year = parseInt(cleanParts[2]);
-        // Try MM/DD first (US format)
-        const m = parseInt(cleanParts[1]);
-        const d = parseInt(cleanParts[0]);
-        if (m >= 1 && m <= 12) {
-          // Likely MM/DD format
-          month = m;
-          day = d;
-        } else {
-          // Likely DD/MM format
-          month = parseInt(cleanParts[0]);
-          day = parseInt(cleanParts[1]);
-        }
+      // If second part > 12, it must be day (MM-DD format)
+      else if (second > 12) {
+        month = first;
+        day = second;
       }
-      // Single digit year - invalid
+      // Ambiguous - assume DD-MM
       else {
-        return null;
+        day = first;
+        month = second;
       }
 
-      // Validate date values
-      if (!year || !month || !day) return null;
-      if (year < 1900 || year > 2100) return null;
-      if (month < 1 || month > 12) return null;
-      if (day < 1 || day > 31) return null;
-
-      // Format as YYYY-MM-DD
-      const yearStr = String(year).padStart(4, "0");
-      const monthStr = String(month).padStart(2, "0");
-      const dayStr = String(day).padStart(2, "0");
-
-      return `${yearStr}-${monthStr}-${dayStr}`;
+      // Validate
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 1900 && year <= 2100) {
+        return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      }
     }
 
-    // Last resort: try JavaScript's built-in Date parser
+    // Try JavaScript's built-in Date parser
     try {
-      const parsed = new Date(dateStr);
+      const parsed = new Date(str);
       if (!isNaN(parsed.getTime())) {
         const year = parsed.getFullYear();
         const month = String(parsed.getMonth() + 1).padStart(2, "0");
@@ -1850,7 +1856,7 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
         return `${year}-${month}-${day}`;
       }
     } catch (e) {
-      // Fall through to return null
+      // Fall through
     }
 
     return null;
