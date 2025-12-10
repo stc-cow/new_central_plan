@@ -104,8 +104,10 @@ setInterval(() => {
   const threshold = 160; // Approximate height of DevTools
   const widthThreshold = 160; // Approximate width when DevTools opens on side
 
-  if (window.outerWidth - window.innerWidth > widthThreshold ||
-      window.outerHeight - window.innerHeight > threshold) {
+  if (
+    window.outerWidth - window.innerWidth > widthThreshold ||
+    window.outerHeight - window.innerHeight > threshold
+  ) {
     // DevTools detected - optionally lock user out
     console.clear();
     // Uncomment below to logout user when DevTools is detected:
@@ -118,9 +120,9 @@ Object.defineProperty(window, "console", {
   value: new Proxy(console, {
     get: () => {
       return null;
-    }
+    },
   }),
-  writable: false
+  writable: false,
 });
 
 // ==========================================
