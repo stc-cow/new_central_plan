@@ -1747,25 +1747,33 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       return dateStr.substring(0, 10);
     }
 
-    // Try MM/DD/YYYY format (very common)
-    const mmddyyyyMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (mmddyyyyMatch) {
-      const month = parseInt(mmddyyyyMatch[1]);
-      const day = parseInt(mmddyyyyMatch[2]);
-      const year = parseInt(mmddyyyyMatch[3]);
-      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-        return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      }
-    }
+    // Try slash-separated format (MM/DD/YYYY or DD/MM/YYYY)
+    const slashMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) {
+      const first = parseInt(slashMatch[1]);
+      const second = parseInt(slashMatch[2]);
+      const year = parseInt(slashMatch[3]);
 
-    // Try DD/MM/YYYY format
-    const ddmmyyyyMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (ddmmyyyyMatch) {
-      const day = parseInt(ddmmyyyyMatch[1]);
-      const month = parseInt(ddmmyyyyMatch[2]);
-      const year = parseInt(ddmmyyyyMatch[3]);
-      // If day > 12, it can't be MM/DD, so assume DD/MM
-      if (day > 12 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      let month, day;
+
+      // If first part > 12, it must be day (DD/MM format)
+      if (first > 12) {
+        day = first;
+        month = second;
+      }
+      // If second part > 12, it must be day (MM/DD format)
+      else if (second > 12) {
+        month = first;
+        day = second;
+      }
+      // Both could be valid for either format, assume US format (MM/DD)
+      else {
+        month = first;
+        day = second;
+      }
+
+      // Validate
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 1900 && year <= 2100) {
         return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
       }
     }
