@@ -1115,6 +1115,19 @@ window.searchSite = function searchSite(siteName) {
       ? parseFloat(result.lastfuelingqty).toFixed(2)
       : "N/A";
 
+    // Calculate days remaining until next fueling
+    const daysRemaining = dayDiff(result.nextfuelingplan);
+    let daysStatusText = "N/A";
+    if (daysRemaining !== null) {
+      if (daysRemaining < 0) {
+        daysStatusText = `Overdue by ${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? 's' : ''}`;
+      } else if (daysRemaining === 0) {
+        daysStatusText = "Due Today";
+      } else {
+        daysStatusText = `Coming in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`;
+      }
+    }
+
     resultDiv.innerHTML = `
       <div class="search-result-item">
         <div class="search-result-header">
@@ -1132,6 +1145,10 @@ window.searchSite = function searchSite(siteName) {
           <div class="search-result-row">
             <div class="search-result-label">Next Fueling Date</div>
             <div class="search-result-value">${escapeHTML(nextFuelingDate)}</div>
+          </div>
+          <div class="search-result-row">
+            <div class="search-result-label">Days Remaining</div>
+            <div class="search-result-value" style="font-weight: 700; color: ${daysRemaining !== null && daysRemaining < 0 ? '#d32f2f' : daysRemaining === 0 ? '#ff9e00' : '#27ae60'};">${daysStatusText}</div>
           </div>
         </div>
       </div>
