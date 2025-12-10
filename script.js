@@ -49,6 +49,7 @@ const SA_BOUNDS = [
 const STATUS_COLORS = {
   due: "#d32f2f",
   today: "#ff9e00",
+  coming3: "#ffd700",
   next15: "#27ae60",
 };
 
