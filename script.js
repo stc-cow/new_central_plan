@@ -1735,6 +1735,16 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   );
   console.log("Total invoice data rows:", invoiceData.length);
 
+  // Log sample raw data to understand the structure
+  if (invoiceData.length > 0) {
+    console.log("First 3 raw invoice rows:");
+    invoiceData.slice(0, 3).forEach((row, i) => {
+      console.log(
+        `  [${i}] ${row.sitename} | ${row.lastfuelingdate} | ${row.region} | ${row.lastfuelingquantity}`,
+      );
+    });
+  }
+
   // Helper function to parse dates from various formats and return as YYYY-MM-DD string
   function parseDateToString(dateStr) {
     if (!dateStr) return null;
