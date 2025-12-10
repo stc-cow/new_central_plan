@@ -1725,32 +1725,51 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   function parseDateToString(dateStr) {
     if (!dateStr) return null;
 
+    // Trim whitespace
+    dateStr = dateStr.trim();
+
     // Try ISO format first (YYYY-MM-DD)
     if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
       return dateStr.substring(0, 10);
     }
 
     // Try other common formats
-    const parts = dateStr.split(/[-\/]/);
-    if (parts.length === 3) {
+    const parts = dateStr.split(/[-\/\s,]/);
+    const cleanParts = parts.filter((p) => p.trim());
+
+    if (cleanParts.length === 3) {
       let year, month, day;
+      const p0Len = cleanParts[0].length;
+      const p2Len = cleanParts[2].length;
 
       // Try YYYY-MM-DD or YYYY/MM/DD
-      if (parts[0].length === 4) {
-        year = parts[0];
-        month = String(parseInt(parts[1])).padStart(2, "0");
-        day = String(parseInt(parts[2])).padStart(2, "0");
+      if (p0Len === 4) {
+        year = parseInt(cleanParts[0]);
+        month = parseInt(cleanParts[1]);
+        day = parseInt(cleanParts[2]);
       }
-      // Try DD-MM-YYYY or MM-DD-YYYY (assume DD/MM format)
-      else if (parts[2].length === 4) {
-        year = parts[2];
-        month = String(parseInt(parts[1])).padStart(2, "0");
-        day = String(parseInt(parts[0])).padStart(2, "0");
+      // Try DD-MM-YYYY or MM-DD-YYYY (check which has 4 digits for year)
+      else if (p2Len === 4) {
+        year = parseInt(cleanParts[2]);
+        day = parseInt(cleanParts[0]);
+        month = parseInt(cleanParts[1]);
+      }
+      // Single digit year at start - invalid, skip
+      else {
+        return null;
       }
 
-      if (year && month && day) {
-        return `${year}-${month}-${day}`;
-      }
+      // Validate date values
+      if (!year || !month || !day) return null;
+      if (month < 1 || month > 12) return null;
+      if (day < 1 || day > 31) return null;
+
+      // Format as YYYY-MM-DD
+      const yearStr = String(year).padStart(4, "0");
+      const monthStr = String(month).padStart(2, "0");
+      const dayStr = String(day).padStart(2, "0");
+
+      return `${yearStr}-${monthStr}-${dayStr}`;
     }
 
     return null;
