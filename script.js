@@ -1939,13 +1939,37 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   console.log(
     `Filter results: ${filteredInvoiceData.length} rows (from ${invoiceData.length} total)`,
   );
+  console.log(`Filters applied - Start: "${startDate}", End: "${endDate}", Region: "${region}"`);
 
-  if (filteredInvoiceData.length > 0 && filteredInvoiceData.length <= 20) {
-    console.log("All matching rows:");
+  // Debug: analyze why rows are excluded
+  if (invoiceData.length > filteredInvoiceData.length) {
+    const excluded = [];
+    invoiceData.forEach((row) => {
+      const isInFiltered = filteredInvoiceData.some((fr) => fr.sitename === row.sitename);
+      if (!isInFiltered) {
+        const dateStr = parseDateToString(row.lastfuelingdate);
+        excluded.push({
+          site: row.sitename,
+          rawDate: row.lastfuelingdate,
+          parsedDate: dateStr,
+          region: row.region,
+        });
+      }
+    });
+    console.log(`Excluded ${excluded.length} rows. First 10 excluded:`);
+    excluded.slice(0, 10).forEach((row) => {
+      console.log(
+        `  ${row.site} | Raw: "${row.rawDate}" | Parsed: "${row.parsedDate}" | Region: ${row.region}`,
+      );
+    });
+  }
+
+  if (filteredInvoiceData.length > 0 && filteredInvoiceData.length <= 50) {
+    console.log(`All ${filteredInvoiceData.length} matching rows:`);
     filteredInvoiceData.forEach((row, i) => {
       const parsed = parseDateToString(row.lastfuelingdate);
       console.log(
-        `  [${i}] ${row.sitename} | ${row.lastfuelingdate} (parsed: ${parsed}) | ${row.region}`,
+        `  [${i}] ${row.sitename} | ${row.lastfuelingdate} (→ ${parsed}) | ${row.region}`,
       );
     });
   }
