@@ -1815,10 +1815,10 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
         month = first;
         day = second;
       }
-      // Both could be valid for either format, assume MM/DD (US format - month first)
+      // Both could be valid for either format, assume DD/MM (international format)
       else {
-        month = first;
-        day = second;
+        day = first;
+        month = second;
       }
 
       // Validate
