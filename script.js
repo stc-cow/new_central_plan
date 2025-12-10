@@ -1135,10 +1135,9 @@ window.searchSite = function searchSite(siteName) {
   const resultDiv = document.getElementById("searchResult");
 
   if (result) {
-    const nextFuelingDate = formatFuelDate(result.fuelDate);
-    const lastFuelingDate = result.lastfuelingdate || "N/A";
+    const nextFuelingDate = formatDateShort(result.nextfuelingplan);
+    const lastFuelingDate = formatDateShort(result.lastfuelingdate);
     const lastFuelingQty = result.lastfuelingqty ? parseFloat(result.lastfuelingqty).toFixed(2) : "N/A";
-    const nextFuelingPlan = result.nextfuelingplan || "N/A";
     const priority = result.status ? result.status.charAt(0).toUpperCase() + result.status.slice(1) : "N/A";
 
     resultDiv.innerHTML = `
@@ -1155,10 +1154,6 @@ window.searchSite = function searchSite(siteName) {
           <div class="search-result-row">
             <div class="search-result-label">Last Fueling Qty</div>
             <div class="search-result-value">${escapeHTML(lastFuelingQty)}</div>
-          </div>
-          <div class="search-result-row">
-            <div class="search-result-label">Next Fueling Plan</div>
-            <div class="search-result-value">${escapeHTML(nextFuelingPlan)}</div>
           </div>
           <div class="search-result-row">
             <div class="search-result-label">Next Fueling Date</div>
