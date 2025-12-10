@@ -757,36 +757,6 @@ function populateTodayTable(sites) {
   });
 }
 
-function populateComingTable(sites) {
-  const tbody = document.getElementById("comingTableBody");
-  tbody.innerHTML = "";
-
-  const oneDay = sites.filter((s) => s.days === 1).length;
-  const twoDays = sites.filter((s) => s.days === 2).length;
-  const threeDays = sites.filter((s) => s.days === 3).length;
-
-  const summaryElement = document.getElementById("comingSummary");
-  if (summaryElement) {
-    summaryElement.textContent = `- One day (${oneDay}), Two days (${twoDays}), Three days (${threeDays})`;
-  }
-
-  if (sites.length === 0) {
-    const tr = document.createElement("tr");
-    tr.innerHTML =
-      '<td colspan="2" style="text-align: center; color: #94a3b8; padding: 12px;">No sites coming in 3 days</td>';
-    tbody.appendChild(tr);
-    return;
-  }
-
-  sites.forEach((site) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-            <td>${site.sitename}</td>
-            <td><span style="color: #ffbe0b; font-weight: 600;">${site.days}</span></td>
-        `;
-    tbody.appendChild(tr);
-  });
-}
 
 function initMap() {
   // Initialize Leaflet map
