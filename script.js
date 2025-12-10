@@ -1598,9 +1598,17 @@ async function loadInvoiceData() {
     try {
       console.log("Trying direct fetch (no proxy)");
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      let timeoutId;
 
       try {
+        timeoutId = setTimeout(() => {
+          try {
+            controller.abort();
+          } catch (e) {
+            // Ignore
+          }
+        }, 8000);
+
         const response = await fetch(INVOICE_CSV_URL, {
           method: "GET",
           mode: "cors",
