@@ -1803,17 +1803,30 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
     if (!rowDateStr) {
       // Exclude rows with unparseable dates when date filtering is active
       console.debug(
-        `Skipping row ${row.sitename}: Could not parse date "${row.lastfuelingdate}"`,
+        `Skipping ${row.sitename}: Could not parse date "${row.lastfuelingdate}"`,
       );
       return false;
     }
 
+    // Log first few parsed dates for debugging
+    if (invoiceData.indexOf(row) < 3) {
+      console.log(
+        `Date parsing: Site=${row.sitename}, CSV="${row.lastfuelingdate}", Parsed="${rowDateStr}", Range=${startDate} to ${endDate}`,
+      );
+    }
+
     // Apply date range filters
     if (startDate && rowDateStr < startDate) {
+      console.log(
+        `${row.sitename}: ${rowDateStr} < ${startDate} - excluded (before start)`,
+      );
       return false;
     }
 
     if (endDate && rowDateStr > endDate) {
+      console.log(
+        `${row.sitename}: ${rowDateStr} > ${endDate} - excluded (after end)`,
+      );
       return false;
     }
 
