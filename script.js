@@ -1124,7 +1124,7 @@ window.searchSite = function searchSite(siteName) {
 
     if (daysRemaining !== null) {
       if (daysRemaining < 0) {
-        daysStatusText = `Overdue by ${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? 's' : ''}`;
+        daysStatusText = `Overdue by ${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? "s" : ""}`;
         highlightColor = "#ffebee";
         borderColor = "#d32f2f";
         statusColor = "#d32f2f";
@@ -1134,7 +1134,7 @@ window.searchSite = function searchSite(siteName) {
         borderColor = "#ff9e00";
         statusColor = "#ff9e00";
       } else {
-        daysStatusText = `Coming in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`;
+        daysStatusText = `Coming in ${daysRemaining} day${daysRemaining !== 1 ? "s" : ""}`;
         highlightColor = "#e8f5e9";
         borderColor = "#27ae60";
         statusColor = "#27ae60";
