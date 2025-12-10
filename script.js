@@ -22,6 +22,111 @@ const VVVIP_SITES_LIST = [
   "COW552",
 ];
 
+// ==========================================
+// CONSOLE LOCK - Security Protection
+// ==========================================
+
+// Disable all console methods
+if (window.location.hostname !== "localhost") {
+  const noop = () => {};
+  console.log = noop;
+  console.error = noop;
+  console.warn = noop;
+  console.info = noop;
+  console.debug = noop;
+  console.trace = noop;
+  console.group = noop;
+  console.groupEnd = noop;
+  console.time = noop;
+  console.timeEnd = noop;
+}
+
+// Detect and block DevTools keyboard shortcuts
+document.addEventListener("keydown", (e) => {
+  // F12 - Opens DevTools
+  if (e.key === "F12" || e.keyCode === 123) {
+    e.preventDefault();
+    return false;
+  }
+
+  // Ctrl+Shift+I (Windows/Linux) - Opens DevTools
+  if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+    e.preventDefault();
+    return false;
+  }
+
+  // Ctrl+Shift+J (Windows/Linux) - Opens Console
+  if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+    e.preventDefault();
+    return false;
+  }
+
+  // Ctrl+Shift+C (Windows/Linux) - Opens Inspector
+  if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+    e.preventDefault();
+    return false;
+  }
+
+  // Cmd+Option+I (Mac) - Opens DevTools
+  if (e.metaKey && e.altKey && e.keyCode === 73) {
+    e.preventDefault();
+    return false;
+  }
+
+  // Cmd+Option+J (Mac) - Opens Console
+  if (e.metaKey && e.altKey && e.keyCode === 74) {
+    e.preventDefault();
+    return false;
+  }
+
+  // Cmd+Option+U (Mac) - View Source
+  if (e.metaKey && e.altKey && e.keyCode === 85) {
+    e.preventDefault();
+    return false;
+  }
+
+  // Ctrl+S (Windows/Linux) - Save page (optional, prevent download)
+  // Uncomment if you want to prevent saving the page
+  // if (e.ctrlKey && e.keyCode === 83) {
+  //   e.preventDefault();
+  //   return false;
+  // }
+});
+
+// Disable right-click context menu (optional - uncomment to enable)
+// document.addEventListener("contextmenu", (e) => {
+//   e.preventDefault();
+//   return false;
+// });
+
+// Detect if DevTools is open using debounce technique
+setInterval(() => {
+  const threshold = 160; // Approximate height of DevTools
+  const widthThreshold = 160; // Approximate width when DevTools opens on side
+
+  if (window.outerWidth - window.innerWidth > widthThreshold ||
+      window.outerHeight - window.innerHeight > threshold) {
+    // DevTools detected - optionally lock user out
+    console.clear();
+    // Uncomment below to logout user when DevTools is detected:
+    // handleLogout();
+  }
+}, 500);
+
+// Prevent access to console via window object
+Object.defineProperty(window, "console", {
+  value: new Proxy(console, {
+    get: () => {
+      return null;
+    }
+  }),
+  writable: false
+});
+
+// ==========================================
+// END CONSOLE LOCK
+// ==========================================
+
 // Extract username from URL params
 const urlParams = new URLSearchParams(window.location.search);
 let urlUsername = urlParams.get("username") || "Guest";
