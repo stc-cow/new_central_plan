@@ -1544,42 +1544,37 @@ async function loadInvoiceData() {
 
         console.log("Trying proxy:", CORS_PROXIES[i]);
 
-        const controller = new AbortController();
-        let timeoutId;
-
         try {
-          timeoutId = setTimeout(() => {
-            try {
-              controller.abort();
-            } catch (e) {
-              // Ignore
-            }
-          }, 8000);
-
-          const response = await fetch(proxyUrl, {
+          const fetchPromise = fetch(proxyUrl, {
             method: "GET",
             headers: {
               Accept: "text/plain",
             },
-            signal: controller.signal,
           });
 
-          clearTimeout(timeoutId);
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error("timeout")), 8000);
+          });
 
-          if (response.ok) {
-            const csvText = await response.text();
-            console.log("CSV fetched successfully, length:", csvText.length);
-            if (csvText.trim()) {
-              invoiceData = parseInvoiceCSV(csvText);
-              console.log("Invoice data loaded:", invoiceData.length, "rows");
-              return;
+          try {
+            const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+            if (response.ok) {
+              const csvText = await response.text();
+              console.log("CSV fetched successfully, length:", csvText.length);
+              if (csvText.trim()) {
+                invoiceData = parseInvoiceCSV(csvText);
+                console.log("Invoice data loaded:", invoiceData.length, "rows");
+                return;
+              }
+            }
+          } catch (fetchError) {
+            if (fetchError.message !== "timeout") {
+              console.log("Proxy fetch failed:", fetchError.message);
             }
           }
-        } catch (fetchError) {
-          clearTimeout(timeoutId);
-          if (fetchError.name !== "AbortError") {
-            console.log("Proxy fetch failed:", fetchError.message);
-          }
+        } catch (error) {
+          console.debug("Proxy error:", error.message);
         }
       } catch (proxyError) {
         console.log("Proxy setup failed:", proxyError.message);
