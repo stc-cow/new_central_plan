@@ -1554,9 +1554,17 @@ async function loadInvoiceData() {
         console.log("Trying proxy:", CORS_PROXIES[i]);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        let timeoutId;
 
         try {
+          timeoutId = setTimeout(() => {
+            try {
+              controller.abort();
+            } catch (e) {
+              // Ignore
+            }
+          }, 8000);
+
           const response = await fetch(proxyUrl, {
             method: "GET",
             headers: {
