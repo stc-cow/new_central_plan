@@ -1118,18 +1118,31 @@ window.searchSite = function searchSite(siteName) {
     // Calculate days remaining until next fueling
     const daysRemaining = dayDiff(result.nextfuelingplan);
     let daysStatusText = "N/A";
+    let highlightColor = "#e8f5e9";
+    let borderColor = "#27ae60";
+    let statusColor = "#27ae60";
+
     if (daysRemaining !== null) {
       if (daysRemaining < 0) {
         daysStatusText = `Overdue by ${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? 's' : ''}`;
+        highlightColor = "#ffebee";
+        borderColor = "#d32f2f";
+        statusColor = "#d32f2f";
       } else if (daysRemaining === 0) {
         daysStatusText = "Due Today";
+        highlightColor = "#fff8e1";
+        borderColor = "#ff9e00";
+        statusColor = "#ff9e00";
       } else {
         daysStatusText = `Coming in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`;
+        highlightColor = "#e8f5e9";
+        borderColor = "#27ae60";
+        statusColor = "#27ae60";
       }
     }
 
     resultDiv.innerHTML = `
-      <div class="search-result-item">
+      <div class="search-result-item" style="background: linear-gradient(135deg, ${highlightColor} 0%, #ffffff 100%); border: 3px solid ${borderColor};">
         <div class="search-result-header">
           <div class="search-result-site-name">${escapeHTML(result.sitename)}</div>
         </div>
@@ -1148,7 +1161,7 @@ window.searchSite = function searchSite(siteName) {
           </div>
           <div class="search-result-row">
             <div class="search-result-label">Days Remaining</div>
-            <div class="search-result-value" style="font-weight: 700; color: ${daysRemaining !== null && daysRemaining < 0 ? '#d32f2f' : daysRemaining === 0 ? '#ff9e00' : '#27ae60'};">${daysStatusText}</div>
+            <div class="search-result-value" style="font-weight: 700; color: ${statusColor};">${daysStatusText}</div>
           </div>
         </div>
       </div>
