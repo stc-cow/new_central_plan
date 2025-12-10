@@ -1095,6 +1095,36 @@ function formatFuelDate(fuelDate) {
   return `${day}/${month}/${year}`;
 }
 
+function formatDateShort(dateStr) {
+  if (!dateStr) return "N/A";
+
+  // Try parsing the date string
+  let date;
+
+  // Try ISO format first (YYYY-MM-DD)
+  if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+    date = new Date(dateStr + "T00:00:00");
+  }
+  // Try DD/MM/YYYY format
+  else if (/^\d{2}\/\d{2}\/\d{4}/.test(dateStr)) {
+    const parts = dateStr.split("/");
+    date = new Date(parts[2], parts[1] - 1, parts[0]);
+  }
+  // Try standard Date parsing
+  else {
+    date = new Date(dateStr);
+  }
+
+  if (isNaN(date.getTime())) return "N/A";
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+
+  return `${day} ${month} ${year}`;
+}
+
 window.searchSite = function searchSite(siteName) {
   const searchTerm = siteName.trim().toUpperCase();
   const result = sitesData.find(
