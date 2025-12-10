@@ -1691,32 +1691,48 @@ function parseInvoiceCSV(csvText) {
   }
 
   console.log("Parsed invoice data:", data.length, "rows");
-  // Log first few rows for debugging
+  // Log comprehensive debugging info
   if (data.length > 0) {
     console.log("First row:", data[0]);
     console.log("Last row:", data[data.length - 1]);
-    // Log all dates for debugging - sample every 10th row
-    const dateSamples = data.filter((_, i) => i % Math.max(1, Math.floor(data.length / 20)) === 0);
-    console.log("Date format samples (every ~10th row):", dateSamples.map((row) => row.lastfuelingdate));
+
+    // Sample all rows to show date format
+    const maxToLog = Math.min(20, data.length);
+    console.log(`First ${maxToLog} rows with dates:`);
+    for (let i = 0; i < maxToLog; i++) {
+      const row = data[i];
+      console.log(
+        `  [${i}] ${row.sitename} | Date: "${row.lastfuelingdate}" | Qty: ${row.lastfuelingquantity}`,
+      );
+    }
 
     // Count rows by month
     const monthCounts = {};
+    const noDateCount = { empty: 0, null: 0 };
     data.forEach((row) => {
       const dateStr = row.lastfuelingdate;
+      if (!dateStr) {
+        noDateCount.empty++;
+        return;
+      }
+
       // Extract month from various formats
       let month = null;
       if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
         month = dateStr.substring(5, 7);
       } else if (/^\d{2}\/\d{2}\/\d{4}/.test(dateStr)) {
+        // DD/MM/YYYY
         month = dateStr.substring(3, 5);
       } else if (/^\d{2}-\d{2}-\d{4}/.test(dateStr)) {
         month = dateStr.substring(3, 5);
       }
+
       if (month) {
         monthCounts[month] = (monthCounts[month] || 0) + 1;
       }
     });
-    console.log("Rows by month:", monthCounts);
+    console.log("Rows with dates by month:", monthCounts);
+    console.log("Rows with missing dates:", noDateCount);
   }
   return data;
 }
