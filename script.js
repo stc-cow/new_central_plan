@@ -1729,13 +1729,15 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
     }
 
     if (startDate) {
-      console.log(`Comparing ${row.sitename} (${rowDateStr}) >= ${startDate}: ${rowDateStr >= startDate}`);
-      if (rowDateStr < startDate) return false;
+      const isBeforeStart = rowDateStr < startDate;
+      console.log(`Row ${row.sitename}: ${rowDateStr} < ${startDate} (before start)? ${isBeforeStart}`);
+      if (isBeforeStart) return false;
     }
 
     if (endDate) {
-      console.log(`Comparing ${row.sitename} (${rowDateStr}) <= ${endDate}: ${rowDateStr <= endDate}`);
-      if (rowDateStr > endDate) return false;
+      const isAfterEnd = rowDateStr > endDate;
+      console.log(`Row ${row.sitename}: ${rowDateStr} > ${endDate} (after end)? ${isAfterEnd}`);
+      if (isAfterEnd) return false;
     }
 
     if (region && region !== "") {
