@@ -1584,30 +1584,38 @@ async function loadInvoiceData() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      const response = await fetch(INVOICE_CSV_URL, {
-        method: "GET",
-        mode: "cors",
-        signal: controller.signal,
-      });
+      try {
+        const response = await fetch(INVOICE_CSV_URL, {
+          method: "GET",
+          mode: "cors",
+          signal: controller.signal,
+        });
 
-      clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const csvText = await response.text();
-        console.log("CSV fetched directly, length:", csvText.length);
-        if (csvText.trim()) {
-          invoiceData = parseInvoiceCSV(csvText);
-          console.log("Invoice data loaded:", invoiceData.length, "rows");
-          return;
+        if (response.ok) {
+          const csvText = await response.text();
+          console.log("CSV fetched directly, length:", csvText.length);
+          if (csvText.trim()) {
+            invoiceData = parseInvoiceCSV(csvText);
+            console.log("Invoice data loaded:", invoiceData.length, "rows");
+            return;
+          }
+        } else {
+          console.debug("Direct fetch failed with status:", response.status);
         }
-      } else {
-        console.warn("Direct fetch failed with status:", response.status);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        // Silently ignore AbortErrors (timeout)
+        if (fetchError.name !== "AbortError") {
+          console.debug("Direct fetch error:", fetchError.message);
+        }
       }
     } catch (error) {
-      console.warn("Failed to load invoice data:", error.message);
+      console.debug("Invoice data loading fallback:", error.message);
     }
   } catch (error) {
-    console.error("Error loading invoice data:", error);
+    console.debug("Invoice loading outer catch:", error.message);
   }
 
   console.warn("No invoice data loaded, invoiceData set to empty array");
