@@ -254,9 +254,17 @@ async function fetchCSV() {
   if (!isStaticHosting) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      let timeoutId;
 
       try {
+        timeoutId = setTimeout(() => {
+          try {
+            controller.abort();
+          } catch (e) {
+            // Silently ignore abort errors
+          }
+        }, 5000);
+
         const response = await fetch(CSV_API_URL, {
           method: "GET",
           headers: {
