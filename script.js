@@ -1586,7 +1586,14 @@ function parseDateToString(dateStr) {
     }
 
     // Validate
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 1900 && year <= 2100) {
+    if (
+      month >= 1 &&
+      month <= 12 &&
+      day >= 1 &&
+      day <= 31 &&
+      year >= 1900 &&
+      year <= 2100
+    ) {
       return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     }
   }
@@ -1621,7 +1628,14 @@ function parseDateToString(dateStr) {
     }
 
     // Validate
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 1900 && year <= 2100) {
+    if (
+      month >= 1 &&
+      month <= 12 &&
+      day >= 1 &&
+      day <= 31 &&
+      year >= 1900 &&
+      year <= 2100
+    ) {
       return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     }
   }
@@ -1921,7 +1935,14 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
 
     // Log first 10 parsed dates for debugging
     const rowIndex = invoiceData.indexOf(row);
-    if (rowIndex < 10 || (startDate && rowDateStr >= startDate && endDate && rowDateStr <= endDate && rowIndex < 20)) {
+    if (
+      rowIndex < 10 ||
+      (startDate &&
+        rowDateStr >= startDate &&
+        endDate &&
+        rowDateStr <= endDate &&
+        rowIndex < 20)
+    ) {
       console.log(
         `[${rowIndex}] Site=${row.sitename}, CSV="${row.lastfuelingdate}", Parsed="${rowDateStr}", InRange=${!startDate || rowDateStr >= startDate} && ${!endDate || rowDateStr <= endDate}`,
       );
@@ -1942,13 +1963,17 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   console.log(
     `Filter results: ${filteredInvoiceData.length} rows (from ${invoiceData.length} total)`,
   );
-  console.log(`Filters applied - Start: "${startDate}", End: "${endDate}", Region: "${region}"`);
+  console.log(
+    `Filters applied - Start: "${startDate}", End: "${endDate}", Region: "${region}"`,
+  );
 
   // Debug: analyze why rows are excluded
   if (invoiceData.length > filteredInvoiceData.length) {
     const excluded = [];
     invoiceData.forEach((row) => {
-      const isInFiltered = filteredInvoiceData.some((fr) => fr.sitename === row.sitename);
+      const isInFiltered = filteredInvoiceData.some(
+        (fr) => fr.sitename === row.sitename,
+      );
       if (!isInFiltered) {
         const dateStr = parseDateToString(row.lastfuelingdate);
         excluded.push({
