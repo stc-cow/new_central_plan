@@ -1776,31 +1776,7 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   }
 
   filteredInvoiceData = invoiceData.filter((row) => {
-    const rowDateStr = parseDateToString(row.lastfuelingdate);
-
-    if (!rowDateStr) {
-      console.warn(
-        `Row ${row.sitename}: Could not parse date "${row.lastfuelingdate}"`,
-      );
-      return false; // Exclude rows with unparseable dates
-    }
-
-    if (startDate) {
-      const isBeforeStart = rowDateStr < startDate;
-      console.log(
-        `Row ${row.sitename}: ${rowDateStr} < ${startDate} (before start)? ${isBeforeStart}`,
-      );
-      if (isBeforeStart) return false;
-    }
-
-    if (endDate) {
-      const isAfterEnd = rowDateStr > endDate;
-      console.log(
-        `Row ${row.sitename}: ${rowDateStr} > ${endDate} (after end)? ${isAfterEnd}`,
-      );
-      if (isAfterEnd) return false;
-    }
-
+    // Apply region filter if selected
     if (region && region !== "") {
       const rowRegion = row.region.toLowerCase();
       const filterRegion = region.toLowerCase();
@@ -1814,6 +1790,31 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
           return false;
         }
       }
+    }
+
+    // If no date filters, include the row
+    if (!startDate && !endDate) {
+      return true;
+    }
+
+    // Parse the row date
+    const rowDateStr = parseDateToString(row.lastfuelingdate);
+
+    if (!rowDateStr) {
+      // Exclude rows with unparseable dates when date filtering is active
+      console.debug(
+        `Skipping row ${row.sitename}: Could not parse date "${row.lastfuelingdate}"`,
+      );
+      return false;
+    }
+
+    // Apply date range filters
+    if (startDate && rowDateStr < startDate) {
+      return false;
+    }
+
+    if (endDate && rowDateStr > endDate) {
+      return false;
     }
 
     return true;
