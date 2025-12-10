@@ -1747,34 +1747,69 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       return dateStr.substring(0, 10);
     }
 
-    // Try other common formats
+    // Try MM/DD/YYYY format (very common)
+    const mmddyyyyMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (mmddyyyyMatch) {
+      const month = parseInt(mmddyyyyMatch[1]);
+      const day = parseInt(mmddyyyyMatch[2]);
+      const year = parseInt(mmddyyyyMatch[3]);
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      }
+    }
+
+    // Try DD/MM/YYYY format
+    const ddmmyyyyMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (ddmmyyyyMatch) {
+      const day = parseInt(ddmmyyyyMatch[1]);
+      const month = parseInt(ddmmyyyyMatch[2]);
+      const year = parseInt(ddmmyyyyMatch[3]);
+      // If day > 12, it can't be MM/DD, so assume DD/MM
+      if (day > 12 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      }
+    }
+
+    // Try general format with various separators
     const parts = dateStr.split(/[-\/\s,]/);
     const cleanParts = parts.filter((p) => p.trim());
 
     if (cleanParts.length === 3) {
       let year, month, day;
       const p0Len = cleanParts[0].length;
+      const p1Len = cleanParts[1].length;
       const p2Len = cleanParts[2].length;
 
-      // Try YYYY-MM-DD or YYYY/MM/DD
+      // YYYY-MM-DD or YYYY/MM/DD
       if (p0Len === 4) {
         year = parseInt(cleanParts[0]);
         month = parseInt(cleanParts[1]);
         day = parseInt(cleanParts[2]);
       }
-      // Try DD-MM-YYYY or MM-DD-YYYY (check which has 4 digits for year)
+      // DD-MM-YYYY or MM-DD-YYYY (4-digit year at end)
       else if (p2Len === 4) {
         year = parseInt(cleanParts[2]);
-        day = parseInt(cleanParts[0]);
-        month = parseInt(cleanParts[1]);
+        // Try MM/DD first (US format)
+        const m = parseInt(cleanParts[1]);
+        const d = parseInt(cleanParts[0]);
+        if (m >= 1 && m <= 12) {
+          // Likely MM/DD format
+          month = m;
+          day = d;
+        } else {
+          // Likely DD/MM format
+          month = parseInt(cleanParts[0]);
+          day = parseInt(cleanParts[1]);
+        }
       }
-      // Single digit year at start - invalid, skip
+      // Single digit year - invalid
       else {
         return null;
       }
 
       // Validate date values
       if (!year || !month || !day) return null;
+      if (year < 1900 || year > 2100) return null;
       if (month < 1 || month > 12) return null;
       if (day < 1 || day > 31) return null;
 
