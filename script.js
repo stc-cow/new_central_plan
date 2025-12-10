@@ -1721,6 +1721,16 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   );
   console.log("Total invoice data rows:", invoiceData.length);
 
+  // Log sample dates from CSV to help debug
+  if (invoiceData.length > 0) {
+    const sampleDates = invoiceData.slice(0, 5).map((row) => ({
+      site: row.sitename,
+      csvDate: row.lastfuelingdate,
+      parsed: parseDateToString(row.lastfuelingdate),
+    }));
+    console.log("Sample CSV dates and parsing:", sampleDates);
+  }
+
   // Helper function to parse dates from various formats and return as YYYY-MM-DD string
   function parseDateToString(dateStr) {
     if (!dateStr) return null;
