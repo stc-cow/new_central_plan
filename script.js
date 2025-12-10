@@ -1423,6 +1423,8 @@ window.showVVVIPModal = function showVVVIPModal() {
         rowColor = "#ffebee";
       } else if (site.status === "today") {
         rowColor = "#fff8e1";
+      } else if (site.status === "coming3") {
+        rowColor = "#fff8e1";
       } else if (site.status === "next15") {
         rowColor = "#e8f5e9";
       }
