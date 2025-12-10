@@ -1667,6 +1667,13 @@ function parseInvoiceCSV(csvText) {
   }
 
   console.log("Parsed invoice data:", data.length, "rows");
+  // Log first few rows for debugging
+  if (data.length > 0) {
+    console.log("First row:", data[0]);
+    console.log("Last row:", data[data.length - 1]);
+    // Log all dates for debugging
+    console.log("All dates in parsed data:", data.map(row => ({ sitename: row.sitename, date: row.lastfuelingdate })));
+  }
   return data;
 }
 
