@@ -1581,36 +1581,68 @@ function parseInvoiceCSV(csvText) {
   const lines = csvText.trim().split("\n");
   if (lines.length === 0) return [];
 
-  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+  const headers = lines[0].split(",").map((h) => h.trim());
+  const headerLower = headers.map((h) => h.toLowerCase());
   const data = [];
+
+  // Find column indices - handle different possible header names
+  const siteNameIndex = headerLower.findIndex(
+    (h) => h === "sitename" || h === "site name" || h === "site_name"
+  );
+  const regionIndex = headerLower.findIndex((h) => h === "region");
+  const dateIndex = headerLower.findIndex(
+    (h) =>
+      h === "lastfuelingdate" ||
+      h === "last fueling date" ||
+      h === "last_fueling_date"
+  );
+  const qtyIndex = headerLower.findIndex(
+    (h) =>
+      h === "lastfuelingqty" ||
+      h === "lastfuelingquantity" ||
+      h === "last fueling qty" ||
+      h === "last fueling quantity"
+  );
+
+  console.log("Invoice CSV Headers:", headers);
+  console.log(
+    "Column indices - Site:",
+    siteNameIndex,
+    "Region:",
+    regionIndex,
+    "Date:",
+    dateIndex,
+    "Qty:",
+    qtyIndex
+  );
 
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
     if (!line.trim()) continue;
 
     const values = parseCSVLine(line);
-    const row = {};
-
-    headers.forEach((header, index) => {
-      row[header] = values[index] ? values[index].trim() : "";
-    });
+    const sitename = siteNameIndex >= 0 ? (values[siteNameIndex] || "").trim() : "";
+    const region = regionIndex >= 0 ? (values[regionIndex] || "").trim() : "";
+    const lastfuelingdate = dateIndex >= 0 ? (values[dateIndex] || "").trim() : "";
+    const lastfuelingqty = qtyIndex >= 0 ? (values[qtyIndex] || "").trim() : "";
 
     // Validate required fields
-    if (row.sitename && row.lastfuelingdate) {
-      const dateValid = !Number.isNaN(Date.parse(row.lastfuelingdate));
-      const quantity = Number(row.lastfuelingquantity) || 0;
+    if (sitename && lastfuelingdate) {
+      const dateValid = !Number.isNaN(Date.parse(lastfuelingdate));
+      const quantity = Number(lastfuelingqty) || 0;
 
       if (dateValid && quantity > 0) {
         data.push({
-          sitename: row.sitename,
-          region: row.region || "",
-          lastfuelingdate: row.lastfuelingdate,
+          sitename,
+          region,
+          lastfuelingdate,
           lastfuelingquantity: quantity,
         });
       }
     }
   }
 
+  console.log("Parsed invoice data:", data.length, "rows");
   return data;
 }
 
