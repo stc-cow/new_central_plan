@@ -1672,7 +1672,13 @@ function parseInvoiceCSV(csvText) {
     console.log("First row:", data[0]);
     console.log("Last row:", data[data.length - 1]);
     // Log all dates for debugging
-    console.log("All dates in parsed data:", data.map(row => ({ sitename: row.sitename, date: row.lastfuelingdate })));
+    console.log(
+      "All dates in parsed data:",
+      data.map((row) => ({
+        sitename: row.sitename,
+        date: row.lastfuelingdate,
+      })),
+    );
   }
   return data;
 }
@@ -1682,7 +1688,14 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   const endDate = document.getElementById("invoiceEndDate").value;
   const region = document.getElementById("invoiceRegion").value;
 
-  console.log("Applying filters - Start:", startDate, "End:", endDate, "Region:", region);
+  console.log(
+    "Applying filters - Start:",
+    startDate,
+    "End:",
+    endDate,
+    "Region:",
+    region,
+  );
   console.log("Total invoice data rows:", invoiceData.length);
 
   // Helper function to parse dates from various formats and return as YYYY-MM-DD string
@@ -1702,14 +1715,14 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
       // Try YYYY-MM-DD or YYYY/MM/DD
       if (parts[0].length === 4) {
         year = parts[0];
-        month = String(parseInt(parts[1])).padStart(2, '0');
-        day = String(parseInt(parts[2])).padStart(2, '0');
+        month = String(parseInt(parts[1])).padStart(2, "0");
+        day = String(parseInt(parts[2])).padStart(2, "0");
       }
       // Try DD-MM-YYYY or MM-DD-YYYY (assume DD/MM format)
       else if (parts[2].length === 4) {
         year = parts[2];
-        month = String(parseInt(parts[1])).padStart(2, '0');
-        day = String(parseInt(parts[0])).padStart(2, '0');
+        month = String(parseInt(parts[1])).padStart(2, "0");
+        day = String(parseInt(parts[0])).padStart(2, "0");
       }
 
       if (year && month && day) {
@@ -1724,19 +1737,25 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
     const rowDateStr = parseDateToString(row.lastfuelingdate);
 
     if (!rowDateStr) {
-      console.warn(`Row ${row.sitename}: Could not parse date "${row.lastfuelingdate}"`);
+      console.warn(
+        `Row ${row.sitename}: Could not parse date "${row.lastfuelingdate}"`,
+      );
       return false; // Exclude rows with unparseable dates
     }
 
     if (startDate) {
       const isBeforeStart = rowDateStr < startDate;
-      console.log(`Row ${row.sitename}: ${rowDateStr} < ${startDate} (before start)? ${isBeforeStart}`);
+      console.log(
+        `Row ${row.sitename}: ${rowDateStr} < ${startDate} (before start)? ${isBeforeStart}`,
+      );
       if (isBeforeStart) return false;
     }
 
     if (endDate) {
       const isAfterEnd = rowDateStr > endDate;
-      console.log(`Row ${row.sitename}: ${rowDateStr} > ${endDate} (after end)? ${isAfterEnd}`);
+      console.log(
+        `Row ${row.sitename}: ${rowDateStr} > ${endDate} (after end)? ${isAfterEnd}`,
+      );
       if (isAfterEnd) return false;
     }
 
