@@ -1685,57 +1685,57 @@ window.applyInvoiceFilters = function applyInvoiceFilters() {
   console.log("Applying filters - Start:", startDate, "End:", endDate, "Region:", region);
   console.log("Total invoice data rows:", invoiceData.length);
 
-  filteredInvoiceData = invoiceData.filter((row) => {
-    // Parse the date from CSV - handle various date formats
-    let rowDate = new Date(row.lastfuelingdate);
+  // Helper function to parse dates from various formats and return as YYYY-MM-DD string
+  function parseDateToString(dateStr) {
+    if (!dateStr) return null;
 
-    // If date parsing fails, try to parse MM/DD/YYYY or DD/MM/YYYY formats
-    if (isNaN(rowDate.getTime())) {
-      const parts = row.lastfuelingdate.split(/[-\/]/);
-      if (parts.length === 3) {
-        // Try different date formats
-        let year, month, day;
+    // Try ISO format first (YYYY-MM-DD)
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+      return dateStr.substring(0, 10);
+    }
 
-        // Try YYYY-MM-DD or YYYY/MM/DD
-        if (parts[0].length === 4) {
-          year = parseInt(parts[0]);
-          month = parseInt(parts[1]);
-          day = parseInt(parts[2]);
-        }
-        // Try DD-MM-YYYY or MM-DD-YYYY
-        else if (parts[2].length === 4) {
-          year = parseInt(parts[2]);
-          // Assume DD/MM format (day first)
-          day = parseInt(parts[0]);
-          month = parseInt(parts[1]);
-        }
+    // Try other common formats
+    const parts = dateStr.split(/[-\/]/);
+    if (parts.length === 3) {
+      let year, month, day;
 
-        if (year && month && day) {
-          rowDate = new Date(year, month - 1, day);
-        }
+      // Try YYYY-MM-DD or YYYY/MM/DD
+      if (parts[0].length === 4) {
+        year = parts[0];
+        month = String(parseInt(parts[1])).padStart(2, '0');
+        day = String(parseInt(parts[2])).padStart(2, '0');
+      }
+      // Try DD-MM-YYYY or MM-DD-YYYY (assume DD/MM format)
+      else if (parts[2].length === 4) {
+        year = parts[2];
+        month = String(parseInt(parts[1])).padStart(2, '0');
+        day = String(parseInt(parts[0])).padStart(2, '0');
+      }
+
+      if (year && month && day) {
+        return `${year}-${month}-${day}`;
       }
     }
 
-    // Normalize row date to midnight for comparison
-    const normalizedRowDate = new Date(rowDate);
-    normalizedRowDate.setHours(0, 0, 0, 0);
+    return null;
+  }
+
+  filteredInvoiceData = invoiceData.filter((row) => {
+    const rowDateStr = parseDateToString(row.lastfuelingdate);
+
+    if (!rowDateStr) {
+      console.warn(`Row ${row.sitename}: Could not parse date "${row.lastfuelingdate}"`);
+      return false; // Exclude rows with unparseable dates
+    }
 
     if (startDate) {
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-
-      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${normalizedRowDate.toISOString()}, Filter Start: ${start.toISOString()}, rowDate < start (excluded):`, normalizedRowDate < start);
-
-      if (normalizedRowDate < start) return false;
+      console.log(`Comparing ${row.sitename} (${rowDateStr}) >= ${startDate}: ${rowDateStr >= startDate}`);
+      if (rowDateStr < startDate) return false;
     }
 
     if (endDate) {
-      const end = new Date(endDate);
-      end.setHours(0, 0, 0, 0);
-
-      console.log(`Row: ${row.sitename}, CSV Date: ${row.lastfuelingdate}, Parsed: ${normalizedRowDate.toISOString()}, Filter End: ${end.toISOString()}, rowDate > end (excluded):`, normalizedRowDate > end);
-
-      if (normalizedRowDate > end) return false;
+      console.log(`Comparing ${row.sitename} (${rowDateStr}) <= ${endDate}: ${rowDateStr <= endDate}`);
+      if (rowDateStr > endDate) return false;
     }
 
     if (region && region !== "") {
