@@ -1548,27 +1548,34 @@ async function loadInvoiceData() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-        const response = await fetch(proxyUrl, {
-          method: "GET",
-          headers: {
-            Accept: "text/plain",
-          },
-          signal: controller.signal,
-        });
+        try {
+          const response = await fetch(proxyUrl, {
+            method: "GET",
+            headers: {
+              Accept: "text/plain",
+            },
+            signal: controller.signal,
+          });
 
-        clearTimeout(timeoutId);
+          clearTimeout(timeoutId);
 
-        if (response.ok) {
-          const csvText = await response.text();
-          console.log("CSV fetched successfully, length:", csvText.length);
-          if (csvText.trim()) {
-            invoiceData = parseInvoiceCSV(csvText);
-            console.log("Invoice data loaded:", invoiceData.length, "rows");
-            return;
+          if (response.ok) {
+            const csvText = await response.text();
+            console.log("CSV fetched successfully, length:", csvText.length);
+            if (csvText.trim()) {
+              invoiceData = parseInvoiceCSV(csvText);
+              console.log("Invoice data loaded:", invoiceData.length, "rows");
+              return;
+            }
+          }
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          if (fetchError.name !== "AbortError") {
+            console.log("Proxy fetch failed:", fetchError.message);
           }
         }
       } catch (proxyError) {
-        console.log("Proxy failed:", proxyError.message);
+        console.log("Proxy setup failed:", proxyError.message);
       }
     }
 
