@@ -590,8 +590,7 @@ function classify(days) {
 
   if (days < 0) return { label: "due", color: "#d32f2f" };
   if (days === 0) return { label: "today", color: "#d32f2f" };
-  if (days >= 1 && days <= 3) return { label: "coming3", color: "#ff9e00" };
-  if (days >= 4 && days <= 15) return { label: "next15", color: "#27ae60" };
+  if (days >= 1 && days <= 15) return { label: "next15", color: "#27ae60" };
 
   return { label: "next15", color: "#27ae60" };
 }
