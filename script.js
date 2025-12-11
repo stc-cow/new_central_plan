@@ -1029,6 +1029,7 @@ function addPulsingCircles(markers) {
 
 function updateMapVisualization(zoom) {
   const HEATMAP_THRESHOLD = 10;
+  const LABEL_THRESHOLD = 13;
 
   markersLayer.eachLayer((marker) => {
     if (zoom >= HEATMAP_THRESHOLD) {
@@ -1046,6 +1047,18 @@ function updateMapVisualization(zoom) {
         fillOpacity: 0.6,
         opacity: 0.6,
       });
+    }
+
+    // Show site name labels at high zoom levels
+    if (zoom >= LABEL_THRESHOLD) {
+      if (marker.getTooltip()) {
+        marker.setTooltipContent(marker.siteData.siteName);
+        marker.openTooltip();
+      }
+    } else {
+      if (marker.getTooltip()) {
+        marker.closeTooltip();
+      }
     }
   });
 }
