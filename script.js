@@ -1031,24 +1031,21 @@ function updateMapVisualization(zoom) {
   const HEATMAP_THRESHOLD = 10;
 
   markersLayer.eachLayer((marker) => {
-    // Only update circle markers, skip icon markers
-    if (typeof marker.setRadius === "function") {
-      if (zoom >= HEATMAP_THRESHOLD) {
-        // Show individual markers at high zoom
-        marker.setRadius(8);
-        marker.setStyle({
-          fillOpacity: 0.8,
-          opacity: 1,
-        });
-      } else {
-        // Show heatmap-style visualization at low zoom
-        const radius = 15 - (zoom || 5);
-        marker.setRadius(radius);
-        marker.setStyle({
-          fillOpacity: 0.6,
-          opacity: 0.6,
-        });
-      }
+    if (zoom >= HEATMAP_THRESHOLD) {
+      // Show individual markers at high zoom
+      marker.setRadius(8);
+      marker.setStyle({
+        fillOpacity: 0.8,
+        opacity: 1,
+      });
+    } else {
+      // Show heatmap-style visualization at low zoom
+      const radius = 15 - (zoom || 5);
+      marker.setRadius(radius);
+      marker.setStyle({
+        fillOpacity: 0.6,
+        opacity: 0.6,
+      });
     }
   });
 }
