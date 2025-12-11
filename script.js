@@ -1089,37 +1089,18 @@ function addMarkersToMap(sites) {
 
   sites.forEach((site) => {
     const color = site.color || getStatusColor(site.status);
-    const isTowerSite = TOWER_ICON_SITES.includes(site.sitename);
 
-    let marker;
+    // Create circle marker for all sites
+    const marker = L.circleMarker([site.lat, site.lng], {
+      radius: 8,
+      fillColor: color,
+      color: "white",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8,
+    });
 
-    if (isTowerSite) {
-      // Create custom icon marker for tower sites
-      const towerIcon = L.icon({
-        iconUrl: "https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F6ff08508274a47c3be99239725ec5b5e?format=webp&width=100",
-        iconSize: [50, 50],
-        iconAnchor: [25, 50],
-        popupAnchor: [0, -50],
-      });
-
-      marker = L.marker([site.lat, site.lng], {
-        icon: towerIcon,
-      });
-
-      marker.addTo(markersLayer);
-    } else {
-      // Create circle marker for regular sites
-      marker = L.circleMarker([site.lat, site.lng], {
-        radius: 8,
-        fillColor: color,
-        color: "white",
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.8,
-      });
-
-      marker.addTo(markersLayer);
-    }
+    marker.addTo(markersLayer);
 
     // Store marker reference
     marker.siteData = {
