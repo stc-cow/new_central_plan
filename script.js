@@ -22,6 +22,17 @@ const VVVIP_SITES_LIST = [
   "COW552",
 ];
 
+// Test sites with custom radio tower icon
+const TOWER_ICON_SITES = [
+  "COW775",
+  "COW726",
+  "COW823",
+  "COW056",
+  "COW017",
+  "COW018",
+  "COW801",
+];
+
 // ==========================================
 // CONSOLE LOCK - Security Protection
 // ==========================================
