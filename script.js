@@ -1105,6 +1105,14 @@ function addMarkersToMap(sites) {
       coords: [site.lat, site.lng],
     };
 
+    // Add tooltip with site name that shows on hover or at high zoom
+    marker.bindTooltip(site.sitename, {
+      permanent: false,
+      direction: "top",
+      offset: [0, -10],
+      className: "site-name-tooltip",
+    });
+
     // Add popup on click
     marker.on("click", () => {
       const popupContent = `
