@@ -1051,14 +1051,9 @@ function updateMapVisualization(zoom) {
 
     // Show site name labels at high zoom levels
     if (zoom >= LABEL_THRESHOLD) {
-      if (marker.getTooltip()) {
-        marker.setTooltipContent(marker.siteData.siteName);
-        marker.openTooltip();
-      }
+      marker.openTooltip();
     } else {
-      if (marker.getTooltip()) {
-        marker.closeTooltip();
-      }
+      marker.closeTooltip();
     }
   });
 }
