@@ -115,16 +115,6 @@ setInterval(() => {
   }
 }, 500);
 
-// Prevent access to console via window object
-Object.defineProperty(window, "console", {
-  value: new Proxy(console, {
-    get: () => {
-      return null;
-    },
-  }),
-  writable: false,
-});
-
 // ==========================================
 // END CONSOLE LOCK
 // ==========================================
