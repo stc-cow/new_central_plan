@@ -1096,10 +1096,10 @@ function addMarkersToMap(sites) {
     if (isTowerSite) {
       // Create custom icon marker for tower sites
       const towerIcon = L.icon({
-        iconUrl: "https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F5428de61b901456a920448ded075b4b7?format=webp&width=100",
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -40],
+        iconUrl: "https://cdn.builder.io/api/v1/image/assets%2Fbd65b3cd7a86452e803a3d7dc7a3d048%2F6ff08508274a47c3be99239725ec5b5e?format=webp&width=100",
+        iconSize: [50, 50],
+        iconAnchor: [25, 50],
+        popupAnchor: [0, -50],
       });
 
       marker = L.marker([site.lat, site.lng], {
