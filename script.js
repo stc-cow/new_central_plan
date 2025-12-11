@@ -1020,7 +1020,7 @@ function addPulsingCircles(markers) {
 
     markers.forEach((marker) => {
       const siteData = marker.siteData;
-      if (siteData && siteData.status === "due") {
+      if (siteData && siteData.status === "due" && typeof marker.setRadius === "function") {
         const scale = 1 + 0.8 * Math.sin(pulsePhase);
         const radius = 8 * scale;
         const opacity = 0.5 * (1.8 - scale);
