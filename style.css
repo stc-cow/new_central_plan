@@ -2345,3 +2345,20 @@ body {
     flex-wrap: wrap;
   }
 }
+
+/* Site Name Tooltip Styles */
+.site-name-tooltip {
+  background-color: var(--aces-primary);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(32, 43, 109, 0.3);
+  border: none;
+  white-space: nowrap;
+}
+
+.site-name-tooltip::before {
+  border-top-color: var(--aces-primary);
+}
